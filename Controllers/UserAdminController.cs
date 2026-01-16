@@ -617,7 +617,7 @@ namespace one_db_mitra.Controllers
                 var sectionIds = _context.tbl_m_seksi.AsNoTracking()
                     .Where(s => s.departemen_id == scope.DepartmentId.Value)
                     .Select(s => s.seksi_id);
-                positionsQuery = positionsQuery.Where(p => sectionIds.Contains(p.seksi_id));
+                positionsQuery = positionsQuery.Where(p => p.seksi_id.HasValue && sectionIds.Contains(p.seksi_id.Value));
             }
             else if (scope.CompanyId > 0)
             {

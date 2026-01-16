@@ -50,7 +50,7 @@ namespace one_db_mitra.Models.Admin
         public string CompanyName { get; set; } = string.Empty;
 
         [Display(Name = "Tipe Perusahaan")]
-        public int CompanyTypeId { get; set; }
+        public int? CompanyTypeId { get; set; }
 
         [Display(Name = "Perusahaan Induk")]
         public int? ParentCompanyId { get; set; }
@@ -112,7 +112,7 @@ namespace one_db_mitra.Models.Admin
         public string PositionName { get; set; } = string.Empty;
 
         [Display(Name = "Section")]
-        public int SectionId { get; set; }
+        public int? SectionId { get; set; }
 
         [Display(Name = "Perusahaan")]
         public int CompanyId { get; set; }

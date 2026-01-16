@@ -813,63 +813,87 @@ namespace one_db_mitra.Controllers
             var companies = await _context.tbl_m_perusahaan.AsNoTracking()
                 .Where(c => c.is_aktif)
                 .OrderBy(c => c.nama_perusahaan)
+                .Select(c => new
+                {
+                    CompanyId = c.perusahaan_id,
+                    Name = c.nama_perusahaan
+                })
                 .ToListAsync(cancellationToken);
 
             var departments = await _context.tbl_m_departemen.AsNoTracking()
                 .Where(d => d.is_aktif)
                 .OrderBy(d => d.nama_departemen)
+                .Select(d => new
+                {
+                    DepartmentId = d.departemen_id,
+                    CompanyId = d.perusahaan_id,
+                    Name = d.nama_departemen
+                })
                 .ToListAsync(cancellationToken);
 
             var sections = await _context.tbl_m_seksi.AsNoTracking()
                 .Where(s => s.is_aktif)
                 .OrderBy(s => s.nama_seksi)
+                .Select(s => new
+                {
+                    SectionId = s.seksi_id,
+                    DepartmentId = s.departemen_id,
+                    Name = s.nama_seksi
+                })
                 .ToListAsync(cancellationToken);
 
             var positions = await _context.tbl_m_jabatan.AsNoTracking()
                 .Where(j => j.is_aktif)
                 .OrderBy(j => j.nama_jabatan)
+                .Select(j => new
+                {
+                    PositionId = j.jabatan_id,
+                    SectionId = j.seksi_id,
+                    Name = j.nama_jabatan
+                })
                 .ToListAsync(cancellationToken);
 
             var sectionsByDepartment = sections
-                .GroupBy(s => s.departemen_id)
+                .GroupBy(s => s.DepartmentId)
                 .ToDictionary(g => g.Key, g => g.ToList());
             var positionsBySection = positions
-                .GroupBy(p => p.seksi_id)
+                .Where(p => p.SectionId.HasValue)
+                .GroupBy(p => p.SectionId!.Value)
                 .ToDictionary(g => g.Key, g => g.ToList());
             var departmentsByCompany = departments
-                .GroupBy(d => d.perusahaan_id)
+                .GroupBy(d => d.CompanyId)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
             var result = new List<CompanyHierarchyItem>();
             foreach (var company in companies)
             {
                 var deptItems = new List<DepartmentHierarchyItem>();
-                if (departmentsByCompany.TryGetValue(company.perusahaan_id, out var deptList))
+                if (departmentsByCompany.TryGetValue(company.CompanyId, out var deptList))
                 {
                     foreach (var dept in deptList)
                     {
                         var sectionItems = new List<SectionHierarchyItem>();
-                        if (sectionsByDepartment.TryGetValue(dept.departemen_id, out var sectionList))
+                        if (sectionsByDepartment.TryGetValue(dept.DepartmentId, out var sectionList))
                         {
                             foreach (var section in sectionList)
                             {
                                 var positionItems = new List<PositionHierarchyItem>();
-                                if (positionsBySection.TryGetValue(section.seksi_id, out var positionList))
+                                if (positionsBySection.TryGetValue(section.SectionId, out var positionList))
                                 {
                                     foreach (var position in positionList)
                                     {
                                         positionItems.Add(new PositionHierarchyItem
                                         {
-                                            PositionId = position.jabatan_id,
-                                            PositionName = position.nama_jabatan ?? string.Empty
+                                            PositionId = position.PositionId,
+                                            PositionName = position.Name ?? string.Empty
                                         });
                                     }
                                 }
 
                                 sectionItems.Add(new SectionHierarchyItem
                                 {
-                                    SectionId = section.seksi_id,
-                                    SectionName = section.nama_seksi ?? string.Empty,
+                                    SectionId = section.SectionId,
+                                    SectionName = section.Name ?? string.Empty,
                                     Positions = positionItems
                                 });
                             }
@@ -877,8 +901,8 @@ namespace one_db_mitra.Controllers
 
                         deptItems.Add(new DepartmentHierarchyItem
                         {
-                            DepartmentId = dept.departemen_id,
-                            DepartmentName = dept.nama_departemen ?? string.Empty,
+                            DepartmentId = dept.DepartmentId,
+                            DepartmentName = dept.Name ?? string.Empty,
                             Sections = sectionItems
                         });
                     }
@@ -886,8 +910,8 @@ namespace one_db_mitra.Controllers
 
                 result.Add(new CompanyHierarchyItem
                 {
-                    CompanyId = company.perusahaan_id,
-                    CompanyName = company.nama_perusahaan ?? string.Empty,
+                    CompanyId = company.CompanyId,
+                    CompanyName = company.Name ?? string.Empty,
                     Departments = deptItems
                 });
             }

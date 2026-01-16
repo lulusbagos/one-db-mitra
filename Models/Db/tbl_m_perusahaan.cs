@@ -9,7 +9,7 @@ public partial class tbl_m_perusahaan
 
     public string nama_perusahaan { get; set; } = null!;
 
-    public int tipe_perusahaan_id { get; set; }
+    public int? tipe_perusahaan_id { get; set; }
 
     public int? perusahaan_induk_id { get; set; }
 

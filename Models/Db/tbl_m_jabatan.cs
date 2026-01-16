@@ -7,7 +7,7 @@ public partial class tbl_m_jabatan
 {
     public int jabatan_id { get; set; }
 
-    public int seksi_id { get; set; }
+    public int? seksi_id { get; set; }
 
     public string nama_jabatan { get; set; } = null!;
 
