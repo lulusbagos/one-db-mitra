@@ -74,12 +74,13 @@ public partial class OneDbMitraContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var activeConverter = new ValueConverter<bool, string?>(
-            v => v ? "1" : "0",
+        var activeConverter = new ValueConverter<bool?, string?>(
+            v => v.HasValue ? (v.Value ? "1" : "0") : null,
             v => string.IsNullOrWhiteSpace(v)
-                 || v.Equals("1", StringComparison.OrdinalIgnoreCase)
-                 || v.Equals("true", StringComparison.OrdinalIgnoreCase)
-                 || v.Equals("aktif", StringComparison.OrdinalIgnoreCase));
+                 ? (bool?)null
+                 : v.Equals("1", StringComparison.OrdinalIgnoreCase)
+                   || v.Equals("true", StringComparison.OrdinalIgnoreCase)
+                   || v.Equals("aktif", StringComparison.OrdinalIgnoreCase));
 
         modelBuilder.Entity<tbl_m_departemen>(entity =>
         {
@@ -90,8 +91,10 @@ public partial class OneDbMitraContext : DbContext
             entity.Property(e => e.perusahaan_id).HasColumnName("id_perusahaan");
             entity.Property(e => e.is_aktif).HasColumnName("status_aktif").HasConversion(activeConverter);
             entity.Property(e => e.dibuat_pada).HasColumnName("created_at").HasDefaultValueSql("(sysutcdatetime())");
-            entity.Property(e => e.diubah_pada).HasColumnName("updated_at");
-            entity.Property(e => e.nama_departemen).HasMaxLength(150);
+            entity.Property(e => e.kode_departemen).HasMaxLength(15);
+            entity.Property(e => e.nama_departemen).HasMaxLength(50);
+            entity.Property(e => e.keterangan).HasMaxLength(250);
+            entity.Property(e => e.created_by).HasMaxLength(30);
         });
 
         modelBuilder.Entity<tbl_m_email_notifikasi>(entity =>
@@ -130,7 +133,13 @@ public partial class OneDbMitraContext : DbContext
             entity.Property(e => e.is_aktif).HasColumnName("status_aktif").HasConversion(activeConverter);
             entity.Property(e => e.dibuat_pada).HasColumnName("created_at").HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.diubah_pada).HasColumnName("updated_at");
-            entity.Property(e => e.nama_jabatan).HasMaxLength(150);
+            entity.Property(e => e.kode_jabatan).HasMaxLength(10);
+            entity.Property(e => e.nama_jabatan).HasMaxLength(50);
+            entity.Property(e => e.keterangan).HasMaxLength(600);
+            entity.Property(e => e.status_jabatan).HasMaxLength(5);
+            entity.Property(e => e.created_by).HasMaxLength(30);
+            entity.Property(e => e.updated_by).HasMaxLength(30);
+            entity.Property(e => e.deleted_at).HasMaxLength(100);
         });
 
         modelBuilder.Entity<tbl_t_karyawan>(entity =>
@@ -246,7 +255,13 @@ public partial class OneDbMitraContext : DbContext
             entity.Property(e => e.is_aktif).HasColumnName("status_aktif").HasDefaultValue(true);
             entity.Property(e => e.dibuat_pada).HasColumnName("created_at").HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.diubah_pada).HasColumnName("updated_at");
+            entity.Property(e => e.kode_perusahaan).HasMaxLength(15);
             entity.Property(e => e.nama_perusahaan).HasMaxLength(200);
+            entity.Property(e => e.alamat_perusahaan).HasMaxLength(200);
+            entity.Property(e => e.status_perusahaan).HasMaxLength(5);
+            entity.Property(e => e.created_by).HasMaxLength(50);
+            entity.Property(e => e.updated_by).HasMaxLength(50);
+            entity.Property(e => e.deleted_by).HasMaxLength(50);
             entity.Property(e => e.tipe_perusahaan_id).HasColumnName("tipe_perusahaan_id");
             entity.Property(e => e.perusahaan_induk_id).HasColumnName("perusahaan_induk_id");
         });
@@ -259,10 +274,16 @@ public partial class OneDbMitraContext : DbContext
             entity.Property(e => e.seksi_id).HasColumnName("id");
             entity.Property(e => e.departemen_id).HasColumnName("id_departemen");
             entity.Property(e => e.perusahaan_id).HasColumnName("id_perusahaan");
-            entity.Property(e => e.is_aktif).HasColumnName("status_aktif").HasConversion(activeConverter);
-            entity.Property(e => e.dibuat_pada).HasColumnName("created_at").HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.is_aktif).HasColumnName("status_aktif");
+            entity.Property(e => e.dibuat_pada).HasColumnName("created_at");
             entity.Property(e => e.diubah_pada).HasColumnName("updated_at");
-            entity.Property(e => e.nama_seksi).HasMaxLength(150);
+            entity.Property(e => e.kode_seksi).HasMaxLength(20);
+            entity.Property(e => e.nama_seksi).HasMaxLength(100);
+            entity.Property(e => e.keterangan).HasMaxLength(150);
+            entity.Property(e => e.status_seksi).HasMaxLength(5);
+            entity.Property(e => e.created_by).HasMaxLength(30);
+            entity.Property(e => e.updated_by).HasMaxLength(30);
+            entity.Property(e => e.deleted_by).HasMaxLength(30);
         });
 
         modelBuilder.Entity<tbl_m_tipe_perusahaan>(entity =>

@@ -43,6 +43,7 @@
             <table class="table table-striped align-middle mb-0">
                 <thead>
                     <tr>
+                        <th>Kode</th>
                         <th>Nama</th>
                         <th>Tipe</th>
                         <th>Induk</th>
@@ -54,7 +55,7 @@
                     @if (Model.Count == 0)
                     {
                         <tr>
-                            <td colspan="5" class="text-center text-secondary py-4">Belum ada perusahaan. Tambahkan perusahaan pertama.</td>
+                            <td colspan="6" class="text-center text-secondary py-4">Belum ada perusahaan. Tambahkan perusahaan pertama.</td>
                         </tr>
                     }
                     else
@@ -62,6 +63,7 @@
                         @foreach (var company in Model)
                         {
                             <tr>
+                                <td>@company.CompanyCode</td>
                                 <td>@company.CompanyName</td>
                                 <td>@company.CompanyTypeName</td>
                                 <td>@company.ParentCompanyName</td>

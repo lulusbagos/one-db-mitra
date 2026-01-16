@@ -21,10 +21,19 @@
             <form method="post" asp-action="CreatePosition">
                 @Html.AntiForgeryToken()
                 <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="PositionCode" class="form-label"></label>
+                        <input asp-for="PositionCode" class="form-control" />
+                        <span class="text-danger" asp-validation-for="PositionCode"></span>
+                    </div>
                     <div class="col-md-6">
                         <label asp-for="PositionName" class="form-label"></label>
                         <input asp-for="PositionName" class="form-control" />
                         <span class="text-danger" asp-validation-for="PositionName"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Description" class="form-label"></label>
+                        <input asp-for="Description" class="form-control" />
                     </div>
                     <div class="col-md-6">
                         <label asp-for="CompanyId" class="form-label"></label>

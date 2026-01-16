@@ -19,10 +19,19 @@
             <form method="post" asp-action="CreateDepartment">
                 @Html.AntiForgeryToken()
                 <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="DepartmentCode" class="form-label"></label>
+                        <input asp-for="DepartmentCode" class="form-control" />
+                        <span class="text-danger" asp-validation-for="DepartmentCode"></span>
+                    </div>
                     <div class="col-md-6">
                         <label asp-for="DepartmentName" class="form-label"></label>
                         <input asp-for="DepartmentName" class="form-control" />
                         <span class="text-danger" asp-validation-for="DepartmentName"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Description" class="form-label"></label>
+                        <input asp-for="Description" class="form-control" />
                     </div>
                     <div class="col-md-6">
                         <label asp-for="CompanyId" class="form-label"></label>

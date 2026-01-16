@@ -45,6 +45,7 @@
             <table class="table table-striped align-middle mb-0">
                 <thead>
                     <tr>
+                        <th>Kode</th>
                         <th>Nama</th>
                         <th>Perusahaan</th>
                         <th>Departemen</th>
@@ -56,7 +57,7 @@
                     @if (Model.Count == 0)
                     {
                         <tr>
-                            <td colspan="5" class="text-center text-secondary py-4">Belum ada section. Tambahkan section pertama.</td>
+                            <td colspan="6" class="text-center text-secondary py-4">Belum ada section. Tambahkan section pertama.</td>
                         </tr>
                     }
                     else
@@ -64,6 +65,7 @@
                         @foreach (var sec in Model)
                         {
                             <tr>
+                                <td>@sec.SectionCode</td>
                                 <td>@sec.SectionName</td>
                                 <td>@sec.CompanyName</td>
                                 <td>@sec.DepartmentName</td>

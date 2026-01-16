@@ -35,6 +35,10 @@
         && string.Equals(ViewContext.RouteData.Values["action"]?.ToString(), "Index", StringComparison.OrdinalIgnoreCase);
     var currentRoleName = User.FindFirst(ClaimTypes.Role)?.Value ?? "-";
     var currentRoleId = int.TryParse(User.FindFirstValue("role_id"), out var parsedRole) ? parsedRole : 0;
+    var companyId = int.TryParse(User.FindFirstValue("company_id"), out var parsedCompanyId) ? parsedCompanyId : 0;
+    var departmentId = int.TryParse(User.FindFirstValue("department_id"), out var parsedDeptId) ? parsedDeptId : 0;
+    var sectionId = int.TryParse(User.FindFirstValue("section_id"), out var parsedSectionId) ? parsedSectionId : 0;
+    var positionId = int.TryParse(User.FindFirstValue("position_id"), out var parsedPositionId) ? parsedPositionId : 0;
     var roleIds = (User.FindFirstValue("role_ids") ?? string.Empty)
         .Split(',', StringSplitOptions.RemoveEmptyEntries)
         .Select(value => int.TryParse(value, out var id) ? id : 0)
@@ -53,6 +57,30 @@
             .OrderByDescending(r => r.level_akses)
             .ToListAsync();
     }
+    var currentRole = roleOptions.FirstOrDefault(role => role.peran_id == currentRoleId);
+    var departmentName = departmentId > 0
+        ? await Db.tbl_m_departemen.AsNoTracking()
+            .Where(d => d.departemen_id == departmentId)
+            .Select(d => d.nama_departemen)
+            .FirstOrDefaultAsync()
+        : null;
+    var sectionName = sectionId > 0
+        ? await Db.tbl_m_seksi.AsNoTracking()
+            .Where(s => s.seksi_id == sectionId)
+            .Select(s => s.nama_seksi)
+            .FirstOrDefaultAsync()
+        : null;
+    var positionName = positionId > 0
+        ? await Db.tbl_m_jabatan.AsNoTracking()
+            .Where(p => p.jabatan_id == positionId)
+            .Select(p => p.nama_jabatan)
+            .FirstOrDefaultAsync()
+        : null;
+    var scopeCompanyName = User.FindFirstValue("company_name");
+    var scopeLabel = $"Scope: {(string.IsNullOrWhiteSpace(scopeCompanyName) ? "Semua Perusahaan" : scopeCompanyName)}";
+    scopeLabel += $" · Dept {(string.IsNullOrWhiteSpace(departmentName) ? "Semua" : departmentName)}";
+    scopeLabel += $" · Section {(string.IsNullOrWhiteSpace(sectionName) ? "Semua" : sectionName)}";
+    scopeLabel += $" · Jabatan {(string.IsNullOrWhiteSpace(positionName) ? "Semua" : positionName)}";
     var impersonatorName = User.FindFirstValue("impersonator_name");
     var isImpersonating = !string.IsNullOrWhiteSpace(impersonatorName);
 }
@@ -128,6 +156,9 @@
                                 <span>@pageTitle</span>
                             </nav>
                         }
+                        <span class="badge text-bg-light border mt-2 d-inline-flex align-items-center gap-1">
+                            <i class="bi bi-shield-lock"></i>@scopeLabel
+                        </span>
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-2 topbar-actions">

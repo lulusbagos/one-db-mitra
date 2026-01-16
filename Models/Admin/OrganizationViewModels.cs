@@ -8,6 +8,7 @@ namespace one_db_mitra.Models.Admin
     public class CompanyListItem
     {
         public int CompanyId { get; set; }
+        public string CompanyCode { get; set; } = string.Empty;
         public string CompanyName { get; set; } = string.Empty;
         public string CompanyTypeName { get; set; } = string.Empty;
         public string ParentCompanyName { get; set; } = "-";
@@ -17,6 +18,7 @@ namespace one_db_mitra.Models.Admin
     public class DepartmentListItem
     {
         public int DepartmentId { get; set; }
+        public string DepartmentCode { get; set; } = string.Empty;
         public string DepartmentName { get; set; } = string.Empty;
         public string CompanyName { get; set; } = string.Empty;
         public bool IsActive { get; set; }
@@ -25,6 +27,7 @@ namespace one_db_mitra.Models.Admin
     public class SectionListItem
     {
         public int SectionId { get; set; }
+        public string SectionCode { get; set; } = string.Empty;
         public string SectionName { get; set; } = string.Empty;
         public string DepartmentName { get; set; } = string.Empty;
         public string CompanyName { get; set; } = string.Empty;
@@ -34,6 +37,7 @@ namespace one_db_mitra.Models.Admin
     public class PositionListItem
     {
         public int PositionId { get; set; }
+        public string PositionCode { get; set; } = string.Empty;
         public string PositionName { get; set; } = string.Empty;
         public string SectionName { get; set; } = string.Empty;
         public string CompanyName { get; set; } = string.Empty;
@@ -44,10 +48,22 @@ namespace one_db_mitra.Models.Admin
     {
         public int CompanyId { get; set; }
 
+        [Display(Name = "Kode Perusahaan")]
+        [StringLength(15)]
+        public string? CompanyCode { get; set; }
+
         [Required]
         [StringLength(200)]
         [Display(Name = "Nama Perusahaan")]
         public string CompanyName { get; set; } = string.Empty;
+
+        [Display(Name = "Alamat Perusahaan")]
+        [StringLength(200)]
+        public string? CompanyAddress { get; set; }
+
+        [Display(Name = "Status Perusahaan")]
+        [StringLength(5)]
+        public string? CompanyStatus { get; set; }
 
         [Display(Name = "Tipe Perusahaan")]
         public int? CompanyTypeId { get; set; }
@@ -66,10 +82,18 @@ namespace one_db_mitra.Models.Admin
     {
         public int DepartmentId { get; set; }
 
+        [Display(Name = "Kode Departemen")]
+        [StringLength(15)]
+        public string? DepartmentCode { get; set; }
+
         [Required]
-        [StringLength(150)]
+        [StringLength(50)]
         [Display(Name = "Nama Departemen")]
         public string DepartmentName { get; set; } = string.Empty;
+
+        [Display(Name = "Keterangan")]
+        [StringLength(250)]
+        public string? Description { get; set; }
 
         [Display(Name = "Perusahaan")]
         public int CompanyId { get; set; }
@@ -84,10 +108,18 @@ namespace one_db_mitra.Models.Admin
     {
         public int SectionId { get; set; }
 
+        [Display(Name = "Kode Section")]
+        [StringLength(20)]
+        public string? SectionCode { get; set; }
+
         [Required]
-        [StringLength(150)]
+        [StringLength(100)]
         [Display(Name = "Nama Section")]
         public string SectionName { get; set; } = string.Empty;
+
+        [Display(Name = "Keterangan")]
+        [StringLength(150)]
+        public string? Description { get; set; }
 
         [Display(Name = "Departemen")]
         public int DepartmentId { get; set; }
@@ -106,10 +138,18 @@ namespace one_db_mitra.Models.Admin
     {
         public int PositionId { get; set; }
 
+        [Display(Name = "Kode Jabatan")]
+        [StringLength(10)]
+        public string? PositionCode { get; set; }
+
         [Required]
-        [StringLength(150)]
+        [StringLength(50)]
         [Display(Name = "Nama Jabatan")]
         public string PositionName { get; set; } = string.Empty;
+
+        [Display(Name = "Keterangan")]
+        [StringLength(600)]
+        public string? Description { get; set; }
 
         [Display(Name = "Section")]
         public int? SectionId { get; set; }

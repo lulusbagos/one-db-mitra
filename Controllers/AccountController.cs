@@ -38,7 +38,7 @@ namespace one_db_mitra.Controllers
             ViewBag.ActiveMenuCount = await _context.tbl_m_menu.AsNoTracking().CountAsync(m => m.is_aktif, cancellationToken);
             ViewBag.ActiveUserCount = await _context.tbl_m_pengguna.AsNoTracking().CountAsync(u => u.is_aktif, cancellationToken);
             ViewBag.ActiveCompanyCount = await _context.tbl_m_perusahaan.AsNoTracking().CountAsync(c => c.is_aktif, cancellationToken);
-            ViewBag.ActiveDepartmentCount = await _context.tbl_m_departemen.AsNoTracking().CountAsync(d => d.is_aktif, cancellationToken);
+            ViewBag.ActiveDepartmentCount = await _context.tbl_m_departemen.AsNoTracking().CountAsync(d => d.is_aktif == true, cancellationToken);
             var activeWindow = DateTime.UtcNow.AddMinutes(-30);
             ViewBag.ActiveSessionCount = await _context.tbl_r_sesi_aktif.AsNoTracking()
                 .CountAsync(s => s.is_aktif && s.last_seen >= activeWindow, cancellationToken);

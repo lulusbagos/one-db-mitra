@@ -494,6 +494,7 @@
             background: radial-gradient(circle, rgba(14, 165, 233, 0.18) 0%, transparent 70%);
             top: -200px;
             right: -160px;
+            pointer-events: none;
         }
         .ik-hero::after {
             content: "";
@@ -504,6 +505,11 @@
             background: radial-gradient(circle, rgba(16, 185, 129, 0.16) 0%, transparent 70%);
             bottom: -240px;
             left: -180px;
+            pointer-events: none;
+        }
+        .ik-hero > .d-flex {
+            position: relative;
+            z-index: 1;
         }
         .ik-hero-icon {
             width: 56px;
@@ -664,6 +670,42 @@
             display: none;
             align-items: center;
             justify-content: center;
+        }
+        .ik-form .form-label {
+            font-weight: 600;
+            color: #1e293b;
+            letter-spacing: 0.01em;
+        }
+        .ik-form .form-control,
+        .ik-form .form-select,
+        .ik-form textarea.form-control {
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            padding: 0.7rem 0.9rem;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+        .ik-form .form-control:focus,
+        .ik-form .form-select:focus,
+        .ik-form textarea.form-control:focus {
+            background: #ffffff;
+            border-color: #14b8a6;
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.18);
+        }
+        .ik-form .form-control::placeholder {
+            color: #94a3b8;
+        }
+        .ik-form .form-select {
+            background-image: linear-gradient(45deg, transparent 50%, #64748b 50%),
+                              linear-gradient(135deg, #64748b 50%, transparent 50%);
+            background-position: calc(100% - 18px) calc(1rem + 2px), calc(100% - 12px) calc(1rem + 2px);
+            background-size: 6px 6px, 6px 6px;
+            background-repeat: no-repeat;
+        }
+        .ik-section-container .form-text,
+        .ik-section-container .text-secondary.small {
+            color: #64748b !important;
         }
         .ik-sticky-actions {
             position: sticky;

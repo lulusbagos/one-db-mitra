@@ -22,10 +22,19 @@
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="SectionId" />
                 <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="SectionCode" class="form-label"></label>
+                        <input asp-for="SectionCode" class="form-control" />
+                        <span class="text-danger" asp-validation-for="SectionCode"></span>
+                    </div>
                     <div class="col-md-6">
                         <label asp-for="SectionName" class="form-label"></label>
                         <input asp-for="SectionName" class="form-control" />
                         <span class="text-danger" asp-validation-for="SectionName"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Description" class="form-label"></label>
+                        <input asp-for="Description" class="form-control" />
                     </div>
                     <div class="col-md-6">
                         <label asp-for="CompanyId" class="form-label"></label>

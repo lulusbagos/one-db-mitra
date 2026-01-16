@@ -754,7 +754,7 @@ namespace one_db_mitra.Controllers
             var activeMenus = await _context.tbl_m_menu.AsNoTracking().CountAsync(m => m.is_aktif, cancellationToken);
             var activeUsers = await _context.tbl_m_pengguna.AsNoTracking().CountAsync(u => u.is_aktif, cancellationToken);
             var activeCompanies = await _context.tbl_m_perusahaan.AsNoTracking().CountAsync(c => c.is_aktif, cancellationToken);
-            var activeDepartments = await _context.tbl_m_departemen.AsNoTracking().CountAsync(d => d.is_aktif, cancellationToken);
+            var activeDepartments = await _context.tbl_m_departemen.AsNoTracking().CountAsync(d => d.is_aktif == true, cancellationToken);
 
             return (activeMenus, activeUsers, activeCompanies, activeDepartments);
         }
@@ -821,7 +821,7 @@ namespace one_db_mitra.Controllers
                 .ToListAsync(cancellationToken);
 
             var departments = await _context.tbl_m_departemen.AsNoTracking()
-                .Where(d => d.is_aktif)
+                .Where(d => d.is_aktif == true)
                 .OrderBy(d => d.nama_departemen)
                 .Select(d => new
                 {
@@ -832,7 +832,7 @@ namespace one_db_mitra.Controllers
                 .ToListAsync(cancellationToken);
 
             var sections = await _context.tbl_m_seksi.AsNoTracking()
-                .Where(s => s.is_aktif)
+                .Where(s => s.is_aktif == true)
                 .OrderBy(s => s.nama_seksi)
                 .Select(s => new
                 {
@@ -843,7 +843,7 @@ namespace one_db_mitra.Controllers
                 .ToListAsync(cancellationToken);
 
             var positions = await _context.tbl_m_jabatan.AsNoTracking()
-                .Where(j => j.is_aktif)
+                .Where(j => j.is_aktif == true)
                 .OrderBy(j => j.nama_jabatan)
                 .Select(j => new
                 {
@@ -854,14 +854,16 @@ namespace one_db_mitra.Controllers
                 .ToListAsync(cancellationToken);
 
             var sectionsByDepartment = sections
-                .GroupBy(s => s.DepartmentId)
+                .Where(s => s.DepartmentId.HasValue)
+                .GroupBy(s => s.DepartmentId!.Value)
                 .ToDictionary(g => g.Key, g => g.ToList());
             var positionsBySection = positions
                 .Where(p => p.SectionId.HasValue)
                 .GroupBy(p => p.SectionId!.Value)
                 .ToDictionary(g => g.Key, g => g.ToList());
             var departmentsByCompany = departments
-                .GroupBy(d => d.CompanyId)
+                .Where(d => d.CompanyId.HasValue)
+                .GroupBy(d => d.CompanyId!.Value)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
             var result = new List<CompanyHierarchyItem>();

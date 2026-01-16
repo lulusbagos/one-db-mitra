@@ -551,7 +551,7 @@ namespace one_db_mitra.Controllers
         public async Task<IActionResult> SectionsByDepartment(int departmentId, CancellationToken cancellationToken)
         {
             var sections = await _context.tbl_m_seksi.AsNoTracking()
-                .Where(s => s.departemen_id == departmentId && s.is_aktif)
+                .Where(s => s.departemen_id == departmentId && s.is_aktif == true)
                 .OrderBy(s => s.nama_seksi)
                 .Select(s => new { id = s.seksi_id, name = s.nama_seksi })
                 .ToListAsync(cancellationToken);
@@ -563,7 +563,7 @@ namespace one_db_mitra.Controllers
         public async Task<IActionResult> PositionsBySection(int sectionId, CancellationToken cancellationToken)
         {
             var positions = await _context.tbl_m_jabatan.AsNoTracking()
-                .Where(p => p.seksi_id == sectionId && p.is_aktif)
+                .Where(p => p.seksi_id == sectionId && p.is_aktif == true)
                 .OrderBy(p => p.nama_jabatan)
                 .Select(p => new { id = p.jabatan_id, name = p.nama_jabatan })
                 .ToListAsync(cancellationToken);
@@ -575,7 +575,7 @@ namespace one_db_mitra.Controllers
         public async Task<IActionResult> DepartmentsByCompany(int companyId, CancellationToken cancellationToken)
         {
             var departments = await _context.tbl_m_departemen.AsNoTracking()
-                .Where(d => d.perusahaan_id == companyId && d.is_aktif)
+                .Where(d => d.perusahaan_id == companyId && d.is_aktif == true)
                 .OrderBy(d => d.nama_departemen)
                 .Select(d => new { id = d.departemen_id, name = d.nama_departemen })
                 .ToListAsync(cancellationToken);
@@ -598,19 +598,19 @@ namespace one_db_mitra.Controllers
                 .ToListAsync(cancellationToken);
 
             var departments = await _context.tbl_m_departemen.AsNoTracking()
-                .Where(d => (d.is_aktif || d.departemen_id == model.DepartmentId) && (scope.IsDepartmentAdmin ? d.departemen_id == scope.DepartmentId : (scope.CompanyId <= 0 || d.perusahaan_id == scope.CompanyId)))
+                .Where(d => ((d.is_aktif == true) || d.departemen_id == model.DepartmentId) && (scope.IsDepartmentAdmin ? d.departemen_id == scope.DepartmentId : (scope.CompanyId <= 0 || d.perusahaan_id == scope.CompanyId)))
                 .OrderBy(d => d.nama_departemen)
                 .Select(d => new SelectListItem(d.nama_departemen, d.departemen_id.ToString()))
                 .ToListAsync(cancellationToken);
 
             var sections = await _context.tbl_m_seksi.AsNoTracking()
-                .Where(s => (s.is_aktif || s.seksi_id == model.SectionId) && (!scope.IsDepartmentAdmin || s.departemen_id == scope.DepartmentId))
+                .Where(s => ((s.is_aktif == true) || s.seksi_id == model.SectionId) && (!scope.IsDepartmentAdmin || s.departemen_id == scope.DepartmentId))
                 .OrderBy(s => s.nama_seksi)
                 .Select(s => new SelectListItem(s.nama_seksi, s.seksi_id.ToString()))
                 .ToListAsync(cancellationToken);
 
             var positionsQuery = _context.tbl_m_jabatan.AsNoTracking()
-                .Where(p => p.is_aktif || p.jabatan_id == model.PositionId);
+                .Where(p => (p.is_aktif == true) || p.jabatan_id == model.PositionId);
 
             if (scope.IsDepartmentAdmin && scope.DepartmentId.HasValue)
             {

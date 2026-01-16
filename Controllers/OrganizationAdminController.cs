@@ -54,6 +54,7 @@ namespace one_db_mitra.Controllers
                                    select new CompanyListItem
                                    {
                                        CompanyId = company.perusahaan_id,
+                                       CompanyCode = company.kode_perusahaan ?? string.Empty,
                                        CompanyName = company.nama_perusahaan ?? string.Empty,
                                        CompanyTypeName = type.nama_tipe ?? string.Empty,
                                        ParentCompanyName = parent != null ? parent.nama_perusahaan ?? "-" : "-",
@@ -108,7 +109,10 @@ namespace one_db_mitra.Controllers
 
             var entity = new Models.Db.tbl_m_perusahaan
             {
+                kode_perusahaan = string.IsNullOrWhiteSpace(model.CompanyCode) ? null : model.CompanyCode.Trim(),
                 nama_perusahaan = model.CompanyName.Trim(),
+                alamat_perusahaan = string.IsNullOrWhiteSpace(model.CompanyAddress) ? null : model.CompanyAddress.Trim(),
+                status_perusahaan = string.IsNullOrWhiteSpace(model.CompanyStatus) ? null : model.CompanyStatus.Trim(),
                 tipe_perusahaan_id = model.CompanyTypeId,
                 perusahaan_induk_id = model.ParentCompanyId,
                 is_aktif = model.IsActive,
@@ -142,7 +146,10 @@ namespace one_db_mitra.Controllers
             var model = new CompanyEditViewModel
             {
                 CompanyId = company.perusahaan_id,
+                CompanyCode = company.kode_perusahaan,
                 CompanyName = company.nama_perusahaan ?? string.Empty,
+                CompanyAddress = company.alamat_perusahaan,
+                CompanyStatus = company.status_perusahaan,
                 CompanyTypeId = company.tipe_perusahaan_id,
                 ParentCompanyId = company.perusahaan_induk_id,
                 IsActive = company.is_aktif
@@ -185,7 +192,10 @@ namespace one_db_mitra.Controllers
                 return View(model);
             }
 
+            company.kode_perusahaan = string.IsNullOrWhiteSpace(model.CompanyCode) ? null : model.CompanyCode.Trim();
             company.nama_perusahaan = model.CompanyName.Trim();
+            company.alamat_perusahaan = string.IsNullOrWhiteSpace(model.CompanyAddress) ? null : model.CompanyAddress.Trim();
+            company.status_perusahaan = string.IsNullOrWhiteSpace(model.CompanyStatus) ? null : model.CompanyStatus.Trim();
             company.tipe_perusahaan_id = model.CompanyTypeId;
             company.perusahaan_induk_id = model.ParentCompanyId;
             company.is_aktif = model.IsActive;
@@ -216,7 +226,7 @@ namespace one_db_mitra.Controllers
             }
 
             var hasDepartments = await _context.tbl_m_departemen.AsNoTracking()
-                .AnyAsync(d => d.perusahaan_id == id && d.is_aktif, cancellationToken);
+                .AnyAsync(d => d.perusahaan_id == id && d.is_aktif == true, cancellationToken);
             var hasUsers = await _context.tbl_m_pengguna.AsNoTracking()
                 .AnyAsync(u => u.perusahaan_id == id && u.is_aktif, cancellationToken);
             var hasChildren = await _context.tbl_m_perusahaan.AsNoTracking()
@@ -244,7 +254,7 @@ namespace one_db_mitra.Controllers
             var baseQuery = ApplyDepartmentScope(_context.tbl_m_departemen.AsNoTracking().AsQueryable(), scope);
             if (activeOnly)
             {
-                baseQuery = baseQuery.Where(dept => dept.is_aktif);
+                baseQuery = baseQuery.Where(dept => dept.is_aktif == true);
             }
             if (companyId.HasValue && companyId.Value > 0)
             {
@@ -262,9 +272,10 @@ namespace one_db_mitra.Controllers
                                      select new DepartmentListItem
                                      {
                                          DepartmentId = dept.departemen_id,
+                                         DepartmentCode = dept.kode_departemen ?? string.Empty,
                                          DepartmentName = dept.nama_departemen ?? string.Empty,
                                          CompanyName = company.nama_perusahaan ?? string.Empty,
-                                         IsActive = dept.is_aktif
+                                         IsActive = dept.is_aktif == true
                                      }).ToListAsync(cancellationToken);
 
             ViewBag.ActiveOnly = activeOnly;
@@ -348,7 +359,9 @@ namespace one_db_mitra.Controllers
 
             var entity = new Models.Db.tbl_m_departemen
             {
+                kode_departemen = string.IsNullOrWhiteSpace(model.DepartmentCode) ? null : model.DepartmentCode.Trim(),
                 nama_departemen = model.DepartmentName.Trim(),
+                keterangan = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description.Trim(),
                 perusahaan_id = model.CompanyId,
                 is_aktif = model.IsActive,
                 dibuat_pada = DateTime.UtcNow
@@ -387,9 +400,11 @@ namespace one_db_mitra.Controllers
             var model = new DepartmentEditViewModel
             {
                 DepartmentId = dept.departemen_id,
+                DepartmentCode = dept.kode_departemen,
                 DepartmentName = dept.nama_departemen ?? string.Empty,
-                CompanyId = dept.perusahaan_id,
-                IsActive = dept.is_aktif
+                Description = dept.keterangan,
+                CompanyId = dept.perusahaan_id ?? 0,
+                IsActive = dept.is_aktif == true
             };
 
             await PopulateDepartmentOptionsAsync(model, scope, cancellationToken);
@@ -448,10 +463,11 @@ namespace one_db_mitra.Controllers
                 return View(model);
             }
 
+            dept.kode_departemen = string.IsNullOrWhiteSpace(model.DepartmentCode) ? null : model.DepartmentCode.Trim();
             dept.nama_departemen = model.DepartmentName.Trim();
+            dept.keterangan = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description.Trim();
             dept.perusahaan_id = model.CompanyId;
             dept.is_aktif = model.IsActive;
-            dept.diubah_pada = DateTime.UtcNow;
 
             await _context.SaveChangesAsync(cancellationToken);
             await _auditLogger.LogAsync("UPDATE", "departemen", dept.departemen_id.ToString(), $"Ubah departemen {dept.nama_departemen}", cancellationToken);
@@ -484,13 +500,13 @@ namespace one_db_mitra.Controllers
             }
 
             var hasSections = await _context.tbl_m_seksi.AsNoTracking()
-                .AnyAsync(s => s.departemen_id == id && s.is_aktif, cancellationToken);
+                .AnyAsync(s => s.departemen_id == id && s.is_aktif == true, cancellationToken);
             var hasUsers = await _context.tbl_m_pengguna.AsNoTracking()
                 .AnyAsync(u => u.departemen_id == id && u.is_aktif, cancellationToken);
             if (hasSections || hasUsers)
             {
                 var sectionNames = await _context.tbl_m_seksi.AsNoTracking()
-                    .Where(s => s.departemen_id == id && s.is_aktif)
+                    .Where(s => s.departemen_id == id && s.is_aktif == true)
                     .OrderBy(s => s.nama_seksi)
                     .Select(s => s.nama_seksi)
                     .Take(3)
@@ -516,7 +532,6 @@ namespace one_db_mitra.Controllers
             }
 
             dept.is_aktif = false;
-            dept.diubah_pada = DateTime.UtcNow;
             await _context.SaveChangesAsync(cancellationToken);
             await _auditLogger.LogAsync("DELETE", "departemen", dept.departemen_id.ToString(), $"Hapus departemen {dept.nama_departemen}", cancellationToken);
             SetAlert("Departemen berhasil dinonaktifkan.");
@@ -531,7 +546,7 @@ namespace one_db_mitra.Controllers
             var baseQuery = ApplySectionScope(_context.tbl_m_seksi.AsNoTracking().AsQueryable(), scope);
             if (activeOnly)
             {
-                baseQuery = baseQuery.Where(section => section.is_aktif);
+                baseQuery = baseQuery.Where(section => section.is_aktif == true);
             }
             if (companyId.HasValue && companyId.Value > 0)
             {
@@ -550,10 +565,11 @@ namespace one_db_mitra.Controllers
                                   select new SectionListItem
                                   {
                                       SectionId = section.seksi_id,
+                                      SectionCode = section.kode_seksi ?? string.Empty,
                                       SectionName = section.nama_seksi ?? string.Empty,
                                       DepartmentName = dept.nama_departemen ?? string.Empty,
                                       CompanyName = company.nama_perusahaan ?? string.Empty,
-                                      IsActive = section.is_aktif
+                                      IsActive = section.is_aktif == true
                                   }).ToListAsync(cancellationToken);
 
             ViewBag.ActiveOnly = activeOnly;
@@ -684,7 +700,9 @@ namespace one_db_mitra.Controllers
 
             var entity = new Models.Db.tbl_m_seksi
             {
+                kode_seksi = string.IsNullOrWhiteSpace(model.SectionCode) ? null : model.SectionCode.Trim(),
                 nama_seksi = model.SectionName.Trim(),
+                keterangan = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description.Trim(),
                 departemen_id = model.DepartmentId,
                 perusahaan_id = department.perusahaan_id,
                 is_aktif = model.IsActive,
@@ -724,10 +742,12 @@ namespace one_db_mitra.Controllers
             var model = new SectionEditViewModel
             {
                 SectionId = section.seksi_id,
+                SectionCode = section.kode_seksi,
                 SectionName = section.nama_seksi ?? string.Empty,
-                DepartmentId = section.departemen_id,
-                CompanyId = section.perusahaan_id,
-                IsActive = section.is_aktif
+                Description = section.keterangan,
+                DepartmentId = section.departemen_id ?? 0,
+                CompanyId = section.perusahaan_id ?? 0,
+                IsActive = section.is_aktif == true
             };
 
             await PopulateSectionOptionsAsync(model, scope, cancellationToken);
@@ -783,7 +803,7 @@ namespace one_db_mitra.Controllers
 
             if (scope.IsDepartmentAdmin && scope.DepartmentId.HasValue)
             {
-                model.DepartmentId = section.departemen_id;
+                model.DepartmentId = section.departemen_id ?? model.DepartmentId;
             }
 
             var exists = await _context.tbl_m_seksi.AsNoTracking()
@@ -820,7 +840,9 @@ namespace one_db_mitra.Controllers
                 return View(model);
             }
 
+            section.kode_seksi = string.IsNullOrWhiteSpace(model.SectionCode) ? null : model.SectionCode.Trim();
             section.nama_seksi = model.SectionName.Trim();
+            section.keterangan = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description.Trim();
             section.departemen_id = model.DepartmentId;
             section.perusahaan_id = department.perusahaan_id;
             section.is_aktif = model.IsActive;
@@ -857,13 +879,13 @@ namespace one_db_mitra.Controllers
             }
 
             var hasPositions = await _context.tbl_m_jabatan.AsNoTracking()
-                .AnyAsync(p => p.seksi_id == id && p.is_aktif, cancellationToken);
+                .AnyAsync(p => p.seksi_id == id && p.is_aktif == true, cancellationToken);
             var hasUsers = await _context.tbl_m_pengguna.AsNoTracking()
                 .AnyAsync(u => u.seksi_id == id && u.is_aktif, cancellationToken);
             if (hasPositions || hasUsers)
             {
                 var positionNames = await _context.tbl_m_jabatan.AsNoTracking()
-                    .Where(p => p.seksi_id == id && p.is_aktif)
+                    .Where(p => p.seksi_id == id && p.is_aktif == true)
                     .OrderBy(p => p.nama_jabatan)
                     .Select(p => p.nama_jabatan)
                     .Take(3)
@@ -904,7 +926,7 @@ namespace one_db_mitra.Controllers
             var baseQuery = ApplyPositionScope(_context.tbl_m_jabatan.AsNoTracking().AsQueryable(), scope);
             if (activeOnly)
             {
-                baseQuery = baseQuery.Where(position => position.is_aktif);
+                baseQuery = baseQuery.Where(position => position.is_aktif == true);
             }
             if (companyId.HasValue && companyId.Value > 0)
             {
@@ -917,16 +939,18 @@ namespace one_db_mitra.Controllers
             }
 
             var positions = await (from position in baseQuery
-                                   join section in _context.tbl_m_seksi.AsNoTracking() on position.seksi_id equals section.seksi_id
+                                   join section in _context.tbl_m_seksi.AsNoTracking() on position.seksi_id equals section.seksi_id into sectionJoin
+                                   from section in sectionJoin.DefaultIfEmpty()
                                    join company in _context.tbl_m_perusahaan.AsNoTracking() on position.perusahaan_id equals company.perusahaan_id
                                    orderby position.jabatan_id descending
                                    select new PositionListItem
                                    {
                                        PositionId = position.jabatan_id,
+                                       PositionCode = position.kode_jabatan ?? string.Empty,
                                        PositionName = position.nama_jabatan ?? string.Empty,
-                                       SectionName = section.nama_seksi ?? string.Empty,
+                                       SectionName = section != null ? section.nama_seksi ?? "-" : "-",
                                        CompanyName = company.nama_perusahaan ?? string.Empty,
-                                       IsActive = position.is_aktif
+                                       IsActive = position.is_aktif == true
                                    }).ToListAsync(cancellationToken);
 
             ViewBag.ActiveOnly = activeOnly;
@@ -1055,7 +1079,9 @@ namespace one_db_mitra.Controllers
 
             var entity = new Models.Db.tbl_m_jabatan
             {
+                kode_jabatan = string.IsNullOrWhiteSpace(model.PositionCode) ? null : model.PositionCode.Trim(),
                 nama_jabatan = model.PositionName.Trim(),
+                keterangan = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description.Trim(),
                 seksi_id = model.SectionId,
                 perusahaan_id = section.perusahaan_id,
                 is_aktif = model.IsActive,
@@ -1108,10 +1134,12 @@ namespace one_db_mitra.Controllers
             var model = new PositionEditViewModel
             {
                 PositionId = position.jabatan_id,
+                PositionCode = position.kode_jabatan,
                 PositionName = position.nama_jabatan ?? string.Empty,
+                Description = position.keterangan,
                 SectionId = position.seksi_id,
-                CompanyId = position.perusahaan_id,
-                IsActive = position.is_aktif
+                CompanyId = position.perusahaan_id ?? 0,
+                IsActive = position.is_aktif == true
             };
 
             await PopulatePositionOptionsAsync(model, scope, cancellationToken);
@@ -1212,7 +1240,9 @@ namespace one_db_mitra.Controllers
                 return View(model);
             }
 
+            position.kode_jabatan = string.IsNullOrWhiteSpace(model.PositionCode) ? null : model.PositionCode.Trim();
             position.nama_jabatan = model.PositionName.Trim();
+            position.keterangan = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description.Trim();
             position.seksi_id = model.SectionId;
             position.perusahaan_id = section.perusahaan_id;
             position.is_aktif = model.IsActive;
@@ -1294,7 +1324,7 @@ namespace one_db_mitra.Controllers
             }
 
             var query = _context.tbl_m_departemen.AsNoTracking()
-                .Where(d => d.perusahaan_id == companyId && d.is_aktif);
+                .Where(d => d.perusahaan_id == companyId && d.is_aktif == true);
             if (scope.IsDepartmentAdmin && scope.DepartmentId.HasValue)
             {
                 query = query.Where(d => d.departemen_id == scope.DepartmentId.Value);
@@ -1318,7 +1348,7 @@ namespace one_db_mitra.Controllers
             }
 
             var query = _context.tbl_m_seksi.AsNoTracking()
-                .Where(s => s.perusahaan_id == companyId && s.is_aktif);
+                .Where(s => s.perusahaan_id == companyId && s.is_aktif == true);
             if (scope.IsDepartmentAdmin && scope.DepartmentId.HasValue)
             {
                 query = query.Where(s => s.departemen_id == scope.DepartmentId.Value);

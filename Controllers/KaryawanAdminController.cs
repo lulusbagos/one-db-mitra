@@ -2078,7 +2078,7 @@ namespace one_db_mitra.Controllers
         public async Task<IActionResult> DepartmentsByCompany(int companyId, CancellationToken cancellationToken)
         {
             var departments = await _context.tbl_m_departemen.AsNoTracking()
-                .Where(d => d.perusahaan_id == companyId && d.is_aktif)
+                .Where(d => d.perusahaan_id == companyId && d.is_aktif == true)
                 .OrderBy(d => d.nama_departemen)
                 .Select(d => new { id = d.departemen_id, name = d.nama_departemen })
                 .ToListAsync(cancellationToken);
@@ -2090,7 +2090,7 @@ namespace one_db_mitra.Controllers
         public async Task<IActionResult> SectionsByDepartment(int departmentId, CancellationToken cancellationToken)
         {
             var sections = await _context.tbl_m_seksi.AsNoTracking()
-                .Where(s => s.departemen_id == departmentId && s.is_aktif)
+                .Where(s => s.departemen_id == departmentId && s.is_aktif == true)
                 .OrderBy(s => s.nama_seksi)
                 .Select(s => new { id = s.seksi_id, name = s.nama_seksi })
                 .ToListAsync(cancellationToken);
@@ -2102,7 +2102,7 @@ namespace one_db_mitra.Controllers
         public async Task<IActionResult> PositionsBySection(int sectionId, CancellationToken cancellationToken)
         {
             var positions = await _context.tbl_m_jabatan.AsNoTracking()
-                .Where(p => p.seksi_id == sectionId && p.is_aktif)
+                .Where(p => p.seksi_id == sectionId && p.is_aktif == true)
                 .OrderBy(p => p.nama_jabatan)
                 .Select(p => new { id = p.jabatan_id, name = p.nama_jabatan })
                 .ToListAsync(cancellationToken);
@@ -2119,19 +2119,19 @@ namespace one_db_mitra.Controllers
                 .ToListAsync(cancellationToken);
 
             model.DepartmentOptions = await _context.tbl_m_departemen.AsNoTracking()
-                .Where(d => d.is_aktif)
+                .Where(d => d.is_aktif == true)
                 .OrderBy(d => d.nama_departemen)
                 .Select(d => new SelectListItem(d.nama_departemen, d.departemen_id.ToString()))
                 .ToListAsync(cancellationToken);
 
             model.SectionOptions = await _context.tbl_m_seksi.AsNoTracking()
-                .Where(s => s.is_aktif)
+                .Where(s => s.is_aktif == true)
                 .OrderBy(s => s.nama_seksi)
                 .Select(s => new SelectListItem(s.nama_seksi, s.seksi_id.ToString()))
                 .ToListAsync(cancellationToken);
 
             model.PositionOptions = await _context.tbl_m_jabatan.AsNoTracking()
-                .Where(p => p.is_aktif)
+                .Where(p => p.is_aktif == true)
                 .OrderBy(p => p.nama_jabatan)
                 .Select(p => new SelectListItem(p.nama_jabatan, p.jabatan_id.ToString()))
                 .ToListAsync(cancellationToken);

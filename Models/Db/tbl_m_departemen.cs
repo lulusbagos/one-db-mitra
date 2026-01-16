@@ -7,13 +7,17 @@ public partial class tbl_m_departemen
 {
     public int departemen_id { get; set; }
 
-    public int perusahaan_id { get; set; }
+    public string? kode_departemen { get; set; }
 
-    public string nama_departemen { get; set; } = null!;
+    public string? nama_departemen { get; set; }
 
-    public bool is_aktif { get; set; }
+    public string? keterangan { get; set; }
 
-    public DateTime dibuat_pada { get; set; }
+    public bool? is_aktif { get; set; }
 
-    public DateTime? diubah_pada { get; set; }
+    public int? perusahaan_id { get; set; }
+
+    public string? created_by { get; set; }
+
+    public DateTime? dibuat_pada { get; set; }
 }

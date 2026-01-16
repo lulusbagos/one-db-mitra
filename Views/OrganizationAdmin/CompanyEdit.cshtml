@@ -18,10 +18,23 @@
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="CompanyId" />
                 <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="CompanyCode" class="form-label"></label>
+                        <input asp-for="CompanyCode" class="form-control" />
+                        <span class="text-danger" asp-validation-for="CompanyCode"></span>
+                    </div>
                     <div class="col-md-6">
                         <label asp-for="CompanyName" class="form-label"></label>
                         <input asp-for="CompanyName" class="form-control" />
                         <span class="text-danger" asp-validation-for="CompanyName"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CompanyAddress" class="form-label"></label>
+                        <input asp-for="CompanyAddress" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="CompanyStatus" class="form-label"></label>
+                        <input asp-for="CompanyStatus" class="form-control" />
                     </div>
                     <div class="col-md-6">
                         <label asp-for="CompanyTypeId" class="form-label"></label>
