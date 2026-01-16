@@ -2817,7 +2817,7 @@ namespace one_db_mitra.Controllers
             var nikList = rows.Select(r => r.NoNik).Where(v => !string.IsNullOrWhiteSpace(v)).Distinct().ToList();
             var existingKaryawan = await _context.tbl_t_karyawan.AsNoTracking()
                 .Where(k => nikList.Contains(k.no_nik))
-                .Select(k => new { k.no_nik, k.perusahaan_id })
+                .Select(k => new { k.no_nik, k.perusahaan_id, k.status_aktif, k.created_at })
                 .ToListAsync(cancellationToken);
 
             var companyMap = await _context.tbl_m_perusahaan.AsNoTracking()
@@ -2893,8 +2893,11 @@ namespace one_db_mitra.Controllers
                         row.Action = "Transfer";
                         if (!scope.IsOwner)
                         {
-                            var latest = existingKaryawan.FirstOrDefault(k => k.no_nik == row.NoNik && k.perusahaan_id != row.CompanyId);
-                            if (latest is not null && latest.status_aktif)
+                            var latest = existingKaryawan
+                                .Where(k => k.no_nik == row.NoNik && k.perusahaan_id != row.CompanyId)
+                                .OrderByDescending(k => k.created_at)
+                                .FirstOrDefault();
+                            if (latest?.status_aktif == true)
                             {
                                 var approved = await HasApprovedMutasiAsync(row.NoNik, latest.perusahaan_id, row.CompanyId, cancellationToken);
                                 if (!approved)

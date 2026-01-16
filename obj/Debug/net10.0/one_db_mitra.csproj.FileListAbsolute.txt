@@ -303,3 +303,4 @@ D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\refint\one_db_m
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\one_db_mitra.pdb
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\one_db_mitra.genruntimeconfig.cache
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\ref\one_db_mitra.dll
+D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\one_db_mitra.sourcelink.json
