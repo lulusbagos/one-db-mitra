@@ -1,0 +1,251 @@
+is_global = true
+build_property.TargetFramework = net10.0
+build_property.TargetFramework = net10.0
+build_property.TargetPlatformMinVersion = 
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.TargetFrameworkIdentifier = .NETCoreApp
+build_property.TargetFrameworkVersion = v10.0
+build_property.RootNamespace = one_db_mitra
+build_property.RootNamespace = one_db_mitra
+build_property.ProjectDir = D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 9.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 10.0
+build_property.EnableCodeStyleSeverity = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/backup_karyawan_ui_20260116_104218/KaryawanAdmin/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = YmFja3VwX2thcnlhd2FuX3VpXzIwMjYwMTE2XzEwNDIxOFxLYXJ5YXdhbkFkbWluXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/backup_karyawan_ui_20260116_104218/KaryawanAdmin/Detail.cshtml]
+build_metadata.AdditionalFiles.TargetPath = YmFja3VwX2thcnlhd2FuX3VpXzIwMjYwMTE2XzEwNDIxOFxLYXJ5YXdhbkFkbWluXERldGFpbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/backup_karyawan_ui_20260116_104218/KaryawanAdmin/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = YmFja3VwX2thcnlhd2FuX3VpXzIwMjYwMTE2XzEwNDIxOFxLYXJ5YXdhbkFkbWluXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/backup_karyawan_ui_20260116_104218/KaryawanAdmin/ImportPreview.cshtml]
+build_metadata.AdditionalFiles.TargetPath = YmFja3VwX2thcnlhd2FuX3VpXzIwMjYwMTE2XzEwNDIxOFxLYXJ5YXdhbkFkbWluXEltcG9ydFByZXZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/backup_karyawan_ui_20260116_104218/KaryawanAdmin/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = YmFja3VwX2thcnlhd2FuX3VpXzIwMjYwMTE2XzEwNDIxOFxLYXJ5YXdhbkFkbWluXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Pages/Dashboard/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGFzaGJvYXJkXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Pages/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Pages/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Pages/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Pages/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/Account/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/Account/Profile.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxQcm9maWxlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/AppSetting/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXBwU2V0dGluZ1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/AuditLog/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXVkaXRMb2dcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/Home/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/Home/Privacy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/KaryawanAdmin/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcS2FyeWF3YW5BZG1pblxDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/KaryawanAdmin/Detail.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcS2FyeWF3YW5BZG1pblxEZXRhaWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/KaryawanAdmin/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcS2FyeWF3YW5BZG1pblxFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/KaryawanAdmin/ImportPreview.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcS2FyeWF3YW5BZG1pblxJbXBvcnRQcmV2aWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/KaryawanAdmin/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcS2FyeWF3YW5BZG1pblxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/MenuAdmin/AccessMatrix.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudUFkbWluXEFjY2Vzc01hdHJpeC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/MenuAdmin/CompanyAccess.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudUFkbWluXENvbXBhbnlBY2Nlc3MuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/MenuAdmin/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudUFkbWluXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/MenuAdmin/Manage.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudUFkbWluXE1hbmFnZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/MenuAdmin/RoleAccess.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudUFkbWluXFJvbGVBY2Nlc3MuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/MenuAdmin/_MenuNode.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudUFkbWluXF9NZW51Tm9kZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/MenuAdmin/_MenuTree.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudUFkbWluXF9NZW51VHJlZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/MenuAdmin/_ParentMenuOptions.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVudUFkbWluXF9QYXJlbnRNZW51T3B0aW9ucy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/MutasiAdmin/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTXV0YXNpQWRtaW5cQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/MutasiAdmin/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTXV0YXNpQWRtaW5cSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/OrganizationAdmin/Companies.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JnYW5pemF0aW9uQWRtaW5cQ29tcGFuaWVzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/OrganizationAdmin/CompanyCreate.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JnYW5pemF0aW9uQWRtaW5cQ29tcGFueUNyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/OrganizationAdmin/CompanyEdit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JnYW5pemF0aW9uQWRtaW5cQ29tcGFueUVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/OrganizationAdmin/DepartmentCreate.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JnYW5pemF0aW9uQWRtaW5cRGVwYXJ0bWVudENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/OrganizationAdmin/DepartmentEdit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JnYW5pemF0aW9uQWRtaW5cRGVwYXJ0bWVudEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/OrganizationAdmin/Departments.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JnYW5pemF0aW9uQWRtaW5cRGVwYXJ0bWVudHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/OrganizationAdmin/PositionCreate.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JnYW5pemF0aW9uQWRtaW5cUG9zaXRpb25DcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/OrganizationAdmin/PositionEdit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JnYW5pemF0aW9uQWRtaW5cUG9zaXRpb25FZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/OrganizationAdmin/Positions.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JnYW5pemF0aW9uQWRtaW5cUG9zaXRpb25zLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/OrganizationAdmin/SectionCreate.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JnYW5pemF0aW9uQWRtaW5cU2VjdGlvbkNyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/OrganizationAdmin/SectionEdit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JnYW5pemF0aW9uQWRtaW5cU2VjdGlvbkVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/OrganizationAdmin/Sections.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JnYW5pemF0aW9uQWRtaW5cU2VjdGlvbnMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/Shared/Components/SidebarMenu/Default.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXENvbXBvbmVudHNcU2lkZWJhck1lbnVcRGVmYXVsdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/Shared/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/Shared/_LoginLayout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9Mb2dpbkxheW91dC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/Shared/_SidebarMenuItem.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9TaWRlYmFyTWVudUl0ZW0uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/UserAdmin/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlckFkbWluXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/UserAdmin/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlckFkbWluXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/UserAdmin/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlckFkbWluXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/UserAdmin/_MenuPreview.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlckFkbWluXF9NZW51UHJldmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = b-g6s185931i

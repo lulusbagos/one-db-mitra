@@ -1,0 +1,100 @@
+RINGKASAN PROYEK - ONE_DB_MITRA
+
+Bahasa/stack:
+- ASP.NET Core MVC (C#), EF Core (scaffolded), SQL Server.
+- UI: Bootstrap 5 + jQuery, font Google (Poppins/Manrope + opsi lain).
+
+Tujuan aplikasi:
+- Sistem administrasi perusahaan multi-level + manajemen user/role/menu + karyawan.
+- Data menu, hak akses, dan banyak konfigurasi disimpan di database.
+
+KONSEP HIRARKI
+1) Hirarki perusahaan (peran bisnis):
+   Owner -> Main Contractor -> Sub Contractor -> Vendor
+
+2) Hirarki organisasi internal (perusahaan):
+   Perusahaan -> Departemen -> Section -> Jabatan
+
+Hak akses umum:
+- Owner: akses penuh, bisa lihat semua data, bisa membuka blacklist.
+- Admin perusahaan: kelola departemen/section/jabatan di perusahaannya.
+- Admin departemen: kelola section/jabatan di departemennya.
+- Admin role di bawahnya: hanya bisa buat user setara/di bawah sesuai aturan.
+- Admin departemen: hanya buat user di departemennya.
+
+Catatan penting:
+- FK tidak dibuat di DB, relasi dipakai di aplikasi.
+- Password masih plaintext di DB (sesuai request awal).
+- Menu tampil sesuai mapping role/perusahaan (role-based menu).
+
+STRUKTUR DATABASE UTAMA (prefix)
+- tbl_m_ = master, tbl_r_ = relasi, tbl_t_ = transaksi.
+- Contoh:
+  - tbl_m_pengguna, tbl_m_peran, tbl_m_menu
+  - tbl_r_menu_peran, tbl_r_menu_perusahaan, tbl_r_pengguna_peran
+  - tbl_t_karyawan, tbl_m_personal, tbl_r_karyawan_status, tbl_r_karyawan_penempatan
+
+PENTING: Tabel karyawan sudah pakai nama tbl_t_karyawan (bukan tbl_m_karyawan).
+
+MENU & AKSES
+- Menu diambil dari DB (tbl_m_menu) + mapping tbl_r_menu_peran/tbl_r_menu_perusahaan.
+- Sidebar render sesuai akses aktif user (role/company).
+- Menu Admin: Manage, RoleAccess, AccessMatrix, dll.
+
+LOGIN & SESI
+- Login MVC standar.
+- Session aktif di tbl_r_sesi_aktif (dipakai untuk online count & session management).
+- Role switcher: user bisa punya multi-role (tbl_r_pengguna_peran).
+
+KARYAWAN
+- Data personal: tbl_m_personal.
+- Data karyawan (penempatan/kepegawaian): tbl_t_karyawan.
+- Status: tbl_r_karyawan_status (nonaktif/blacklist/pelanggaran).
+- Penempatan/mutasi: tbl_r_karyawan_penempatan (status rehire/kontrak, dll).
+- Dokumen: tbl_t_karyawan_dokumen.
+- Pendidikan: tbl_r_karyawan_pendidikan (multi).
+- Vaksin: tbl_r_karyawan_vaksin.
+- Audit perubahan: tbl_r_karyawan_audit.
+- Blacklist: tidak bisa aktif lagi kecuali Owner.
+- Pindah perusahaan minimal 3 bulan dari tanggal nonaktif/resign (kecuali Owner).
+
+IMPORT EXCEL KARYAWAN
+- Template disediakan.
+- Validasi duplikasi NoKTP/NoKK/NoNIK.
+- Jika NIK sama di company yang sama => update, beda company => transfer.
+
+APP SETTING
+- tbl_m_setting_aplikasi:
+  - nama_aplikasi, nama_header, footer_text, logo_url
+  - announcement_* (banner terjadwal)
+  - font_primary, font_secondary
+
+Theme:
+- Tema disimpan di localStorage (per browser).
+- Font bisa global (AppSetting) atau per user.
+
+PER-USER PREFERENCES
+- tbl_m_pengguna memiliki:
+  - user_theme
+  - user_font_primary
+  - user_font_secondary
+
+DASHBOARD (MenuAdmin/Index)
+- KPI ringkas, onboarding checklist, heatmap aktivitas.
+- Audit log terbaru + timeline aktivitas.
+- Owner KPI cards (aktif/blacklist/resign/rehire).
+
+FITUR UI LAIN
+- Command palette (Ctrl+K).
+- Quick switch role (modal).
+- Global search (SearchController).
+- Toast notifications (site.js).
+
+CATATAN PERUBAHAN DB TERBARU (WAJIB)
+1) tbl_m_setting_aplikasi:
+   - announcement_enabled, announcement_title, announcement_message, announcement_type, announcement_start, announcement_end
+   - font_primary, font_secondary
+2) tbl_m_pengguna:
+   - user_theme, user_font_primary, user_font_secondary
+
+Jika pindah project, gunakan file ini sebagai ringkasan aturan & struktur.

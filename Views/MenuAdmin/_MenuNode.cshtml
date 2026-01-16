@@ -1,0 +1,37 @@
+@model one_db_mitra.Models.Menu.MenuItem
+<li>
+    <div class="menu-node @(Model.IsHidden ? "is-hidden" : string.Empty)">
+        <div>
+            <span class="menu-icon"><i class="bi @Model.IconKey"></i></span>
+            <strong>@Model.DisplayName</strong>
+            <span class="text-secondary">(@Model.MenuCode)</span>
+        </div>
+        <div class="menu-node-badges">
+            @if (Model.IsHidden)
+            {
+                <span class="badge text-bg-secondary">Hidden</span>
+            }
+            @if (Model.OpenInNewTab)
+            {
+                <span class="badge text-bg-info">New Tab</span>
+            }
+            @if (Model.AllowedRoles.Any())
+            {
+                <span class="badge text-bg-dark">@string.Join(" • ", Model.AllowedRoles)</span>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.StartupCategory))
+            {
+                <span class="badge text-bg-light text-body">@Model.StartupCategory</span>
+            }
+        </div>
+    </div>
+    @if (Model.Children.Any())
+    {
+        <ul>
+            @foreach (var child in Model.Children.OrderBy(c => c.SortOrder).ThenBy(c => c.DisplayName))
+            {
+                @await Html.PartialAsync("_MenuNode", child)
+            }
+        </ul>
+    }
+</li>

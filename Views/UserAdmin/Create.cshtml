@@ -1,0 +1,212 @@
+@model one_db_mitra.Models.Admin.UserEditViewModel
+@{
+    ViewData["Title"] = "Tambah User";
+    var isDepartmentAdmin = ViewBag.IsDepartmentAdmin == true;
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <p class="text-uppercase text-secondary small mb-1">Pengaturan</p>
+            <h2 class="mb-0">Tambah User</h2>
+        </div>
+        <a class="btn btn-outline-secondary" asp-action="Index">Kembali</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" asp-action="Create">
+                @Html.AntiForgeryToken()
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Username" class="form-label"></label>
+                        <input asp-for="Username" class="form-control" placeholder="admin.operasional" />
+                        <span class="text-danger" asp-validation-for="Username"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Password" class="form-label"></label>
+                        <div class="input-group">
+                            <input asp-for="Password" class="form-control" placeholder="password123" type="password" id="passwordInput" />
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Tampilkan password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <small class="text-secondary">Disimpan plain text sesuai kebutuhan saat ini.</small>
+                        <span class="text-danger" asp-validation-for="Password"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="FullName" class="form-label"></label>
+                        <input asp-for="FullName" class="form-control" placeholder="Nama Lengkap" />
+                        <span class="text-danger" asp-validation-for="FullName"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" placeholder="nama@company.com" />
+                        <span class="text-danger" asp-validation-for="Email"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CompanyId" class="form-label"></label>
+                        @if (isDepartmentAdmin)
+                        {
+                            <select asp-for="CompanyId" class="form-select" asp-items="Model.CompanyOptions" disabled></select>
+                            <input type="hidden" asp-for="CompanyId" />
+                        }
+                        else
+                        {
+                            <select asp-for="CompanyId" class="form-select" asp-items="Model.CompanyOptions"></select>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="RoleIds" class="form-label"></label>
+                        @if (isDepartmentAdmin)
+                        {
+                            <select asp-for="RoleIds" class="form-select" asp-items="Model.RoleOptions" multiple disabled></select>
+                            @foreach (var roleId in Model.RoleIds)
+                            {
+                                <input type="hidden" name="RoleIds" value="@roleId" />
+                            }
+                        }
+                        else
+                        {
+                            <select asp-for="RoleIds" class="form-select" asp-items="Model.RoleOptions" multiple></select>
+                            <small class="text-secondary">Gunakan Ctrl/Shift untuk memilih lebih dari satu role.</small>
+                        }
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="DepartmentId" class="form-label"></label>
+                        @if (isDepartmentAdmin)
+                        {
+                            <select asp-for="DepartmentId" class="form-select" id="departmentSelect" disabled>
+                                <option value="">--</option>
+                            </select>
+                            <input type="hidden" asp-for="DepartmentId" />
+                        }
+                        else
+                        {
+                            <select asp-for="DepartmentId" class="form-select" id="departmentSelect">
+                                <option value="">--</option>
+                            </select>
+                        }
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="SectionId" class="form-label"></label>
+                        <select asp-for="SectionId" class="form-select" id="sectionSelect">
+                            <option value="">--</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="PositionId" class="form-label"></label>
+                        <select asp-for="PositionId" class="form-select" id="positionSelect">
+                            <option value="">--</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-center">
+                        <div class="form-check mt-4">
+                            <input asp-for="IsActive" class="form-check-input" />
+                            <label asp-for="IsActive" class="form-check-label"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const company = document.getElementById('CompanyId');
+            const department = document.getElementById('departmentSelect');
+            const section = document.getElementById('sectionSelect');
+            const position = document.getElementById('positionSelect');
+            const initialDepartment = '@(Model.DepartmentId?.ToString() ?? string.Empty)';
+            const initialSection = '@(Model.SectionId?.ToString() ?? string.Empty)';
+            const initialPosition = '@(Model.PositionId?.ToString() ?? string.Empty)';
+
+            function resetSelect(target) {
+                target.innerHTML = '<option value="">--</option>';
+            }
+
+            async function loadSections(deptId, selectedId) {
+                resetSelect(section);
+                resetSelect(position);
+                if (!deptId) return;
+                const response = await fetch(`/UserAdmin/SectionsByDepartment?departmentId=${deptId}`);
+                const data = await response.json();
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = item.name;
+                    if (selectedId && item.id.toString() === selectedId) {
+                        option.selected = true;
+                    }
+                    section.appendChild(option);
+                });
+            }
+
+            async function loadPositions(sectionId, selectedId) {
+                resetSelect(position);
+                if (!sectionId) return;
+                const response = await fetch(`/UserAdmin/PositionsBySection?sectionId=${sectionId}`);
+                const data = await response.json();
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = item.name;
+                    if (selectedId && item.id.toString() === selectedId) {
+                        option.selected = true;
+                    }
+                    position.appendChild(option);
+                });
+            }
+
+            async function loadDepartments(companyId, selectedId) {
+                resetSelect(department);
+                resetSelect(section);
+                resetSelect(position);
+                if (!companyId) return;
+                const response = await fetch(`/UserAdmin/DepartmentsByCompany?companyId=${companyId}`);
+                const data = await response.json();
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = item.name;
+                    if (selectedId && item.id.toString() === selectedId) {
+                        option.selected = true;
+                    }
+                    department.appendChild(option);
+                });
+            }
+
+            const toggle = document.getElementById('togglePassword');
+            const password = document.getElementById('passwordInput');
+            if (toggle && password) {
+                toggle.addEventListener('click', function () {
+                    const isPassword = password.type === 'password';
+                    password.type = isPassword ? 'text' : 'password';
+                    toggle.innerHTML = isPassword ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+                });
+            }
+
+            company?.addEventListener('change', (e) => loadDepartments(e.target.value, ''));
+            department?.addEventListener('change', (e) => loadSections(e.target.value, ''));
+            section?.addEventListener('change', (e) => loadPositions(e.target.value, ''));
+
+            if (company?.value) {
+                loadDepartments(company.value, initialDepartment).then(() => {
+                    if (department?.value) {
+                        loadSections(department.value, initialSection).then(() => {
+                            if (initialSection) {
+                                loadPositions(initialSection, initialPosition);
+                            }
+                        });
+                    }
+                });
+            }
+        })();
+    </script>
+}

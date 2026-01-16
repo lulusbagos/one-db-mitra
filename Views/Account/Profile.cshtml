@@ -1,0 +1,549 @@
+@model one_db_mitra.Models.Auth.ProfileViewModel
+@{
+    ViewData["Title"] = "Profil Saya";
+    var sessionUsername = User.Identity?.Name ?? "-";
+    var sessionRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "-";
+    var roleBadgeClass = sessionRole.ToLowerInvariant() switch
+    {
+        "owner" => "bg-soft-owner",
+        "main contractor" => "bg-soft-main",
+        "sub contractor" => "bg-soft-sub",
+        "vendor" => "bg-soft-vendor",
+        _ => "bg-soft-primary"
+    };
+    var roleIcon = sessionRole.ToLowerInvariant() switch
+    {
+        "owner" => "bi bi-crown",
+        "main contractor" => "bi bi-building-gear",
+        "sub contractor" => "bi bi-diagram-3",
+        "vendor" => "bi bi-box-seam",
+        _ => "bi bi-shield-check"
+    };
+}
+
+<div class="container-fluid px-0">
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card h-100 profile-card">
+                <div class="card-body text-center">
+                    @{
+                        var profileInitial = !string.IsNullOrWhiteSpace(Model.Username)
+                            ? Model.Username[..1].ToUpperInvariant()
+                            : "A";
+                    }
+                    <div class="profile-hero-banner">
+                        <div class="profile-photo-wrap">
+                            @if (!string.IsNullOrWhiteSpace(Model.PhotoUrl))
+                            {
+                                <img src="@Model.PhotoUrl" class="profile-photo" alt="Foto Profil" id="profilePreview" />
+                            }
+                            else
+                            {
+                                <div class="profile-initial" id="profilePreview">@profileInitial</div>
+                            }
+                        </div>
+                        <h5 class="mt-3 mb-1 text-white">@Model.FullName</h5>
+                        <p class="text-white-50 mb-0">@Model.Username</p>
+                    </div>
+                    <div class="profile-chips mt-3">
+                        <span class="profile-chip badge-pill @roleBadgeClass" data-bs-toggle="tooltip" data-bs-placement="top" title="Level akses: @Model.RoleLevel">
+                            <i class="@roleIcon"></i>@Model.RoleName
+                        </span>
+                        <span class="profile-chip badge-pill bg-soft-company" data-bs-toggle="tooltip" data-bs-placement="top" title="Company ID: @Model.CompanyId">
+                            <i class="bi bi-building"></i>@Model.CompanyName
+                        </span>
+                    </div>
+                    <div class="profile-tags mt-3">
+                        <div class="profile-tag"><i class="bi bi-diagram-2"></i><span>@(string.IsNullOrWhiteSpace(Model.DepartmentName) ? "-" : Model.DepartmentName)</span></div>
+                        <div class="profile-tag"><i class="bi bi-diagram-3"></i><span>@(string.IsNullOrWhiteSpace(Model.SectionName) ? "-" : Model.SectionName)</span></div>
+                        <div class="profile-tag"><i class="bi bi-person-badge"></i><span>@(string.IsNullOrWhiteSpace(Model.PositionName) ? "-" : Model.PositionName)</span></div>
+                    </div>
+                    <p class="text-secondary small mt-4 mb-0">Perbarui foto dan password dari panel pengaturan.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Pengaturan Profil</h6>
+                </div>
+                <div class="card-body">
+                    @if (TempData["ProfileMessage"] is string message)
+                    {
+                        <div class="toast-data" data-message="@message" data-type="success"></div>
+                    }
+                    <form method="post" asp-action="Profile" asp-controller="Account">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="PhotoBase64" />
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Foto Profil</label>
+                                <div class="d-flex flex-column gap-2">
+                                    <input type="file" class="form-control" id="photoInput" accept="image/*" />
+                                    <small class="text-secondary">Unggah foto dan lakukan crop sebelum disimpan.</small>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="PhotoUrl" class="form-label"></label>
+                                <input asp-for="PhotoUrl" class="form-control" placeholder="https://..." />
+                                <small class="text-secondary">Opsional, gunakan URL jika tidak upload file.</small>
+                                <span class="text-danger" asp-validation-for="PhotoUrl"></span>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="CurrentPassword" class="form-label"></label>
+                                <input asp-for="CurrentPassword" class="form-control" />
+                                <span class="text-danger" asp-validation-for="CurrentPassword"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="NewPassword" class="form-label"></label>
+                                <input asp-for="NewPassword" class="form-control" />
+                                <span class="text-danger" asp-validation-for="NewPassword"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ConfirmPassword" class="form-label"></label>
+                                <input asp-for="ConfirmPassword" class="form-control" />
+                                <span class="text-danger" asp-validation-for="ConfirmPassword"></span>
+                            </div>
+                            <div class="col-12">
+                                <hr />
+                                <h6 class="mb-2">Preferensi Tampilan</h6>
+                                <p class="text-secondary small mb-3">Tema & font khusus untuk akun kamu.</p>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="ThemePreference" class="form-label"></label>
+                                <select asp-for="ThemePreference" class="form-select" id="profileThemeSelect">
+                                    <option value="">Ikuti Tema Aplikasi</option>
+                                    <option value="green-blue">Green Blue</option>
+                                    <option value="navy-gold">Navy Gold</option>
+                                    <option value="charcoal-teal">Charcoal Teal</option>
+                                    <option value="slate-amber">Slate Amber</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="FontPrimary" class="form-label"></label>
+                                <select asp-for="FontPrimary" class="form-select" id="profileFontPrimary">
+                                    <option value="">Ikuti Font Aplikasi</option>
+                                    <option value="Poppins">Poppins</option>
+                                    <option value="Manrope">Manrope</option>
+                                    <option value="Montserrat">Montserrat</option>
+                                    <option value="Inter">Inter</option>
+                                    <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+                                    <option value="Sora">Sora</option>
+                                    <option value="Space Grotesk">Space Grotesk</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="FontSecondary" class="form-label"></label>
+                                <select asp-for="FontSecondary" class="form-select" id="profileFontSecondary">
+                                    <option value="">Ikuti Font Aplikasi</option>
+                                    <option value="Manrope">Manrope</option>
+                                    <option value="Poppins">Poppins</option>
+                                    <option value="Montserrat">Montserrat</option>
+                                    <option value="Inter">Inter</option>
+                                    <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+                                    <option value="Sora">Sora</option>
+                                    <option value="Space Grotesk">Space Grotesk</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Detail Organisasi</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <span>Perusahaan</span>
+                                <strong>@Model.CompanyName</strong>
+                                <small>ID: @Model.CompanyId</small>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="detail-item">
+                                <span>Hirarki Perusahaan</span>
+                                @if (string.IsNullOrWhiteSpace(Model.CompanyHierarchyPath))
+                                {
+                                    <strong>-</strong>
+                                }
+                                else
+                                {
+                                    <div class="badge-list">
+                                        @foreach (var item in Model.CompanyHierarchyPath.Split(" - ", StringSplitOptions.RemoveEmptyEntries))
+                                        {
+                                            <span class="badge badge-pill bg-soft-primary">@item</span>
+                                        }
+                                    </div>
+                                }
+                                <small>Urutan perusahaan induk hingga perusahaan saat ini.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <span>Role</span>
+                                <strong>@Model.RoleName</strong>
+                                <small>ID: @Model.RoleId</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Departemen</span>
+                                <strong>@Model.DepartmentName</strong>
+                                <small>ID: @(Model.DepartmentId?.ToString() ?? "-")</small>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="detail-item">
+                                <span>Hirarki Departemen</span>
+                                @if (string.IsNullOrWhiteSpace(Model.DepartmentHierarchyPath))
+                                {
+                                    <strong>-</strong>
+                                }
+                                else
+                                {
+                                    <div class="badge-list">
+                                        @foreach (var item in Model.DepartmentHierarchyPath.Split(" - ", StringSplitOptions.RemoveEmptyEntries))
+                                        {
+                                            <span class="badge badge-pill bg-soft-success">@item</span>
+                                        }
+                                    </div>
+                                }
+                                <small>Perusahaan dan departemen terkait.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Section</span>
+                                <div class="badge-list">
+                                    <span class="badge badge-pill bg-soft-warning">@Model.SectionName</span>
+                                </div>
+                                <small>ID: @(Model.SectionId?.ToString() ?? "-")</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Jabatan</span>
+                                <div class="badge-list">
+                                    <span class="badge badge-pill bg-soft-danger">@Model.PositionName</span>
+                                </div>
+                                <small>ID: @(Model.PositionId?.ToString() ?? "-")</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Log Detail Sesi Aktif</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <span>User Login</span>
+                                <strong>@sessionUsername</strong>
+                                <small>ID: @Model.UserId</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <span>Login Sebagai</span>
+                                <strong>@sessionRole</strong>
+                                <small>Company: @Model.CompanyName</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Company ID</span>
+                                <strong>@Model.CompanyId</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Department ID</span>
+                                <strong>@(Model.DepartmentId?.ToString() ?? "-")</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Section ID</span>
+                                <strong>@(Model.SectionId?.ToString() ?? "-")</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Position ID</span>
+                                <strong>@(Model.PositionId?.ToString() ?? "-")</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="detail-item">
+                                <span>URL Foto</span>
+                                <strong>@(string.IsNullOrWhiteSpace(Model.PhotoUrl) ? "-" : Model.PhotoUrl)</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mt-1">
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h6 class="mb-0">Aktivitas Terbaru</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="timeline">
+                                @if (Model.Activity.Count == 0)
+                                {
+                                    <li class="timeline-item">
+                                        <div class="timeline-dot"></div>
+                                        <div>
+                                            <strong>Belum ada aktivitas.</strong>
+                                            <small class="d-block text-secondary">Mulai melakukan perubahan data.</small>
+                                        </div>
+                                    </li>
+                                }
+                                else
+                                {
+                                    @foreach (var activity in Model.Activity)
+                                    {
+                                        <li class="timeline-item">
+                                            <div class="timeline-dot"></div>
+                                            <div>
+                                                <strong>@activity.Action @activity.Entity</strong>
+                                                <small class="d-block text-secondary">@activity.Description</small>
+                                                <small class="text-muted">@activity.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</small>
+                                            </div>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Sesi Aktif</h6>
+                                @{
+                                    var hasOtherSession = Model.Sessions.Any(s => !s.IsCurrent);
+                                }
+                                <div class="d-flex gap-2">
+                                    <form asp-action="RevokeOtherSessions" asp-controller="Account" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" @(hasOtherSession ? null : "disabled")>Revoke Lainnya</button>
+                                    </form>
+                                    <form asp-action="RevokeAllSessions" asp-controller="Account" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger">Revoke Semua</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>IP</th>
+                                            <th>Device</th>
+                                            <th>Lokasi</th>
+                                            <th>Terakhir</th>
+                                            <th>Status</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.Sessions.Count == 0)
+                                        {
+                                            <tr>
+                                                <td colspan="6" class="text-center text-secondary py-3">Belum ada sesi aktif.</td>
+                                            </tr>
+                                        }
+                                        else
+                                        {
+                                            @foreach (var session in Model.Sessions)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <div class="fw-semibold">@session.IpAddress</div>
+                                                        <small class="text-secondary">@session.UserAgent</small>
+                                                    </td>
+                                                    <td>
+                                                        <div class="fw-semibold">@session.DeviceLabel</div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="fw-semibold">@session.LocationLabel</div>
+                                                    </td>
+                                                    <td>
+                                                        <div>@(session.LastSeen?.ToLocalTime().ToString("dd MMM HH:mm") ?? "-")</div>
+                                                        <small class="text-secondary">Login: @session.CreatedAt.ToLocalTime().ToString("dd MMM HH:mm")</small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge @(session.IsCurrent ? "text-bg-success" : "text-bg-secondary")">
+                                                            @(session.IsCurrent ? "Sesi Ini" : "Aktif")
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <form asp-action="RevokeSession" asp-controller="Account" method="post">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="sessionId" value="@session.SessionId" />
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger" @(session.IsCurrent ? "disabled" : null)>Revoke</button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cropModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">Crop Foto Profil</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="cropper-container">
+                    <img id="cropperImage" src="" alt="Cropper" style="max-width: 100%;" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="saveCropped">Simpan Foto</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+    <script>
+        (function () {
+            var photoInput = document.getElementById('photoInput');
+            var cropperImage = document.getElementById('cropperImage');
+            var cropModalEl = document.getElementById('cropModal');
+            var saveButton = document.getElementById('saveCropped');
+            var photoBase64Input = document.querySelector('input[name="PhotoBase64"]');
+            var profilePreview = document.getElementById('profilePreview');
+            var cropper = null;
+
+            if (!photoInput || !cropModalEl || !saveButton) {
+                return;
+            }
+
+            var modal = new bootstrap.Modal(cropModalEl);
+
+            photoInput.addEventListener('change', function (event) {
+                var file = event.target.files && event.target.files[0];
+                if (!file) {
+                    return;
+                }
+
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    cropperImage.src = e.target.result;
+                    modal.show();
+                };
+                reader.readAsDataURL(file);
+            });
+
+            cropModalEl.addEventListener('shown.bs.modal', function () {
+                if (cropper) {
+                    cropper.destroy();
+                }
+                cropper = new Cropper(cropperImage, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    background: false,
+                    autoCropArea: 1
+                });
+            });
+
+            cropModalEl.addEventListener('hidden.bs.modal', function () {
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+            });
+
+            saveButton.addEventListener('click', function () {
+                if (!cropper) {
+                    return;
+                }
+
+                var canvas = cropper.getCroppedCanvas({ width: 512, height: 512 });
+                var dataUrl = canvas.toDataURL('image/png');
+                photoBase64Input.value = dataUrl;
+
+                if (profilePreview && profilePreview.tagName === 'IMG') {
+                    profilePreview.src = dataUrl;
+                } else if (profilePreview) {
+                    var img = document.createElement('img');
+                    img.className = 'profile-photo';
+                    img.id = 'profilePreview';
+                    img.src = dataUrl;
+                    profilePreview.replaceWith(img);
+                }
+
+                modal.hide();
+            });
+
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            const themeSelect = document.getElementById('profileThemeSelect');
+            const fontPrimarySelect = document.getElementById('profileFontPrimary');
+            const fontSecondarySelect = document.getElementById('profileFontSecondary');
+
+            function applyPreview() {
+                const theme = themeSelect?.value;
+                if (theme) {
+                    document.documentElement.setAttribute('data-theme', theme);
+                }
+
+                const fontPrimary = fontPrimarySelect?.value;
+                const fontSecondary = fontSecondarySelect?.value;
+                if (fontPrimary) {
+                    document.documentElement.style.setProperty('--app-font-primary', fontPrimary);
+                }
+                if (fontSecondary) {
+                    document.documentElement.style.setProperty('--app-font-secondary', fontSecondary);
+                }
+            }
+
+            if (themeSelect || fontPrimarySelect || fontSecondarySelect) {
+                [themeSelect, fontPrimarySelect, fontSecondarySelect].forEach(el => {
+                    if (!el) return;
+                    el.addEventListener('change', applyPreview);
+                });
+            }
+        })();
+    </script>
+}

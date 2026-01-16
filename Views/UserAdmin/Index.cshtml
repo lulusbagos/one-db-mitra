@@ -1,0 +1,290 @@
+@model one_db_mitra.Models.Admin.UserAdminIndexViewModel
+@{
+    ViewData["Title"] = "Manajemen User";
+}
+
+<div class="modal fade" id="menuPreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">Preview Menu User</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="menuPreviewBody" class="text-secondary small">Memuat menu...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const modalElement = document.getElementById('menuPreviewModal');
+            const body = document.getElementById('menuPreviewBody');
+            if (!modalElement || !body) {
+                return;
+            }
+            const modal = new bootstrap.Modal(modalElement);
+
+            document.querySelectorAll('[data-menu-preview]').forEach(button => {
+                button.addEventListener('click', async function () {
+                    const userId = button.getAttribute('data-menu-preview');
+                    if (!userId) {
+                        return;
+                    }
+                    body.textContent = 'Memuat menu...';
+                    modal.show();
+                    try {
+                        const response = await fetch(`/UserAdmin/MenuPreview?userId=${userId}`);
+                        if (!response.ok) {
+                            body.textContent = 'Gagal memuat menu.';
+                            return;
+                        }
+                        const html = await response.text();
+                        body.innerHTML = html;
+                    } catch {
+                        body.textContent = 'Gagal memuat menu.';
+                    }
+                });
+            });
+        })();
+    </script>
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 mb-4">
+        <div>
+            <p class="text-uppercase text-secondary small mb-1">Pengaturan</p>
+            <h2 class="mb-1">Manajemen User</h2>
+            <p class="text-secondary mb-0">Kelola akses user dengan role dan organisasi.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <form method="get" class="me-2 d-flex align-items-center gap-2">
+                <input type="hidden" name="activeOnly" value="false" />
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="userActiveOnly" name="activeOnly" value="true" @(Model.ActiveOnly ? "checked" : null) onchange="this.form.submit()" />
+                    <label class="form-check-label" for="userActiveOnly">Tampilkan aktif saja</label>
+                </div>
+                <span class="badge @(Model.ActiveOnly ? "text-bg-success" : "text-bg-secondary")">
+                    @(Model.ActiveOnly ? "Filter: Aktif" : "Filter: Semua")
+                </span>
+            </form>
+            <a class="btn btn-primary" asp-action="Create">
+                <i class="bi bi-plus-lg me-2"></i>Tambah User
+            </a>
+            @if (ViewBag.CanManageRoles == true)
+            {
+                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#roleModal">
+                    <i class="bi bi-shield-lock me-2"></i>Kelola Role
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h6 class="mb-0">Daftar User</h6>
+        </div>
+        <div class="card-body table-responsive">
+            @if (ViewBag.CanImpersonate == true)
+            {
+                <div class="alert alert-info">
+                    <strong>Impersonate</strong> memungkinkan Owner masuk sementara sebagai user lain untuk mengecek menu, akses, dan tampilan.
+                    Gunakan hanya untuk troubleshooting; klik <em>Stop</em> di topbar untuk kembali ke akun Owner.
+                </div>
+            }
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Nama</th>
+                        <th>Perusahaan</th>
+                        <th>Role</th>
+                        <th>Departemen</th>
+                        <th>Section</th>
+                        <th>Jabatan</th>
+                        <th>Status</th>
+                        <th>Online</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Users.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center text-secondary py-4">Belum ada user. Tambahkan user pertama.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var user in Model.Users)
+                        {
+                            <tr>
+                                <td>@user.Username</td>
+                                <td>@user.FullName</td>
+                                <td>@user.CompanyName</td>
+                                <td>@user.RoleName</td>
+                                <td>@user.DepartmentName</td>
+                                <td>@user.SectionName</td>
+                                <td>@user.PositionName</td>
+                            <td>
+                                <span class="badge @(user.IsActive ? "text-bg-success" : "text-bg-secondary")">
+                                    @(user.IsActive ? "Aktif" : "Nonaktif")
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge @(user.IsOnline ? "text-bg-success" : "text-bg-secondary")">
+                                    @(user.IsOnline ? "Online" : "Offline")
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-secondary me-1" type="button" data-menu-preview="@user.UserId">
+                                    Preview Menu
+                                </button>
+                                @if (ViewBag.CanImpersonate == true)
+                                {
+                                    <form asp-controller="Account" asp-action="Impersonate" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userId" value="@user.UserId" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <button type="submit" class="btn btn-sm btn-outline-warning me-1">Impersonate</button>
+                                    </form>
+                                }
+                                <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@user.UserId">Edit</a>
+                                <form asp-action="Delete" asp-route-id="@user.UserId" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="activeOnly" value="@Model.ActiveOnly" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus user ini?')">Hapus</button>
+                                </form>
+                            </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (ViewBag.CanManageRoles == true)
+{
+    <div class="modal fade" id="roleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Kelola Role</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" asp-action="CreateRole" class="mb-4">
+                        @Html.AntiForgeryToken()
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label">Nama Role</label>
+                                <input name="roleName" class="form-control" placeholder="Owner / Admin" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Level Akses</label>
+                                <input name="accessLevel" type="number" class="form-control" value="1" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Startup URL</label>
+                                <input name="startupUrl" class="form-control" placeholder="/MenuAdmin/Index" />
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" name="isActive" checked />
+                                    <label class="form-check-label">Aktif</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2 d-grid">
+                                <button type="submit" class="btn btn-primary">Tambah</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Role</th>
+                                    <th>Level</th>
+                                    <th>Status</th>
+                                    <th>Startup</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Roles.Count == 0)
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center text-secondary py-3">Belum ada role. Tambahkan role baru di atas.</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @foreach (var roleItem in Model.Roles)
+                                    {
+                                        <tr>
+                                            <td>@roleItem.RoleName</td>
+                                            <td>@roleItem.AccessLevel</td>
+                                            <td>
+                                                <span class="badge @(roleItem.IsActive ? "text-bg-success" : "text-bg-secondary")">
+                                                    @(roleItem.IsActive ? "Aktif" : "Nonaktif")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="text-secondary small">@(!string.IsNullOrWhiteSpace(roleItem.StartupUrl) ? roleItem.StartupUrl : "-")</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#roleEdit@roleItem.RoleId">Edit</button>
+                                                <form asp-action="DeleteRole" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="roleId" value="@roleItem.RoleId" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus role ini?')">Hapus</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        <tr class="collapse" id="roleEdit@roleItem.RoleId">
+                                            <td colspan="5">
+                                                <form method="post" asp-action="UpdateRole">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="roleId" value="@roleItem.RoleId" />
+                                                    <div class="row g-3 align-items-end">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">Nama Role</label>
+                                                            <input name="roleName" class="form-control" value="@roleItem.RoleName" />
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label">Level Akses</label>
+                                                            <input name="accessLevel" type="number" class="form-control" value="@roleItem.AccessLevel" />
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label">Startup URL</label>
+                                                            <input name="startupUrl" class="form-control" value="@roleItem.StartupUrl" placeholder="/MenuAdmin/Index" />
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-check mt-4">
+                                                                <input class="form-check-input" type="checkbox" name="isActive" value="true" @(roleItem.IsActive ? "checked" : "") />
+                                                                <label class="form-check-label">Aktif</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2 d-grid">
+                                                            <button type="submit" class="btn btn-primary">Simpan</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

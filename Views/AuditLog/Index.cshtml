@@ -1,0 +1,130 @@
+@model one_db_mitra.Models.Admin.AuditLogIndexViewModel
+@{
+    ViewData["Title"] = "Audit Log";
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 mb-4">
+        <div>
+            <p class="text-uppercase text-secondary small mb-1">Pengaturan</p>
+            <h2 class="mb-1">Audit Log</h2>
+            <p class="text-secondary mb-0">Jejak aktivitas perubahan data.</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <input type="hidden" name="range" value="" />
+                <div class="col-md-3">
+                    <label class="form-label">Entitas</label>
+                    <input name="entity" class="form-control" value="@Model.EntityFilter" placeholder="menu / pengguna" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Username</label>
+                    <input name="username" class="form-control" value="@Model.UsernameFilter" placeholder="admin" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Dari</label>
+                    <input name="from" type="date" class="form-control" value="@(Model.FromDate?.ToString("yyyy-MM-dd"))" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Sampai</label>
+                    <input name="to" type="date" class="form-control" value="@(Model.ToDate?.ToString("yyyy-MM-dd"))" />
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a class="btn btn-outline-secondary btn-sm" asp-action="Index" asp-route-range="today">Hari ini</a>
+        <a class="btn btn-outline-secondary btn-sm" asp-action="Index" asp-route-range="7days">7 Hari Terakhir</a>
+        <a class="btn btn-outline-secondary btn-sm" asp-action="Index">Reset Filter</a>
+        <span class="text-secondary small align-self-center">
+            Menampilkan @Model.Logs.Count dari @Model.TotalCount data
+        </span>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h6 class="mb-0">Aktivitas Terbaru</h6>
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Aksi</th>
+                        <th>Entitas</th>
+                        <th>Key</th>
+                        <th>Deskripsi</th>
+                        <th>User</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Logs.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-secondary py-4">Belum ada aktivitas yang cocok dengan filter.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var log in Model.Logs)
+                        {
+                            <tr>
+                                <td>@log.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                                <td>@log.Action</td>
+                                <td>@log.Entity</td>
+                                <td>@(log.Key ?? "-")</td>
+                                <td>@(log.Description ?? "-")</td>
+                                <td>@(log.Username ?? "-")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @{
+        var totalPages = (int)Math.Ceiling(Model.TotalCount / (double)Model.PageSize);
+        var prevPage = Model.Page > 1 ? Model.Page - 1 : 1;
+        var nextPage = Model.Page < totalPages ? Model.Page + 1 : totalPages;
+        var showLeftEllipsis = true;
+        var showRightEllipsis = true;
+    }
+    @if (totalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@prevPage" asp-route-entity="@Model.EntityFilter" asp-route-username="@Model.UsernameFilter" asp-route-from="@(Model.FromDate?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.ToDate?.ToString("yyyy-MM-dd"))" asp-route-range="@Model.RangeFilter">Sebelumnya</a>
+                </li>
+                @for (var i = 1; i <= totalPages; i++)
+                {
+                    if (i == 1 || i == totalPages || Math.Abs(i - Model.Page) <= 2)
+                    {
+                        <li class="page-item @(i == Model.Page ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-entity="@Model.EntityFilter" asp-route-username="@Model.UsernameFilter" asp-route-from="@(Model.FromDate?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.ToDate?.ToString("yyyy-MM-dd"))" asp-route-range="@Model.RangeFilter">@i</a>
+                        </li>
+                    }
+                    else if (i < Model.Page && showLeftEllipsis)
+                    {
+                        showLeftEllipsis = false;
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    }
+                    else if (i > Model.Page && showRightEllipsis)
+                    {
+                        showRightEllipsis = false;
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    }
+                }
+                <li class="page-item @(Model.Page == totalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@nextPage" asp-route-entity="@Model.EntityFilter" asp-route-username="@Model.UsernameFilter" asp-route-from="@(Model.FromDate?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.ToDate?.ToString("yyyy-MM-dd"))" asp-route-range="@Model.RangeFilter">Berikutnya</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>

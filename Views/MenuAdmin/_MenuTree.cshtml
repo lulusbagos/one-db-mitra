@@ -1,0 +1,14 @@
+@model IEnumerable<one_db_mitra.Models.Menu.MenuItem>
+@if (Model is null || !Model.Any())
+{
+    <p class="text-secondary mb-0">Belum ada menu terdaftar.</p>
+}
+else
+{
+    <ul class="menu-tree">
+        @foreach (var menu in Model.OrderBy(m => m.SortOrder).ThenBy(m => m.DisplayName))
+        {
+            @await Html.PartialAsync("_MenuNode", menu)
+        }
+    </ul>
+}

@@ -1,0 +1,351 @@
+@model IReadOnlyList<one_db_mitra.Models.Admin.KaryawanListItem>
+@using System
+@using System.Linq
+@{
+    ViewData["Title"] = "Data Karyawan";
+    var activeOnly = ViewBag.ActiveOnly as bool? ?? true;
+    var activeCount = ViewBag.ActiveCount as int? ?? 0;
+    var nonActiveCount = ViewBag.NonActiveCount as int? ?? 0;
+    var isOwner = ViewBag.IsOwner as bool? ?? false;
+
+    string GetInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0][0].ToString().ToUpperInvariant();
+        return (parts[0][0].ToString() + parts[^1][0].ToString()).ToUpperInvariant();
+    }
+
+    string GetAvatarTone(string name)
+    {
+        var tones = new[] { "emerald", "teal", "cyan", "sky", "blue", "indigo", "violet" };
+        if (string.IsNullOrWhiteSpace(name)) return "secondary";
+        return tones[name[0] % tones.Length];
+    }
+}
+
+<div class="karyawan-header">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 text-white">
+        <div>
+            <span class="badge karyawan-badge mb-2">
+                <i class="bi bi-people me-2"></i>Manajemen Karyawan
+            </span>
+            <h2 class="mb-1 fw-bold">Data Karyawan</h2>
+            <p class="mb-0 text-white-50">Kelola profil, penempatan, dan dokumen karyawan.</p>
+        </div>
+        <div class="d-flex gap-2 align-items-end flex-wrap">
+            <div class="text-end">
+                <div class="text-uppercase small text-white-50">Aktif</div>
+                <div class="fs-4 fw-semibold">@activeCount</div>
+            </div>
+            <div class="text-end">
+                <div class="text-uppercase small text-white-50">Nonaktif</div>
+                <div class="fs-4 fw-semibold">@nonActiveCount</div>
+            </div>
+            <a class="btn btn-outline-light fw-semibold" asp-action="DownloadTemplate">
+                <i class="bi bi-download me-2"></i>Template Excel
+            </a>
+            <a class="btn btn-outline-light fw-semibold" asp-action="ExportExcel" asp-route-activeOnly="@activeOnly">
+                <i class="bi bi-file-earmark-spreadsheet me-2"></i>Export Excel
+            </a>
+            <button class="btn btn-light fw-semibold" data-bs-toggle="modal" data-bs-target="#importExcelModal">
+                <i class="bi bi-upload me-2"></i>Import Excel
+            </button>
+            <a class="btn btn-light fw-semibold" asp-action="Create">
+                <i class="bi bi-plus-lg me-2"></i>Tambah Karyawan
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-0 karyawan-body">
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body d-flex flex-column flex-lg-row gap-3 align-items-start align-items-lg-center">
+            <form method="get" class="d-flex align-items-center gap-2">
+                <input type="hidden" name="activeOnly" value="false" />
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="karyawanActiveOnly" name="activeOnly" value="true" @(activeOnly ? "checked" : null) onchange="this.form.submit()" />
+                    <label class="form-check-label" for="karyawanActiveOnly">Tampilkan aktif saja</label>
+                </div>
+            </form>
+            <span class="badge @(activeOnly ? "text-bg-success" : "text-bg-secondary")">
+                @(activeOnly ? "Filter: Aktif" : "Filter: Semua")
+            </span>
+        </div>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 karyawan-table">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Profil</th>
+                        <th>Kontak</th>
+                        <th>Posisi</th>
+                        <th>Departemen</th>
+                        <th>Status & Dokumen</th>
+                        <th class="text-center pe-4">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-secondary">
+                                Belum ada data karyawan.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model)
+                        {
+                            var initials = GetInitials(item.NamaLengkap);
+                            var tone = GetAvatarTone(item.NamaLengkap);
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        @if (!string.IsNullOrWhiteSpace(item.PhotoUrl))
+                                        {
+                                            <img src="@item.PhotoUrl" alt="Foto" class="karyawan-avatar" />
+                                        }
+                                        else
+                                        {
+                                            <div class="karyawan-avatar karyawan-avatar-initial bg-soft-@tone text-@tone">
+                                                @initials
+                                            </div>
+                                        }
+                                        <div>
+                                            <div class="fw-semibold text-dark">@item.NamaLengkap</div>
+                                            <div class="text-secondary small d-flex flex-wrap gap-2">
+                                                <span><i class="bi bi-person-badge me-1"></i>@item.NoNik</span>
+                                                <span><i class="bi bi-building me-1"></i>@item.CompanyName</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="small text-dark fw-semibold">@(!string.IsNullOrWhiteSpace(item.Email) ? item.Email : "-")</div>
+                                    <div class="text-secondary small">@(!string.IsNullOrWhiteSpace(item.Phone) ? item.Phone : "-")</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark">@item.PositionName</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-soft-emerald text-emerald-700 border border-emerald-100 rounded-pill px-3 py-2">
+                                        @item.DepartmentName
+                                    </span>
+                                    <div class="text-secondary small mt-1">@item.SectionName</div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                                        <span class="badge @(item.IsActive ? "text-bg-success" : "text-bg-secondary")">
+                                            @(item.IsActive ? "Aktif" : "Nonaktif")
+                                        </span>
+                                        <span class="badge text-bg-light">
+                                            <i class="bi bi-paperclip me-1"></i>@item.DocumentCount
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="text-center pe-4">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a class="btn btn-sm btn-outline-primary" asp-action="Detail" asp-route-id="@item.KaryawanId">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@item.KaryawanId">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        @if (item.IsActive)
+                                        {
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#nonaktifModal"
+                                                    data-id="@item.KaryawanId"
+                                                    data-name="@item.NamaLengkap"
+                                                    data-nik="@item.NoNik">
+                                                <i class="bi bi-slash-circle"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-outline-secondary" disabled>
+                                                <i class="bi bi-slash-circle"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="nonaktifModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="nonaktifModalTitle">Nonaktifkan Karyawan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Nonaktifkan" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="nonaktifKaryawanId" />
+                    <div class="alert alert-warning small mb-3">
+                        Nonaktif memerlukan alasan. Blacklist hanya bisa dibuka kembali oleh Owner.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="statusType" class="form-select" id="nonaktifStatusType">
+                            <option value="nonaktif">Nonaktif</option>
+                            @if (isOwner)
+                            {
+                                <option value="blacklist">Blacklist</option>
+                            }
+                            else
+                            {
+                                <option value="blacklist" disabled>Blacklist</option>
+                            }
+                        </select>
+                        @if (!isOwner)
+                        {
+                            <div class="text-secondary small mt-1">Blacklist hanya tersedia untuk Owner.</div>
+                        }
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kategori</label>
+                        <select name="kategori" class="form-select">
+                            <option value="Resign">Resign</option>
+                            <option value="Pelanggaran">Pelanggaran</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Alasan</label>
+                        <textarea name="alasan" class="form-control" rows="3" placeholder="Tuliskan alasan..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="importExcelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import Karyawan (Excel)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="ImportPreview" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <p class="text-secondary small mb-2">
+                        Unduh template terlebih dahulu, lalu isi dan upload kembali.
+                    </p>
+                    <input type="file" name="file" class="form-control" accept=".xlsx" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .karyawan-header {
+            background: linear-gradient(135deg, #064e3b 0%, #0ea5a5 100%);
+            padding: 2rem 2.5rem 4rem;
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 15px 35px rgba(6, 78, 59, 0.35);
+            margin-bottom: -2rem;
+            position: relative;
+            z-index: 1;
+        }
+        .karyawan-badge {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 999px;
+            padding: 0.35rem 0.9rem;
+        }
+
+        .karyawan-body {
+            position: relative;
+            z-index: 2;
+        }
+
+        .karyawan-table th {
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.04em;
+            color: #64748b;
+            font-weight: 700;
+        }
+
+        .karyawan-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            object-fit: cover;
+            border: 2px solid #fff;
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+        }
+
+        .karyawan-avatar-initial {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+        }
+
+        .bg-soft-emerald { background-color: #d1fae5; }
+        .text-emerald-700 { color: #047857; }
+        .border-emerald-100 { border-color: #d1fae5 !important; }
+
+        .bg-soft-teal { background-color: #ccfbf1; }
+        .text-teal { color: #0f766e; }
+        .bg-soft-cyan { background-color: #cffafe; }
+        .text-cyan { color: #0891b2; }
+        .bg-soft-sky { background-color: #e0f2fe; }
+        .text-sky { color: #0284c7; }
+        .bg-soft-blue { background-color: #dbeafe; }
+        .text-blue { color: #2563eb; }
+        .bg-soft-indigo { background-color: #e0e7ff; }
+        .text-indigo { color: #4f46e5; }
+        .bg-soft-violet { background-color: #ede9fe; }
+        .text-violet { color: #7c3aed; }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        const nonaktifModal = document.getElementById('nonaktifModal');
+        if (nonaktifModal) {
+            nonaktifModal.addEventListener('show.bs.modal', (event) => {
+                const button = event.relatedTarget;
+                const id = button?.getAttribute('data-id') || '';
+                const name = button?.getAttribute('data-name') || '';
+                const nik = button?.getAttribute('data-nik') || '';
+                const title = document.getElementById('nonaktifModalTitle');
+                const inputId = document.getElementById('nonaktifKaryawanId');
+                if (title) {
+                    title.textContent = `Nonaktifkan ${name} (${nik})`;
+                }
+                if (inputId) {
+                    inputId.value = id;
+                }
+            });
+        }
+    </script>
+}

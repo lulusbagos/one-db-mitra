@@ -1,0 +1,41 @@
+@{
+    Layout = null;
+    var setting = ViewBag.Setting;
+    var pageTitle = setting?.nama_aplikasi as string ?? "One DB Mitra";
+    var fontPrimary = setting?.font_primary as string ?? "Poppins";
+    var fontSecondary = setting?.font_secondary as string ?? "Manrope";
+}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="@(setting?.nama_header as string ?? "Konsol Administrasi")" />
+    <title>@pageTitle</title>
+    <link href="~/Assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --app-font-primary: '@fontPrimary';
+            --app-font-secondary: '@fontSecondary';
+        }
+        body {
+            font-family: var(--app-font-primary), var(--app-font-secondary), "Poppins", "Manrope", system-ui, sans-serif;
+        }
+    </style>
+    <link href="~/Assets/css/sb-admin-2.min.css" rel="stylesheet" />
+    <link href="~/Assets/css/alertify.min.css" rel="stylesheet" />
+    @RenderSection("styles", required: false)
+</head>
+<body class="bg-dark text-white font-weight-light">
+    @RenderBody()
+
+    <script src="~/Assets/vendor/jquery/jquery.min.js"></script>
+    <script src="~/Assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/Assets/js/alertify.min.js"></script>
+    <script src="~/Assets/js/sb-admin-2.min.js"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

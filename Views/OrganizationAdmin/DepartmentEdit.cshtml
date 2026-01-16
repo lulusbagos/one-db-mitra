@@ -1,0 +1,57 @@
+@model one_db_mitra.Models.Admin.DepartmentEditViewModel
+@{
+    ViewData["Title"] = "Edit Departemen";
+    var lockCompanyId = ViewBag.LockCompanyId is int value ? value : (int?)null;
+    var companyLocked = lockCompanyId.HasValue && lockCompanyId.Value > 0;
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <p class="text-uppercase text-secondary small mb-1">Pengaturan</p>
+            <h2 class="mb-0">Edit Departemen</h2>
+        </div>
+        <a class="btn btn-outline-secondary" asp-action="Departments">Kembali</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" asp-action="EditDepartment">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="DepartmentId" />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="DepartmentName" class="form-label"></label>
+                        <input asp-for="DepartmentName" class="form-control" />
+                        <span class="text-danger" asp-validation-for="DepartmentName"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CompanyId" class="form-label"></label>
+                        @if (companyLocked)
+                        {
+                            <select asp-for="CompanyId" class="form-select" asp-items="Model.CompanyOptions" disabled="disabled"></select>
+                            <input type="hidden" asp-for="CompanyId" />
+                        }
+                        else
+                        {
+                            <select asp-for="CompanyId" class="form-select" asp-items="Model.CompanyOptions"></select>
+                        }
+                    </div>
+                    <div class="col-md-4 d-flex align-items-center">
+                        <div class="form-check mt-4">
+                            <input asp-for="IsActive" class="form-check-input" />
+                            <label asp-for="IsActive" class="form-check-label"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,108 @@
+@model one_db_mitra.Models.Admin.SectionEditViewModel
+@{
+    ViewData["Title"] = "Edit Section";
+    var lockCompanyId = ViewBag.LockCompanyId is int value ? value : (int?)null;
+    var lockDepartmentId = ViewBag.LockDepartmentId is int deptValue ? deptValue : (int?)null;
+    var companyLocked = lockCompanyId.HasValue && lockCompanyId.Value > 0;
+    var departmentLocked = lockDepartmentId.HasValue && lockDepartmentId.Value > 0;
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <p class="text-uppercase text-secondary small mb-1">Pengaturan</p>
+            <h2 class="mb-0">Edit Section</h2>
+        </div>
+        <a class="btn btn-outline-secondary" asp-action="Sections">Kembali</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" asp-action="EditSection">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="SectionId" />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="SectionName" class="form-label"></label>
+                        <input asp-for="SectionName" class="form-control" />
+                        <span class="text-danger" asp-validation-for="SectionName"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CompanyId" class="form-label"></label>
+                        @if (companyLocked)
+                        {
+                            <select asp-for="CompanyId" class="form-select" asp-items="Model.CompanyOptions" id="companySelect" disabled="disabled"></select>
+                            <input type="hidden" asp-for="CompanyId" />
+                        }
+                        else
+                        {
+                            <select asp-for="CompanyId" class="form-select" asp-items="Model.CompanyOptions" id="companySelect"></select>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="DepartmentId" class="form-label"></label>
+                        @if (departmentLocked)
+                        {
+                            <select asp-for="DepartmentId" class="form-select" id="departmentSelect" disabled="disabled">
+                                <option value="">--</option>
+                            </select>
+                            <input type="hidden" asp-for="DepartmentId" />
+                        }
+                        else
+                        {
+                            <select asp-for="DepartmentId" class="form-select" id="departmentSelect">
+                                <option value="">--</option>
+                            </select>
+                        }
+                    </div>
+                    <div class="col-md-4 d-flex align-items-center">
+                        <div class="form-check mt-4">
+                            <input asp-for="IsActive" class="form-check-input" />
+                            <label asp-for="IsActive" class="form-check-label"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const company = document.getElementById('companySelect');
+            const department = document.getElementById('departmentSelect');
+            const initialDepartment = '@(Model.DepartmentId.ToString())';
+
+            function resetSelect(target) {
+                target.innerHTML = '<option value="">--</option>';
+            }
+
+            async function loadDepartments(companyId, selectedId) {
+                resetSelect(department);
+                if (!companyId) return;
+                const response = await fetch(`/OrganizationAdmin/DepartmentsByCompany?companyId=${companyId}`);
+                const data = await response.json();
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = item.name;
+                    if (selectedId && item.id.toString() === selectedId) {
+                        option.selected = true;
+                    }
+                    department.appendChild(option);
+                });
+            }
+
+            company?.addEventListener('change', (e) => loadDepartments(e.target.value, ''));
+
+            if (company?.value) {
+                loadDepartments(company.value, initialDepartment);
+            }
+        })();
+    </script>
+}

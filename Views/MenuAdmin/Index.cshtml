@@ -1,0 +1,955 @@
+@model one_db_mitra.Models.Menu.MenuAdminViewModel
+@{
+    ViewData["Title"] = "Konsol Administrasi";
+    var roleName = Model.RoleName ?? string.Empty;
+}
+
+@functions {
+    private string BuildSparklinePoints(IReadOnlyList<int> values, int width = 120, int height = 36)
+    {
+        if (values == null || values.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        var max = Math.Max(1, values.Max());
+        var step = values.Count > 1 ? width / (values.Count - 1) : width;
+        var points = values.Select((value, index) =>
+        {
+            var x = index * step;
+            var y = height - (int)Math.Round((value / (double)max) * (height - 4)) - 2;
+            return $"{x},{y}";
+        });
+
+        return string.Join(" ", points);
+    }
+
+    private string GetHeatClass(int count)
+    {
+        if (count <= 0) return "heat-0";
+        if (count <= 2) return "heat-1";
+        if (count <= 5) return "heat-2";
+        if (count <= 10) return "heat-3";
+        return "heat-4";
+    }
+}
+
+<div class="container-fluid px-0">
+    <section class="mb-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
+            <div>
+                <p class="text-uppercase text-secondary small mb-1">Premium Workspace</p>
+                <h2 class="mb-1">Konsol Administrasi Menu</h2>
+                <p class="text-secondary mb-0">Kelola struktur menu, hak akses, dan profil organisasi secara terpusat.</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-outline-secondary">
+                    <i class="bi bi-funnel me-2"></i>Filter
+                </button>
+                <button class="btn btn-primary">
+                    <i class="bi bi-upload me-2"></i>Sinkronisasi
+                </button>
+            </div>
+        </div>
+        <div class="row g-3 mt-2">
+            <div class="col-sm-6 col-lg-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="small text-uppercase text-secondary mb-1">Menu Aktif</p>
+                        <h3 class="mb-0">@Model.ActiveMenuCount</h3>
+                        <svg class="sparkline" viewBox="0 0 120 36" aria-hidden="true">
+                            <polyline points="@BuildSparklinePoints(Model.MenuTrend)" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="small text-uppercase text-secondary mb-1">User Aktif</p>
+                        <h3 class="mb-0">@Model.ActiveUserCount</h3>
+                        <svg class="sparkline" viewBox="0 0 120 36" aria-hidden="true">
+                            <polyline points="@BuildSparklinePoints(Model.UserTrend)" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="small text-uppercase text-secondary mb-1">Perusahaan Aktif</p>
+                        <h3 class="mb-0">@Model.ActiveCompanyCount</h3>
+                        <svg class="sparkline" viewBox="0 0 120 36" aria-hidden="true">
+                            <polyline points="@BuildSparklinePoints(Model.CompanyTrend)" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="small text-uppercase text-secondary mb-1">Departemen Aktif</p>
+                        <h3 class="mb-0">@Model.ActiveDepartmentCount</h3>
+                        <svg class="sparkline" viewBox="0 0 120 36" aria-hidden="true">
+                            <polyline points="@BuildSparklinePoints(Model.DepartmentTrend)" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="mb-4">
+        <div class="card">
+            <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+                <div>
+                    <h6 class="mb-1">Health Check</h6>
+                    <small class="text-secondary">Status database dan sinkronisasi terakhir.</small>
+                </div>
+                <span class="badge @(Model.Health.IsDatabaseUp ? "text-bg-success" : "text-bg-danger")">
+                    @(Model.Health.IsDatabaseUp ? "DB Online" : "DB Down")
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="detail-item">
+                            <span>Database</span>
+                            <strong>@(Model.Health.IsDatabaseUp ? "Terhubung" : "Tidak Terhubung")</strong>
+                            <small>@(Model.Health.IsDatabaseUp ? "Koneksi normal." : "Periksa koneksi server.")</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-item">
+                            <span>Job Status</span>
+                            <strong>@Model.Health.JobStatus</strong>
+                            <small>Monitoring proses terjadwal.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-item">
+                            <span>Last Sync</span>
+                            <strong>@Model.Health.LastSyncLabel</strong>
+                            <small>Sinkronisasi menu & data.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @if (roleName.Equals("Owner", System.StringComparison.OrdinalIgnoreCase))
+    {
+        <section class="mb-5">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <p class="small text-uppercase text-secondary mb-1">Karyawan Aktif</p>
+                            <h3 class="mb-0">@Model.ActiveKaryawanCount</h3>
+                            <small class="text-secondary">Total aktif seluruh perusahaan.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <p class="small text-uppercase text-secondary mb-1">Blacklist Aktif</p>
+                            <h3 class="mb-0 text-danger">@Model.BlacklistCount</h3>
+                            <small class="text-secondary">Perlu validasi Owner.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <p class="small text-uppercase text-secondary mb-1">Resign & Rehire</p>
+                            <h3 class="mb-0">@Model.ResignCount</h3>
+                            <small class="text-secondary">Rehire tercatat: @Model.RehireCount</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    }
+
+    @{
+        var onboardingItems = new[]
+        {
+            new { Label = "Perusahaan", Done = Model.ActiveCompanyCount > 0, Count = Model.ActiveCompanyCount },
+            new { Label = "Departemen", Done = Model.ActiveDepartmentCount > 0, Count = Model.ActiveDepartmentCount },
+            new { Label = "Role", Done = Model.ActiveRoleCount > 0, Count = Model.ActiveRoleCount },
+            new { Label = "User", Done = Model.ActiveUserCount > 0, Count = Model.ActiveUserCount },
+            new { Label = "Menu", Done = Model.ActiveMenuCount > 0, Count = Model.ActiveMenuCount }
+        };
+        var completed = onboardingItems.Count(i => i.Done);
+        var total = onboardingItems.Length;
+        var percent = total > 0 ? (int)Math.Round(completed * 100.0 / total) : 0;
+    }
+
+    <section class="mb-5">
+        <div class="card">
+            <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+                <div>
+                    <h5 class="mb-1">Smart Onboarding</h5>
+                    <small class="text-secondary">Checklist setup awal supaya modul berjalan sempurna.</small>
+                </div>
+                <span class="badge text-bg-light">@percent% selesai</span>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-3" style="height: 10px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: @percent%;" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="row g-3">
+                    @foreach (var item in onboardingItems)
+                    {
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>@item.Label</span>
+                                <strong>@(item.Done ? "Selesai" : "Belum")</strong>
+                                <small>Total aktif: @item.Count</small>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-1">Activity Heatmap</h5>
+                <small class="text-secondary">Aktivitas login & update 28 hari terakhir.</small>
+            </div>
+            <div class="card-body">
+                <div class="heatmap-grid">
+                    @foreach (var item in Model.ActivityHeatmap)
+                    {
+                        <div class="heatmap-cell @GetHeatClass(item.Count)" title="@item.Date.ToString("dd MMM yyyy"): @item.Count aktivitas"></div>
+                    }
+                </div>
+                <div class="d-flex align-items-center gap-2 mt-3 small text-secondary">
+                    <span>Low</span>
+                    <div class="heatmap-legend heat-0"></div>
+                    <div class="heatmap-legend heat-1"></div>
+                    <div class="heatmap-legend heat-2"></div>
+                    <div class="heatmap-legend heat-3"></div>
+                    <div class="heatmap-legend heat-4"></div>
+                    <span>High</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    @if (Model.ActiveCompanyCount == 0 || Model.ActiveDepartmentCount == 0 || Model.ActiveUserCount == 0 || Model.ActiveMenuCount == 0)
+    {
+        <div class="alert alert-warning">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
+                <div>
+                    <strong>Data master belum lengkap.</strong>
+                    <div class="text-secondary small">Lengkapi data agar menu dan akses berjalan sempurna.</div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    @if (Model.ActiveCompanyCount == 0)
+                    {
+                        <a class="btn btn-outline-secondary btn-sm" asp-controller="OrganizationAdmin" asp-action="Companies">Tambah Perusahaan</a>
+                    }
+                    @if (Model.ActiveDepartmentCount == 0)
+                    {
+                        <a class="btn btn-outline-secondary btn-sm" asp-controller="OrganizationAdmin" asp-action="Departments">Tambah Departemen</a>
+                    }
+                    @if (Model.ActiveUserCount == 0)
+                    {
+                        <a class="btn btn-outline-secondary btn-sm" asp-controller="UserAdmin" asp-action="Index">Tambah User</a>
+                    }
+                    @if (Model.ActiveMenuCount == 0)
+                    {
+                        <a class="btn btn-outline-secondary btn-sm" asp-controller="MenuAdmin" asp-action="Manage">Tambah Menu</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.Notification))
+    {
+        <div class="toast-data" data-message="@Model.Notification" data-type="success"></div>
+    }
+
+    <div id="ajaxAlert"></div>
+
+    <section id="company-deck" class="mb-4">
+        <div class="row g-4">
+            <div class="col-xxl-3 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge text-bg-dark">Owner</span>
+                            <i class="bi bi-person-workspace fs-4 text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Owner</h5>
+                        <p class="card-text text-secondary">Kontrol penuh seluruh modul dan strategi akses perusahaan.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-3 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge text-bg-primary">Main Contractor</span>
+                            <i class="bi bi-building fs-4 text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Main Contractor</h5>
+                        <p class="card-text text-secondary">Akses penuh operasional proyek dan pengaturan vendor.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-3 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge text-bg-warning">Sub Contractor</span>
+                            <i class="bi bi-diagram-3 fs-4 text-warning"></i>
+                        </div>
+                        <h5 class="card-title">Sub Contractor</h5>
+                        <p class="card-text text-secondary">Akses menyesuaikan scope pekerjaan dan SLA section.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-3 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge text-bg-success">Vendor</span>
+                            <i class="bi bi-box-seam fs-4 text-success"></i>
+                        </div>
+                        <h5 class="card-title">Vendor</h5>
+                        <p class="card-text text-secondary">Akses fokus pada procurement dan order harian.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @if (Model.CompanyHierarchy.Count > 0)
+    {
+        <section class="mb-5">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Hirarki Perusahaan & Departemen</h5>
+                    <small class="text-secondary">Ringkasan struktur organisasi untuk Owner.</small>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="companyHierarchy">
+                        @for (var i = 0; i < Model.CompanyHierarchy.Count; i++)
+                        {
+                            var company = Model.CompanyHierarchy[i];
+                            var companyId = $"company_{company.CompanyId}";
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading-@companyId">
+                                    <button class="accordion-button @(i == 0 ? "" : "collapsed")" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@companyId" aria-expanded="@(i == 0 ? "true" : "false")" aria-controls="collapse-@companyId">
+                                        <span class="fw-semibold">@company.CompanyName</span>
+                                        <span class="badge text-bg-secondary ms-3">@company.Departments.Count departemen</span>
+                                    </button>
+                                </h2>
+                                <div id="collapse-@companyId" class="accordion-collapse collapse @(i == 0 ? "show" : "")" aria-labelledby="heading-@companyId" data-bs-parent="#companyHierarchy">
+                                    <div class="accordion-body">
+                                        @if (company.Departments.Count == 0)
+                                        {
+                                            <div class="text-secondary small">Belum ada departemen.</div>
+                                        }
+                                        else
+                                        {
+                                            <div class="row g-3">
+                                                @foreach (var dept in company.Departments)
+                                                {
+                                                    <div class="col-lg-4">
+                                                        <div class="detail-item">
+                                                            <span>Departemen</span>
+                                                            <strong>@dept.DepartmentName</strong>
+                                                            <small>@dept.Sections.Count section</small>
+                                                            @if (dept.Sections.Count > 0)
+                                                            {
+                                                                <ul class="list-unstyled mt-2 mb-0 small text-secondary">
+                                                                    @foreach (var sec in dept.Sections)
+                                                                    {
+                                                                        <li class="mb-1">
+                                                                            <i class="bi bi-diagram-3 me-1"></i>@(sec.SectionName)
+                                                                            <span class="text-muted">(@(sec.Positions.Count) jabatan)</span>
+                                                                        </li>
+                                                                    }
+                                                                </ul>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </section>
+    }
+
+    <section id="menu-config" class="mb-5">
+        <div class="row g-4">
+            <div class="col-xl-7">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">Struktur Menu & Startup</h5>
+                            <small class="text-secondary">Kelola visibilitas menu berdasarkan perusahaan dan role.</small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="toggleHiddenMenu">
+                            <label class="form-check-label" for="toggleHiddenMenu">Tampilkan yang disembunyikan</label>
+                        </div>
+                    </div>
+                    <div class="card-body menu-tree-container" id="menuTreeHost">
+                        @await Html.PartialAsync("_MenuTree", Model.MenuTree)
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-5">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Tambah Menu Utama</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" asp-action="AddMenu" asp-controller="MenuAdmin" id="formAddMenu">
+                            @Html.AntiForgeryToken()
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label asp-for="NewMenu.DisplayName" class="form-label"></label>
+                                    <input asp-for="NewMenu.DisplayName" class="form-control" />
+                                    <span class="text-danger" asp-validation-for="NewMenu.DisplayName"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="NewMenu.MenuCode" class="form-label"></label>
+                                    <input asp-for="NewMenu.MenuCode" class="form-control" />
+                                    <span class="text-danger" asp-validation-for="NewMenu.MenuCode"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="NewMenu.IconKey" class="form-label"></label>
+                                    <input asp-for="NewMenu.IconKey" class="form-control" />
+                                </div>
+                                <div class="col-md-8">
+                                    <label asp-for="NewMenu.UrlPath" class="form-label"></label>
+                                    <input asp-for="NewMenu.UrlPath" class="form-control" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="NewMenu.SortOrder" class="form-label"></label>
+                                    <input asp-for="NewMenu.SortOrder" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="NewMenu.StartupCategory" class="form-label"></label>
+                                    <input asp-for="NewMenu.StartupCategory" class="form-control" />
+                                </div>
+                                <div class="col-md-6 d-flex align-items-center gap-3">
+                                    <div class="form-check">
+                                        <input asp-for="NewMenu.OpenInNewTab" class="form-check-input" />
+                                        <label asp-for="NewMenu.OpenInNewTab" class="form-check-label"></label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input asp-for="NewMenu.IsHidden" class="form-check-input" />
+                                        <label asp-for="NewMenu.IsHidden" class="form-check-label"></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-grid mt-3">
+                                <button type="submit" class="btn btn-primary">Simpan Menu</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Tambah Sub Menu</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" asp-action="AddSubMenu" asp-controller="MenuAdmin" id="formAddSubMenu">
+                            @Html.AntiForgeryToken()
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label asp-for="NewSubMenu.ParentMenuId" class="form-label"></label>
+                                    <select asp-for="NewSubMenu.ParentMenuId" class="form-select" asp-items="Model.ParentMenuOptions" id="parentMenuSelect">
+                                        <option value="">-- Pilih Menu Induk --</option>
+                                    </select>
+                                    <span class="text-danger" asp-validation-for="NewSubMenu.ParentMenuId"></span>
+                                </div>
+                                <div class="col-12">
+                                    <label asp-for="NewSubMenu.DisplayName" class="form-label"></label>
+                                    <input asp-for="NewSubMenu.DisplayName" class="form-control" />
+                                    <span class="text-danger" asp-validation-for="NewSubMenu.DisplayName"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="NewSubMenu.MenuCode" class="form-label"></label>
+                                    <input asp-for="NewSubMenu.MenuCode" class="form-control" />
+                                    <span class="text-danger" asp-validation-for="NewSubMenu.MenuCode"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="NewSubMenu.IconKey" class="form-label"></label>
+                                    <input asp-for="NewSubMenu.IconKey" class="form-control" />
+                                </div>
+                                <div class="col-md-8">
+                                    <label asp-for="NewSubMenu.UrlPath" class="form-label"></label>
+                                    <input asp-for="NewSubMenu.UrlPath" class="form-control" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="NewSubMenu.SortOrder" class="form-label"></label>
+                                    <input asp-for="NewSubMenu.SortOrder" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="NewSubMenu.StartupCategory" class="form-label"></label>
+                                    <input asp-for="NewSubMenu.StartupCategory" class="form-control" />
+                                </div>
+                                <div class="col-md-6 d-flex align-items-center gap-3">
+                                    <div class="form-check">
+                                        <input asp-for="NewSubMenu.OpenInNewTab" class="form-check-input" />
+                                        <label asp-for="NewSubMenu.OpenInNewTab" class="form-check-label"></label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input asp-for="NewSubMenu.IsHidden" class="form-check-input" />
+                                        <label asp-for="NewSubMenu.IsHidden" class="form-check-label"></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-grid mt-3">
+                                <button type="submit" class="btn btn-outline-primary">Simpan Sub Menu</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Widget Khusus Role</h5>
+                <small class="text-secondary">Konten ringkas sesuai akses role.</small>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    @if (roleName.Equals("Owner", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Strategic Overview</span>
+                                <strong>Owner Insight</strong>
+                                <small>Ringkasan perusahaan & akses global.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Governance</span>
+                                <strong>Policy Watch</strong>
+                                <small>Monitoring kebijakan & compliance.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Growth</span>
+                                <strong>Expansion Radar</strong>
+                                <small>Highlight proyek & mitra aktif.</small>
+                            </div>
+                        </div>
+                    }
+                    else if (roleName.Contains("Contractor", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Operational</span>
+                                <strong>Project Pulse</strong>
+                                <small>Status pekerjaan & SLA utama.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Resource</span>
+                                <strong>Site Readiness</strong>
+                                <small>Ketersediaan crew & material.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Partner</span>
+                                <strong>Vendor Tracker</strong>
+                                <small>Ringkasan vendor terlibat.</small>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Focus</span>
+                                <strong>Daily Ops</strong>
+                                <small>Ringkas aktivitas operasional harian.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Delivery</span>
+                                <strong>Task Queue</strong>
+                                <small>Daftar tugas aktif anda.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <span>Support</span>
+                                <strong>Help Center</strong>
+                                <small>Kontak support & panduan.</small>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="row g-3 mt-3">
+                    <div class="col-md-4">
+                        <div class="detail-item">
+                            <span>Role Aktif</span>
+                            <strong>@Model.RoleName</strong>
+                            <small>Level akses: @Model.RoleLevel</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-item">
+                            <span>Company Scope</span>
+                            <strong>@Model.CompanyName</strong>
+                            <small>Konteks perusahaan saat ini.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-item">
+                            <span>Tenaga Kerja Aktif</span>
+                            <strong>@Model.ActiveKaryawanCount</strong>
+                            <small>Jumlah karyawan sesuai scope.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1">Audit Log Terbaru</h5>
+                    <small class="text-secondary">Aktivitas terakhir di sistem.</small>
+                </div>
+                <a class="btn btn-sm btn-outline-secondary" asp-controller="AuditLog" asp-action="Index">Lihat Semua</a>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentAudits.Count == 0)
+                {
+                    <div class="text-secondary">Belum ada audit log.</div>
+                }
+                else
+                {
+                    <div class="audit-list">
+                        @foreach (var item in Model.RecentAudits)
+                        {
+                            <div class="audit-item">
+                                <div class="audit-icon">
+                                    <i class="bi bi-activity"></i>
+                                </div>
+                                <div class="audit-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="fw-semibold">@item.Action</div>
+                                        <span class="badge text-bg-light">@item.Entity</span>
+                                    </div>
+                                    <div class="text-secondary small">
+                                        @(!string.IsNullOrWhiteSpace(item.Description) ? item.Description : "Aktivitas sistem.")
+                                    </div>
+                                    <div class="text-secondary small mt-1">
+                                        @item.CreatedAt.ToString("dd MMM yyyy HH:mm") • @(item.Username ?? "system")
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-1">Activity Timeline (Audit Log)</h5>
+                <small class="text-secondary">Menampilkan urutan aksi terakhir dari audit log.</small>
+            </div>
+            <div class="card-body">
+                <ul class="timeline">
+                    @if (Model.RecentAudits.Count == 0)
+                    {
+                        <li class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div>
+                                <strong>Belum ada aktivitas.</strong>
+                                <small class="d-block text-secondary">Mulai update data untuk melihat timeline.</small>
+                            </div>
+                        </li>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.RecentAudits)
+                        {
+                            <li class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div>
+                                    <strong>@item.Action @item.Entity</strong>
+                                    <small class="d-block text-secondary">@(!string.IsNullOrWhiteSpace(item.Description) ? item.Description : "Aktivitas sistem.")</small>
+                                    <small class="text-muted">@item.CreatedAt.ToString("dd MMM yyyy HH:mm") • @(item.Username ?? "system")</small>
+                                </div>
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="role-matrix" class="mb-5">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Role, Departemen, dan Hirarki Perusahaan</h5>
+                <small class="text-secondary">Mapping akses untuk owner sampai vendor.</small>
+            </div>
+            <div class="card-body table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Role</th>
+                            <th>Departemen</th>
+                            <th>Section</th>
+                            <th>Jabatan</th>
+                            <th>Startup Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Owner</td>
+                            <td>Executive Office</td>
+                            <td>Strategic Planning</td>
+                            <td>Chief Executive</td>
+                            <td>Dasbor Perusahaan</td>
+                        </tr>
+                        <tr>
+                            <td>Main Contractor</td>
+                            <td>Operation</td>
+                            <td>Project Control</td>
+                            <td>Project Director</td>
+                            <td>Pengaturan Menu</td>
+                        </tr>
+                        <tr>
+                            <td>Sub Contractor</td>
+                            <td>Operation</td>
+                            <td>Site Execution</td>
+                            <td>Site Manager</td>
+                            <td>Progress Harian</td>
+                        </tr>
+                        <tr>
+                            <td>Vendor</td>
+                            <td>Procurement</td>
+                            <td>Fulfillment</td>
+                            <td>Account Manager</td>
+                            <td>Vendor Insight</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="session-profile" class="mb-5">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h6 class="mb-0">Profil Sesi Aktif</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span>User ID</span>
+                                <strong>@(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "ADM-001")</strong>
+                            </li>
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span>Username</span>
+                                <strong>@(User.Identity?.Name ?? "-")</strong>
+                            </li>
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span>Company</span>
+                                <strong>@(User.FindFirst("company_name")?.Value ?? "PT Indexim Global Internasional")</strong>
+                            </li>
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span>ID Perusahaan</span>
+                                <strong>@(User.FindFirst("company_id")?.Value ?? "-")</strong>
+                            </li>
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span>Role</span>
+                                <strong>@(User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "Owner")</strong>
+                            </li>
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span>ID Departemen</span>
+                                <strong>@(User.FindFirst("department_id")?.Value ?? "-")</strong>
+                            </li>
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span>ID Section</span>
+                                <strong>@(User.FindFirst("section_id")?.Value ?? "-")</strong>
+                            </li>
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span>ID Jabatan</span>
+                                <strong>@(User.FindFirst("position_id")?.Value ?? "-")</strong>
+                            </li>
+                            <li class="d-flex justify-content-between py-2">
+                                <span>Startup Page</span>
+                                <strong>@Model.StartupPage</strong>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h6 class="mb-0">Ringkasan Akses</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="p-3 rounded-4 border bg-white">
+                                    <p class="small text-uppercase text-secondary mb-1">Role ID</p>
+                                    <h5 class="mb-0">@((User.FindFirst("role_id")?.Value ?? "-"))</h5>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 rounded-4 border bg-white">
+                                    <p class="small text-uppercase text-secondary mb-1">Company ID</p>
+                                    <h5 class="mb-0">@((User.FindFirst("company_id")?.Value ?? "-"))</h5>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 rounded-4 border bg-white">
+                                    <p class="small text-uppercase text-secondary mb-1">Departemen</p>
+                                    <h5 class="mb-0">@((User.FindFirst("department_id")?.Value ?? "-"))</h5>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 rounded-4 border bg-white">
+                                    <p class="small text-uppercase text-secondary mb-1">Section</p>
+                                    <h5 class="mb-0">@((User.FindFirst("section_id")?.Value ?? "-"))</h5>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="p-3 rounded-4 border bg-white">
+                                    <p class="small text-uppercase text-secondary mb-1">Jabatan</p>
+                                    <h5 class="mb-0">@((User.FindFirst("position_id")?.Value ?? "-"))</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-secondary small mt-3 mb-0">Data sesi diambil dari claim saat login.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+@section Styles {
+    <style>
+        .audit-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .audit-item {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 1rem 1.25rem;
+        }
+
+        .audit-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(14, 165, 165, 0.12);
+            color: #0f766e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .audit-body {
+            flex: 1;
+        }
+
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(14, 16px);
+            gap: 6px;
+        }
+
+        .heatmap-cell {
+            width: 16px;
+            height: 16px;
+            border-radius: 5px;
+            background: #e2e8f0;
+        }
+
+        .heatmap-legend {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            background: #e2e8f0;
+        }
+
+        .heat-0 { background: #e2e8f0; }
+        .heat-1 { background: rgba(34, 197, 94, 0.25); }
+        .heat-2 { background: rgba(34, 197, 94, 0.45); }
+        .heat-3 { background: rgba(34, 197, 94, 0.7); }
+        .heat-4 { background: rgba(34, 197, 94, 0.95); }
+
+        .timeline {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 0;
+            top: 0.4rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: #0ea5a5;
+            box-shadow: 0 0 0 4px rgba(14, 165, 165, 0.15);
+        }
+    </style>
+}

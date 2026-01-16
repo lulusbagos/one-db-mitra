@@ -1,0 +1,200 @@
+@model one_db_mitra.Models.Admin.AppSettingViewModel
+@{
+    ViewData["Title"] = "Pengaturan Aplikasi";
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 mb-4">
+        <div>
+            <p class="text-uppercase text-secondary small mb-1">Pengaturan</p>
+            <h2 class="mb-1">Pengaturan Aplikasi</h2>
+            <p class="text-secondary mb-0">Atur logo, nama aplikasi, header, dan footer.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="SettingId" />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="AppName" class="form-label"></label>
+                        <input asp-for="AppName" class="form-control" placeholder="One DB Mitra" />
+                        <span class="text-danger" asp-validation-for="AppName"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="HeaderName" class="form-label"></label>
+                        <input asp-for="HeaderName" class="form-control" placeholder="Konsol Administrasi" />
+                        <span class="text-danger" asp-validation-for="HeaderName"></span>
+                    </div>
+                    <div class="col-md-12">
+                        <label asp-for="FooterText" class="form-label"></label>
+                        <input asp-for="FooterText" class="form-control" placeholder="Footer text" />
+                        <span class="text-danger" asp-validation-for="FooterText"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Upload Logo</label>
+                        <input type="file" name="logoFile" class="form-control" accept=".png,.jpg,.jpeg" id="logoFileInput" />
+                        <small class="text-secondary">Gunakan PNG transparan untuk hasil terbaik.</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="LogoUrl" class="form-label"></label>
+                        <input asp-for="LogoUrl" class="form-control" placeholder="https://..." />
+                        <span class="text-danger" asp-validation-for="LogoUrl"></span>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Tema Aplikasi</label>
+                        <div class="d-flex flex-wrap gap-2" id="themePicker">
+                            <button type="button" class="btn btn-outline-secondary" data-theme="green-blue">Green Blue</button>
+                            <button type="button" class="btn btn-outline-secondary" data-theme="navy-gold">Navy Gold</button>
+                            <button type="button" class="btn btn-outline-secondary" data-theme="charcoal-teal">Charcoal Teal</button>
+                            <button type="button" class="btn btn-outline-secondary" data-theme="slate-amber">Slate Amber</button>
+                        </div>
+                        <small class="text-secondary">Tema disimpan di browser perangkat ini.</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="FontPrimary" class="form-label"></label>
+                        <select asp-for="FontPrimary" class="form-select">
+                            <option value="Poppins">Poppins</option>
+                            <option value="Manrope">Manrope</option>
+                            <option value="Montserrat">Montserrat</option>
+                            <option value="Inter">Inter</option>
+                            <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+                            <option value="Sora">Sora</option>
+                            <option value="Space Grotesk">Space Grotesk</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="FontSecondary" class="form-label"></label>
+                        <select asp-for="FontSecondary" class="form-select">
+                            <option value="Manrope">Manrope</option>
+                            <option value="Poppins">Poppins</option>
+                            <option value="Montserrat">Montserrat</option>
+                            <option value="Inter">Inter</option>
+                            <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+                            <option value="Sora">Sora</option>
+                            <option value="Space Grotesk">Space Grotesk</option>
+                        </select>
+                        <small class="text-secondary">Dipakai untuk paragraf/detail.</small>
+                    </div>
+                    <div class="col-12">
+                        <hr />
+                        <h6 class="mb-2">Announcement Banner</h6>
+                        <p class="text-secondary small mb-3">Pengumuman tampil di topbar sesuai jadwal.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="AnnouncementEnabled" class="form-label"></label>
+                        <div class="form-check form-switch">
+                            <input asp-for="AnnouncementEnabled" class="form-check-input" />
+                            <label class="form-check-label" for="AnnouncementEnabled">Aktifkan</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="AnnouncementType" class="form-label"></label>
+                        <select asp-for="AnnouncementType" class="form-select">
+                            <option value="info">Info</option>
+                            <option value="success">Success</option>
+                            <option value="warning">Warning</option>
+                            <option value="danger">Danger</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="AnnouncementTitle" class="form-label"></label>
+                        <input asp-for="AnnouncementTitle" class="form-control" placeholder="Judul pengumuman" />
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="AnnouncementMessage" class="form-label"></label>
+                        <textarea asp-for="AnnouncementMessage" class="form-control" rows="3" placeholder="Tulis isi pengumuman..."></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="AnnouncementStart" class="form-label"></label>
+                        <input asp-for="AnnouncementStart" class="form-control" type="datetime-local" value="@(Model.AnnouncementStart?.ToString("yyyy-MM-ddTHH:mm"))" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="AnnouncementEnd" class="form-label"></label>
+                        <input asp-for="AnnouncementEnd" class="form-control" type="datetime-local" value="@(Model.AnnouncementEnd?.ToString("yyyy-MM-ddTHH:mm"))" />
+                    </div>
+                    <div class="col-12">
+                        <div class="p-3 border rounded-3 d-flex align-items-center gap-3 bg-white">
+                            <img id="logoPreview" src="@Model.LogoUrl" alt="Logo" style="height:48px; @(string.IsNullOrWhiteSpace(Model.LogoUrl) ? "display:none;" : "")" />
+                            <div class="text-secondary small" id="logoPreviewLabel">
+                                @if (!string.IsNullOrWhiteSpace(Model.LogoUrl))
+                                {
+                                    <text>Preview logo saat ini.</text>
+                                }
+                                else
+                                {
+                                    <text>Preview logo akan muncul di sini.</text>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-primary">Simpan Pengaturan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const input = document.getElementById('logoFileInput');
+            const preview = document.getElementById('logoPreview');
+            const label = document.getElementById('logoPreviewLabel');
+            if (!input || !preview || !label) {
+                return;
+            }
+
+            input.addEventListener('change', function () {
+                const file = input.files && input.files[0];
+                if (!file) {
+                    return;
+                }
+
+                if (!file.type.startsWith('image/')) {
+                    label.textContent = 'File harus berupa gambar.';
+                    preview.style.display = 'none';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    preview.src = event.target.result;
+                    preview.style.display = 'block';
+                    label.textContent = 'Preview logo baru.';
+                };
+                reader.readAsDataURL(file);
+            });
+
+            const themeButtons = document.querySelectorAll('#themePicker [data-theme]');
+            if (themeButtons.length) {
+                themeButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const theme = button.getAttribute('data-theme');
+                        if (!theme) {
+                            return;
+                        }
+
+                        document.documentElement.setAttribute('data-theme', theme);
+                        localStorage.setItem('one_db_theme', theme);
+                        themeButtons.forEach(b => b.classList.remove('active'));
+                        button.classList.add('active');
+                    });
+                });
+
+                const saved = localStorage.getItem('one_db_theme');
+                if (saved) {
+                    const match = document.querySelector(`#themePicker [data-theme="${saved}"]`);
+                    if (match) {
+                        match.classList.add('active');
+                    }
+                }
+            }
+        })();
+    </script>
+}

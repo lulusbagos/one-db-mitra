@@ -1,0 +1,28 @@
+@model IReadOnlyList<one_db_mitra.Models.Menu.MenuItem>
+
+@if (Model.Count == 0)
+{
+    <div class="text-secondary small">Menu tidak tersedia untuk user ini.</div>
+}
+else
+{
+    <ul class="list-unstyled mb-0">
+        @foreach (var item in Model)
+        {
+            <li class="mb-2">
+                <div class="fw-semibold"><i class="@item.IconKey me-2"></i>@item.DisplayName</div>
+                @if (item.Children.Count > 0)
+                {
+                    <ul class="list-unstyled ms-4 mt-2">
+                        @foreach (var child in item.Children)
+                        {
+                            <li class="mb-1">
+                                <i class="@child.IconKey me-2"></i>@child.DisplayName
+                            </li>
+                        }
+                    </ul>
+                }
+            </li>
+        }
+    </ul>
+}

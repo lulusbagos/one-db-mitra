@@ -1,0 +1,5 @@
+@model IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>
+@foreach (var option in Model)
+{
+    <option value="@option.Value">@option.Text</option>
+}

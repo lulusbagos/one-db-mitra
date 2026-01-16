@@ -1,0 +1,193 @@
+@model one_db_mitra.Models.Admin.MenuAccessMatrixViewModel
+@{
+    ViewData["Title"] = "Akses Menu";
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 mb-4">
+        <div>
+            <p class="text-uppercase text-secondary small mb-1">Pengaturan</p>
+            <h2 class="mb-1">Akses Menu (Role & Perusahaan)</h2>
+            <p class="text-secondary mb-0">Kelola akses menu berdasarkan role dan perusahaan pada satu layar.</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="AccessMatrix" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Role</label>
+                    <select name="roleId" class="form-select" @(Model.RoleOptions.Any() ? null : "disabled")>
+                        @foreach (var option in Model.RoleOptions)
+                        {
+                            <option value="@option.Value" selected="@(option.Selected ? "selected" : null)">@option.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Perusahaan</label>
+                    <select name="companyId" class="form-select" @(Model.CompanyOptions.Any() ? null : "disabled")>
+                        @foreach (var option in Model.CompanyOptions)
+                        {
+                            <option value="@option.Value" selected="@(option.Selected ? "selected" : null)">@option.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4 d-grid">
+                    <button type="submit" class="btn btn-outline-secondary">Muat</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (!Model.RoleOptions.Any() || !Model.CompanyOptions.Any())
+    {
+        <div class="alert alert-warning">
+            Role atau perusahaan belum tersedia. Pastikan data master sudah dibuat terlebih dahulu.
+        </div>
+    }
+    else
+    {
+        <form method="post" asp-action="AccessMatrix">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="RoleId" value="@Model.RoleId" />
+            <input type="hidden" name="CompanyId" value="@Model.CompanyId" />
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">Akses Menu per Role</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="toggleRoleAll">
+                                <label class="form-check-label small" for="toggleRoleAll">Pilih semua</label>
+                            </div>
+                        </div>
+                        <div class="card-body table-responsive">
+                            <table class="table table-striped align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Menu</th>
+                                        <th>Kode</th>
+                                        <th class="text-end">Akses</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Menus.Count == 0)
+                                    {
+                                        <tr>
+                                            <td colspan="3" class="text-center text-secondary py-4">Belum ada menu untuk diatur.</td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var menu in Model.Menus)
+                                        {
+                                            var checkedRole = Model.RoleMenuIds.Contains(menu.MenuId);
+                                            <tr>
+                                                <td>
+                                                    <div style="padding-left: @(menu.Depth * 16)px">
+                                                        <strong>@menu.DisplayName</strong>
+                                                    </div>
+                                                </td>
+                                                <td>@menu.MenuCode</td>
+                                                <td class="text-end">
+                                                    <input type="checkbox" class="form-check-input" name="roleMenus" value="@menu.MenuId" @(checkedRole ? "checked" : null) />
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">Akses Menu per Perusahaan</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="toggleCompanyAll">
+                                <label class="form-check-label small" for="toggleCompanyAll">Pilih semua</label>
+                            </div>
+                        </div>
+                        <div class="card-body table-responsive">
+                            <table class="table table-striped align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Menu</th>
+                                        <th>Kode</th>
+                                        <th class="text-end">Akses</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Menus.Count == 0)
+                                    {
+                                        <tr>
+                                            <td colspan="3" class="text-center text-secondary py-4">Belum ada menu untuk diatur.</td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var menu in Model.Menus)
+                                        {
+                                            var checkedCompany = Model.CompanyMenuIds.Contains(menu.MenuId);
+                                            <tr>
+                                                <td>
+                                                    <div style="padding-left: @(menu.Depth * 16)px">
+                                                        <strong>@menu.DisplayName</strong>
+                                                    </div>
+                                                </td>
+                                                <td>@menu.MenuCode</td>
+                                                <td class="text-end">
+                                                    <input type="checkbox" class="form-check-input" name="companyMenus" value="@menu.MenuId" @(checkedCompany ? "checked" : null) />
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+                <button type="submit" class="btn btn-primary" @(Model.Menus.Count == 0 ? "disabled" : null)>Simpan Akses</button>
+            </div>
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const roleToggle = document.getElementById('toggleRoleAll');
+            const companyToggle = document.getElementById('toggleCompanyAll');
+            const roleChecks = document.querySelectorAll('input[name="roleMenus"]');
+            const companyChecks = document.querySelectorAll('input[name="companyMenus"]');
+
+            function syncToggle(toggle, checks) {
+                if (!toggle) {
+                    return;
+                }
+                const allChecked = Array.from(checks).every(c => c.checked);
+                toggle.checked = allChecked;
+            }
+
+            roleToggle?.addEventListener('change', () => {
+                roleChecks.forEach(c => { c.checked = roleToggle.checked; });
+            });
+            companyToggle?.addEventListener('change', () => {
+                companyChecks.forEach(c => { c.checked = companyToggle.checked; });
+            });
+
+            roleChecks.forEach(c => c.addEventListener('change', () => syncToggle(roleToggle, roleChecks)));
+            companyChecks.forEach(c => c.addEventListener('change', () => syncToggle(companyToggle, companyChecks)));
+
+            syncToggle(roleToggle, roleChecks);
+            syncToggle(companyToggle, companyChecks);
+        })();
+    </script>
+}

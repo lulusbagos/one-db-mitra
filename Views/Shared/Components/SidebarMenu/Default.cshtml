@@ -1,0 +1,24 @@
+@model IReadOnlyList<one_db_mitra.Models.Menu.MenuItem>
+@{
+    var currentPath = Context.Request.Path.Value ?? string.Empty;
+}
+
+@if (Model.Count == 0)
+{
+    <div class="sidebar-empty">
+        <p class="mb-2">Menu belum tersedia.</p>
+    </div>
+}
+else
+{
+    <ul class="sidebar-menu">
+        @foreach (var item in Model)
+        {
+            var childViewData = new ViewDataDictionary(ViewData)
+            {
+                ["CurrentPath"] = currentPath
+            };
+            @await Html.PartialAsync("_SidebarMenuItem", item, childViewData)
+        }
+    </ul>
+}

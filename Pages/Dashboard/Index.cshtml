@@ -1,0 +1,383 @@
+@page
+@model one_db_mitra.Pages.Dashboard.IndexModel
+@{
+    ViewData["Title"] = "Dasbor Administrasi";
+}
+
+<div class="container-fluid px-0">
+    @if (!string.IsNullOrWhiteSpace(Model.Notification))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@Model.Notification
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <section id="company-deck" class="mb-4">
+        <div class="row g-4">
+            <div class="col-xxl-3 col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge text-bg-dark">Owner</span>
+                            <i class="bi bi-person-workspace fs-4 text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Owner</h5>
+                        <p class="card-text text-secondary">Kontrol penuh atas seluruh modul, termasuk memilih menu startup default.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-3 col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge text-bg-primary">Main Contractor</span>
+                            <i class="bi bi-building fs-4 text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Main Contractor</h5>
+                        <p class="card-text text-secondary">Memiliki akses penuh ke menu operasional proyek serta otorisasi vendor.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-3 col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge text-bg-warning">Sub Contractor</span>
+                            <i class="bi bi-diagram-3 fs-4 text-warning"></i>
+                        </div>
+                        <h5 class="card-title">Sub Contractor</h5>
+                        <p class="card-text text-secondary">Menu menyesuaikan scope pekerjaan dan SLA masing-masing section.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-3 col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge text-bg-success">Vendor</span>
+                            <i class="bi bi-box-seam fs-4 text-success"></i>
+                        </div>
+                        <h5 class="card-title">Vendor</h5>
+                        <p class="card-text text-secondary">Akses fokus pada procurement dan pelacakan order harian.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="menu-config" class="mb-5">
+        <div class="row g-4">
+            <div class="col-xl-7">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">Struktur Menu & Startup</h5>
+                            <small class="text-secondary">Kelola visibilitas menu berdasarkan perusahaan, kategori user, dan role.</small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="toggleHiddenMenu">
+                            <label class="form-check-label" for="toggleHiddenMenu">Tampilkan yang disembunyikan</label>
+                        </div>
+                    </div>
+                    <div class="card-body menu-tree-container">
+                        @if (!Model.MenuTree.Any())
+                        {
+                            <p class="text-secondary">Belum ada menu terdaftar.</p>
+                        }
+                        else
+                        {
+                            <ul class="menu-tree">
+                                @foreach (var menu in Model.MenuTree)
+                                {
+                                    <li>
+                                        <div class="menu-node @(menu.IsHidden ? "is-hidden" : string.Empty)">
+                                            <div>
+                                                <span class="menu-icon"><i class="bi @menu.IconKey"></i></span>
+                                                <strong>@menu.DisplayName</strong>
+                                                <span class="text-secondary">(@menu.MenuCode)</span>
+                                            </div>
+                                            <div class="menu-node-badges">
+                                                @if (menu.IsHidden)
+                                                {
+                                                    <span class="badge text-bg-secondary">Hidden</span>
+                                                }
+                                                @if (menu.OpenInNewTab)
+                                                {
+                                                    <span class="badge text-bg-info">New Tab</span>
+                                                }
+                                                <span class="badge text-bg-dark">@string.Join(" • ", menu.AllowedRoles)</span>
+                                            </div>
+                                        </div>
+                                        @if (menu.Children.Any())
+                                        {
+                                            <ul>
+                                                @foreach (var child in menu.Children)
+                                                {
+                                                    <li>
+                                                        <div class="menu-node @(child.IsHidden ? "is-hidden" : string.Empty)">
+                                                            <div>
+                                                                <span class="menu-icon"><i class="bi @child.IconKey"></i></span>
+                                                                <strong>@child.DisplayName</strong>
+                                                                <span class="text-secondary">(@child.MenuCode)</span>
+                                                            </div>
+                                                            <div class="menu-node-badges">
+                                                                @if (child.IsHidden)
+                                                                {
+                                                                    <span class="badge text-bg-secondary">Hidden</span>
+                                                                }
+                                                                @if (child.OpenInNewTab)
+                                                                {
+                                                                    <span class="badge text-bg-info">New Tab</span>
+                                                                }
+                                                                <span class="badge text-bg-light text-body">@child.StartupCategory</span>
+                                                            </div>
+                                                        </div>
+                                                        @if (child.Children.Any())
+                                                        {
+                                                            <ul>
+                                                                @foreach (var grandChild in child.Children)
+                                                                {
+                                                                    <li>
+                                                                        <div class="menu-node @(grandChild.IsHidden ? "is-hidden" : string.Empty)">
+                                                                            <div>
+                                                                                <span class="menu-icon"><i class="bi @grandChild.IconKey"></i></span>
+                                                                                <strong>@grandChild.DisplayName</strong>
+                                                                                <span class="text-secondary">(@grandChild.MenuCode)</span>
+                                                                            </div>
+                                                                            <div class="menu-node-badges">
+                                                                                <span class="badge text-bg-light text-body">@grandChild.StartupCategory</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </li>
+                                                                }
+                                                            </ul>
+                                                        }
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-5">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Tambah Menu Utama</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" asp-page-handler="AddMenu">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label asp-for="NewMenu.DisplayName" class="form-label"></label>
+                                    <input asp-for="NewMenu.DisplayName" class="form-control" />
+                                    <span class="text-danger" asp-validation-for="NewMenu.DisplayName"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="NewMenu.MenuCode" class="form-label"></label>
+                                    <input asp-for="NewMenu.MenuCode" class="form-control" />
+                                    <span class="text-danger" asp-validation-for="NewMenu.MenuCode"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="NewMenu.IconKey" class="form-label"></label>
+                                    <input asp-for="NewMenu.IconKey" class="form-control" />
+                                </div>
+                                <div class="col-md-8">
+                                    <label asp-for="NewMenu.UrlPath" class="form-label"></label>
+                                    <input asp-for="NewMenu.UrlPath" class="form-control" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="NewMenu.SortOrder" class="form-label"></label>
+                                    <input asp-for="NewMenu.SortOrder" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="NewMenu.StartupCategory" class="form-label"></label>
+                                    <input asp-for="NewMenu.StartupCategory" class="form-control" />
+                                </div>
+                                <div class="col-md-6 d-flex align-items-center gap-3">
+                                    <div class="form-check">
+                                        <input asp-for="NewMenu.OpenInNewTab" class="form-check-input" />
+                                        <label asp-for="NewMenu.OpenInNewTab" class="form-check-label"></label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input asp-for="NewMenu.IsHidden" class="form-check-input" />
+                                        <label asp-for="NewMenu.IsHidden" class="form-check-label"></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-grid mt-3">
+                                <button type="submit" class="btn btn-primary">Simpan Menu</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h6 class="mb-0">Tambah Sub Menu</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" asp-page-handler="AddSubMenu">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label asp-for="NewSubMenu.ParentMenuId" class="form-label"></label>
+                                    <select asp-for="NewSubMenu.ParentMenuId" class="form-select" asp-items="Model.ParentMenuOptions">
+                                        <option value="">-- Pilih Menu Induk --</option>
+                                    </select>
+                                    <span class="text-danger" asp-validation-for="NewSubMenu.ParentMenuId"></span>
+                                </div>
+                                <div class="col-12">
+                                    <label asp-for="NewSubMenu.DisplayName" class="form-label"></label>
+                                    <input asp-for="NewSubMenu.DisplayName" class="form-control" />
+                                    <span class="text-danger" asp-validation-for="NewSubMenu.DisplayName"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="NewSubMenu.MenuCode" class="form-label"></label>
+                                    <input asp-for="NewSubMenu.MenuCode" class="form-control" />
+                                    <span class="text-danger" asp-validation-for="NewSubMenu.MenuCode"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="NewSubMenu.IconKey" class="form-label"></label>
+                                    <input asp-for="NewSubMenu.IconKey" class="form-control" />
+                                </div>
+                                <div class="col-md-8">
+                                    <label asp-for="NewSubMenu.UrlPath" class="form-label"></label>
+                                    <input asp-for="NewSubMenu.UrlPath" class="form-control" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="NewSubMenu.SortOrder" class="form-label"></label>
+                                    <input asp-for="NewSubMenu.SortOrder" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="NewSubMenu.StartupCategory" class="form-label"></label>
+                                    <input asp-for="NewSubMenu.StartupCategory" class="form-control" />
+                                </div>
+                                <div class="col-md-6 d-flex align-items-center gap-3">
+                                    <div class="form-check">
+                                        <input asp-for="NewSubMenu.OpenInNewTab" class="form-check-input" />
+                                        <label asp-for="NewSubMenu.OpenInNewTab" class="form-check-label"></label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input asp-for="NewSubMenu.IsHidden" class="form-check-input" />
+                                        <label asp-for="NewSubMenu.IsHidden" class="form-check-label"></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-grid mt-3">
+                                <button type="submit" class="btn btn-outline-primary">Simpan Sub Menu</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="role-matrix" class="mb-5">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Role, Departemen, dan Hirarki Perusahaan</h5>
+                <small class="text-secondary">Mapping ini menjadi dasar pembuatan FK dan policy akses.</small>
+            </div>
+            <div class="card-body table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Role</th>
+                            <th>Departemen</th>
+                            <th>Section</th>
+                            <th>Jabatan</th>
+                            <th>Startup Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Owner</td>
+                            <td>Executive Office</td>
+                            <td>Strategic Planning</td>
+                            <td>Chief Executive</td>
+                            <td>Dasbor Perusahaan</td>
+                        </tr>
+                        <tr>
+                            <td>Main Contractor</td>
+                            <td>Operation</td>
+                            <td>Project Control</td>
+                            <td>Project Director</td>
+                            <td>Pengaturan Menu</td>
+                        </tr>
+                        <tr>
+                            <td>Sub Contractor</td>
+                            <td>Operation</td>
+                            <td>Site Execution</td>
+                            <td>Site Manager</td>
+                            <td>Progress Harian</td>
+                        </tr>
+                        <tr>
+                            <td>Vendor</td>
+                            <td>Procurement</td>
+                            <td>Fulfillment</td>
+                            <td>Account Manager</td>
+                            <td>Vendor Insight</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="session-profile" class="mb-5">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <h6 class="mb-0">Profil Sesi Aktif</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span>User ID</span>
+                                <strong>ADM-001</strong>
+                            </li>
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span>Company</span>
+                                <strong>PT Indexim Global Internasional</strong>
+                            </li>
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span>Kategori User</span>
+                                <strong>Super Admin</strong>
+                            </li>
+                            <li class="d-flex justify-content-between py-2">
+                                <span>Startup Page</span>
+                                <strong>Dasbor Perusahaan</strong>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <h6 class="mb-0">Rekomendasi Pengembangan</h6>
+                    </div>
+                    <div class="card-body">
+                        <ol class="mb-0 ps-3 text-secondary small">
+                            <li>Hubungkan form ini langsung ke tabel konfigurasi pada SQL Server menggunakan EF Core atau Dapper.</li>
+                            <li>Tambahkan audit trail setiap perubahan menu, role, dan default startup.</li>
+                            <li>Gunakan SignalR untuk push update menu ketika admin melakukan perubahan tanpa perlu refresh.</li>
+                            <li>Implementasikan simulasi akses (impersonate) agar admin dapat mem-preview menu tiap user.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

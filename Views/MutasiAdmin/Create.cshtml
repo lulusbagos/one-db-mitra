@@ -1,0 +1,77 @@
+@model one_db_mitra.Models.Admin.MutasiCreateViewModel
+@{
+    ViewData["Title"] = "Ajukan Mutasi Karyawan";
+}
+
+<div class="karyawan-header">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 text-white">
+        <div>
+            <span class="badge karyawan-badge mb-2">
+                <i class="bi bi-send me-2"></i>Ajukan Mutasi
+            </span>
+            <h2 class="mb-1 fw-bold">Pengajuan Mutasi</h2>
+            <p class="mb-0 text-white-50">Kirim request mutasi ke perusahaan asal untuk persetujuan.</p>
+        </div>
+        <a class="btn btn-outline-light fw-semibold" asp-action="Index">
+            <i class="bi bi-arrow-left me-2"></i>Kembali
+        </a>
+    </div>
+</div>
+
+<div class="container-fluid px-0 karyawan-body">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body">
+            <form method="post">
+                @Html.AntiForgeryToken()
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label">NIK</label>
+                        <input asp-for="NoNik" class="form-control" placeholder="Masukkan NIK karyawan" />
+                        <span asp-validation-for="NoNik" class="text-danger small"></span>
+                        <div class="text-secondary small mt-2">
+                            Sistem akan mencari perusahaan asal berdasarkan NIK terakhir. Jika karyawan masih aktif, pengajuan akan menunggu persetujuan perusahaan asal.
+                        </div>
+                        <div class="text-secondary small mt-1">
+                            Approval hanya bisa dilakukan oleh admin perusahaan asal tanpa departemen atau peran tertinggi.
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Catatan Pengajuan</label>
+                        <textarea asp-for="Catatan" class="form-control" rows="4" placeholder="Contoh: kebutuhan proyek baru, permintaan resmi HR, dll."></textarea>
+                        <span asp-validation-for="Catatan" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a class="btn btn-outline-secondary" asp-action="Index">Batal</a>
+                    <button type="submit" class="btn btn-primary">Kirim Pengajuan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .karyawan-header {
+            background: linear-gradient(135deg, #064e3b 0%, #0ea5a5 100%);
+            padding: 2rem 2.5rem 3.5rem;
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 15px 35px rgba(6, 78, 59, 0.35);
+            margin-bottom: -2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .karyawan-badge {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 999px;
+            padding: 0.35rem 0.9rem;
+        }
+
+        .karyawan-body {
+            position: relative;
+            z-index: 2;
+        }
+    </style>
+}

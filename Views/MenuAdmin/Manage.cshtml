@@ -1,0 +1,229 @@
+@model one_db_mitra.Models.Admin.MenuManageViewModel
+@{
+    ViewData["Title"] = "Manajemen Menu";
+    var createModel = new one_db_mitra.Models.Admin.MenuEditViewModel
+    {
+        ParentOptions = Model.ParentOptions
+    };
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 mb-4">
+        <div>
+            <p class="text-uppercase text-secondary small mb-1">Pengaturan</p>
+            <h2 class="mb-1">Manajemen Menu</h2>
+            <p class="text-secondary mb-0">Kelola menu, struktur, dan status aktif.</p>
+        </div>
+        <form method="get" class="d-flex align-items-center gap-2">
+            <input type="hidden" name="activeOnly" value="false" />
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="activeOnlyToggle" name="activeOnly" value="true" @(Model.ActiveOnly ? "checked" : null) onchange="this.form.submit()" />
+                <label class="form-check-label" for="activeOnlyToggle">Tampilkan aktif saja</label>
+            </div>
+            <span class="badge @(Model.ActiveOnly ? "text-bg-success" : "text-bg-secondary")">
+                @(Model.ActiveOnly ? "Filter: Aktif" : "Filter: Semua")
+            </span>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Tambah Menu</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="CreateMenu">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="activeOnly" value="@Model.ActiveOnly" />
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label asp-for="@createModel.MenuCode" class="form-label">Kode Menu</label>
+                                <input name="MenuCode" class="form-control" placeholder="MENU_MASTER" />
+                                <small class="text-secondary">Gunakan kode unik untuk referensi.</small>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="@createModel.DisplayName" class="form-label">Nama Menu</label>
+                                <input name="DisplayName" class="form-control" placeholder="Master Data" />
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="@createModel.ParentMenuId" class="form-label">Menu Induk</label>
+                                <select name="ParentMenuId" class="form-select" asp-items="Model.ParentOptions">
+                                    <option value="">--</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="@createModel.IconKey" class="form-label">Ikon</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-grid"></i></span>
+                                    <input name="IconKey" class="form-control" placeholder="bi-grid" data-icon-preview />
+                                </div>
+                                <small class="text-secondary">Gunakan ikon Bootstrap Icons (contoh: bi-people).</small>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="@createModel.UrlPath" class="form-label">URL</label>
+                                <input name="UrlPath" class="form-control" placeholder="/MenuAdmin/Index" />
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="@createModel.SortOrder" class="form-label">Urutan</label>
+                                <input name="SortOrder" type="number" class="form-control" value="10" />
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="IsHidden" />
+                                    <label class="form-check-label">Sembunyikan</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="OpenInNewTab" />
+                                    <label class="form-check-label">Buka Tab Baru</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="IsActive" checked />
+                                    <label class="form-check-label">Aktif</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary">Simpan Menu</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-8">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Daftar Menu</h6>
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="table table-striped align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Kode</th>
+                                <th>Nama</th>
+                                <th>Induk</th>
+                                <th>Urutan</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Menus.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center text-secondary py-4">Belum ada menu. Tambahkan menu pertama.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var menu in Model.Menus)
+                                {
+                                    <tr>
+                                        <td>@menu.MenuCode</td>
+                                        <td>@menu.DisplayName</td>
+                                        <td>@menu.ParentName</td>
+                                        <td>@menu.SortOrder</td>
+                                        <td>
+                                            <span class="badge @(menu.IsActive ? "text-bg-success" : "text-bg-secondary")">
+                                                @(menu.IsActive ? "Aktif" : "Nonaktif")
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#editMenu@menu.MenuId">Edit</button>
+                                        <form asp-action="DeleteMenu" asp-route-id="@menu.MenuId" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="activeOnly" value="@Model.ActiveOnly" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus menu ini?')">Hapus</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <tr class="collapse" id="editMenu@menu.MenuId">
+                                    <td colspan="6">
+                                        <form method="post" asp-action="UpdateMenu">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="MenuId" value="@menu.MenuId" />
+                                            <input type="hidden" name="activeOnly" value="@Model.ActiveOnly" />
+                                            <div class="row g-3">
+                                                    <div class="col-md-3">
+                                                        <input name="MenuCode" class="form-control" value="@menu.MenuCode" />
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <input name="DisplayName" class="form-control" value="@menu.DisplayName" />
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <select name="ParentMenuId" class="form-select">
+                                                            <option value="">--</option>
+                                                            @foreach (var option in Model.ParentOptions)
+                                                            {
+                                                                var isSelected = option.Value == (menu.ParentMenuId?.ToString() ?? string.Empty);
+                                                                <option value="@option.Value" selected="@(isSelected ? "selected" : null)">@option.Text</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <input name="SortOrder" type="number" class="form-control" value="@menu.SortOrder" />
+                                                    </div>
+                                            <div class="col-md-3">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="@menu.IconKey"></i></span>
+                                                        <input name="IconKey" class="form-control" value="@menu.IconKey" data-icon-preview />
+                                                    </div>
+                                                </div>
+                                                    <div class="col-md-3">
+                                                        <input name="UrlPath" class="form-control" value="@menu.UrlPath" />
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-check mt-2">
+                                                            <input class="form-check-input" type="checkbox" name="IsHidden" value="true" @(menu.IsHidden ? "checked" : "") />
+                                                            <label class="form-check-label">Hidden</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-check mt-2">
+                                                            <input class="form-check-input" type="checkbox" name="OpenInNewTab" value="true" @(menu.OpenInNewTab ? "checked" : "") />
+                                                            <label class="form-check-label">New Tab</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-check mt-2">
+                                                            <input class="form-check-input" type="checkbox" name="IsActive" value="true" @(menu.IsActive ? "checked" : "") />
+                                                            <label class="form-check-label">Aktif</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex justify-content-end mt-3">
+                                                    <button type="submit" class="btn btn-sm btn-primary">Simpan Perubahan</button>
+                                                </div>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            document.querySelectorAll('[data-icon-preview]').forEach(function (input) {
+                input.addEventListener('input', function () {
+                    const wrapper = input.closest('.input-group');
+                    if (!wrapper) return;
+                    const icon = wrapper.querySelector('i');
+                    if (!icon) return;
+                    icon.className = input.value || 'bi bi-grid';
+                });
+            });
+        })();
+    </script>
+}

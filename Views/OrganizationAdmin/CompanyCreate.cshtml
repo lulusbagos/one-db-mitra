@@ -1,0 +1,52 @@
+@model one_db_mitra.Models.Admin.CompanyEditViewModel
+@{
+    ViewData["Title"] = "Tambah Perusahaan";
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <p class="text-uppercase text-secondary small mb-1">Pengaturan</p>
+            <h2 class="mb-0">Tambah Perusahaan</h2>
+        </div>
+        <a class="btn btn-outline-secondary" asp-action="Companies">Kembali</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" asp-action="CreateCompany">
+                @Html.AntiForgeryToken()
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="CompanyName" class="form-label"></label>
+                        <input asp-for="CompanyName" class="form-control" />
+                        <span class="text-danger" asp-validation-for="CompanyName"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CompanyTypeId" class="form-label"></label>
+                        <select asp-for="CompanyTypeId" class="form-select" asp-items="Model.CompanyTypeOptions"></select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ParentCompanyId" class="form-label"></label>
+                        <select asp-for="ParentCompanyId" class="form-select" asp-items="Model.ParentCompanyOptions">
+                            <option value="">--</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-center">
+                        <div class="form-check mt-4">
+                            <input asp-for="IsActive" class="form-check-input" />
+                            <label asp-for="IsActive" class="form-check-label"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

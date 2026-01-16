@@ -1,0 +1,384 @@
+@model one_db_mitra.Models.Auth.LoginViewModel
+@{
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+    var activeMenuCount = (int?)ViewBag.ActiveMenuCount ?? 0;
+    var activeUserCount = (int?)ViewBag.ActiveUserCount ?? 0;
+    var activeCompanyCount = (int?)ViewBag.ActiveCompanyCount ?? 0;
+    var activeDepartmentCount = (int?)ViewBag.ActiveDepartmentCount ?? 0;
+    var activeSessionCount = (int?)ViewBag.ActiveSessionCount ?? 0;
+    var setting = ViewBag.Setting as one_db_mitra.Models.Db.tbl_m_setting_aplikasi;
+    var appName = setting?.nama_aplikasi ?? "One DB Mitra";
+    var headerName = setting?.nama_header ?? "Konsol Administrasi";
+    var logoUrl = setting?.logo_url;
+}
+
+<div class="login-wrapper font-sans">
+    <div class="row no-gutters h-100">
+        <div class="col-lg-8 d-none d-lg-flex flex-column justify-content-between position-relative overflow-hidden text-white p-6">
+            <div class="video-bg-container">
+                <video autoplay muted loop playsinline class="video-bg-element">
+                    <source src="~/Assets/video/login.mp4" type="video/mp4" />
+                </video>
+                <div class="video-overlay-evolution"></div>
+                <div class="bg-pattern-grid"></div>
+            </div>
+
+            <div class="position-relative z-index-10 animate-fade-down">
+                <div class="d-inline-flex align-items-center mb-3 glass-brand-pill pr-4">
+                    @if (!string.IsNullOrWhiteSpace(logoUrl))
+                    {
+                        <img src="@logoUrl" alt="Logo" class="brand-logo-img mr-3" />
+                    }
+                    else
+                    {
+                        <div class="brand-logo-icon mr-3">
+                            <i class="fas fa-cube"></i>
+                        </div>
+                    }
+                    <div>
+                        <h5 class="font-weight-bold mb-0 text-white tracking-wide" style="font-size: 1rem;">@appName</h5>
+                        <span class="tiny text-cyan text-uppercase tracking-widest font-weight-bold" style="font-size: 0.65rem;">@headerName</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="brand-content position-relative z-index-10 pl-2" style="max-width: 750px;">
+                <div class="mb-4 animate-stagger-1">
+                    <span class="badge-evolution">
+                        <i class="fas fa-code-branch mr-2"></i>v0.2 STABLE
+                    </span>
+                </div>
+
+                <h1 class="display-4 font-weight-800 mb-4 animate-stagger-2 text-shadow-xl" style="line-height: 1.05; letter-spacing: -1px;">
+                    @appName <br />
+                    <span class="text-gradient-evolution">@headerName</span>
+                </h1>
+
+                <p class="lead text-white-80 mb-5 animate-stagger-3 font-light text-shadow-sm" style="max-width: 550px; font-size: 1.15rem;">
+                    Sistem integrasi data karyawan dan mitra yang dirancang untuk memastikan konsistensi, transparansi, dan kemudahan akses informasi.
+                </p>
+
+                <div class="d-flex flex-wrap gap-4 animate-stagger-4">
+                    <div class="stat-pill">
+                        <div class="stat-icon"><i class="fas fa-network-wired"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-value">@activeMenuCount</span>
+                            <span class="stat-label">Modul Operasional</span>
+                        </div>
+                    </div>
+                    <div class="stat-pill">
+                        <div class="stat-icon"><i class="fas fa-database"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-value">@activeDepartmentCount</span>
+                            <span class="stat-label">Master Data</span>
+                        </div>
+                    </div>
+                    <div class="stat-pill" id="onlineUserPill">
+                        <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="onlineUserCount">@activeSessionCount</span>
+                            <span class="stat-label">User Online</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="position-relative z-index-10 animate-stagger-5">
+                <div class="glass-bar d-inline-flex align-items-center pr-4">
+                    <div class="status-dot-container mx-3">
+                        <div class="status-dot"></div>
+                        <div class="status-pulse"></div>
+                    </div>
+                    <div class="d-flex flex-column justify-content-center mr-4 border-right border-white-10 pr-4">
+                        <span class="tiny font-weight-bold text-white tracking-wide">SYSTEM ONLINE</span>
+                        <span class="tiny text-cyan">@DateTime.Now.ToString("dd MMM yyyy")</span>
+                    </div>
+                    <div class="tiny text-white-50 ml-2">Menunggu koneksi...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 bg-white d-flex flex-column position-relative h-100 shadow-left-lg">
+            <div class="position-absolute top-0 right-0 p-4">
+                <div class="d-flex align-items-center text-muted-light">
+                    <i class="fas fa-shield-alt mr-2 text-success"></i> <span class="tiny font-weight-bold text-secondary">SECURE ACCESS</span>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column justify-content-center flex-grow-1 px-5 animate-fade-up">
+                <div class="login-form-container mx-auto w-100" style="max-width: 400px;">
+                    <div class="mb-5">
+                        <div class="d-inline-block p-3 rounded-lg bg-light mb-3">
+                            <i class="fas fa-fingerprint fa-2x text-dark"></i>
+                        </div>
+                        <h3 class="font-weight-800 text-dark mb-1 tracking-tight">Selamat Datang</h3>
+                        <p class="text-muted small">Masuk ke dashboard @appName.</p>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger">@Model.ErrorMessage</div>
+                    }
+
+                    <form method="post" asp-action="Login" asp-controller="Account">
+                        @Html.AntiForgeryToken()
+
+                        <div class="form-group mb-4">
+                            <label asp-for="Username" class="input-label"></label>
+                            <div class="input-group-evolution">
+                                <span class="input-group-icon"><i class="far fa-id-card"></i></span>
+                                <input asp-for="Username" class="form-control input-evolution" autocomplete="username" />
+                            </div>
+                            <span class="text-danger" asp-validation-for="Username"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="Password" class="input-label"></label>
+                            <div class="input-group-evolution">
+                                <span class="input-group-icon"><i class="fas fa-lock"></i></span>
+                                <input asp-for="Password" class="form-control input-evolution" autocomplete="current-password" />
+                            </div>
+                            <span class="text-danger" asp-validation-for="Password"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check remember-check">
+                                <input asp-for="RememberMe" class="form-check-input" />
+                                <label class="form-check-label" for="RememberMe">Ingat saya</label>
+                            </div>
+                            <a href="#" class="tiny font-weight-bold text-primary-evolution hover-underline">Lupa?</a>
+                        </div>
+
+                        <button type="submit" class="btn btn-evolution btn-block btn-lg shadow-lg">
+                            <span class="position-relative z-index-1">Sign In <i class="fas fa-arrow-right ml-2 tiny"></i></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="p-4 text-center border-top bg-light-subtle">
+                <p class="tiny text-muted mb-0 font-weight-500">&copy; @DateTime.Now.Year Sistem Integration Division &bull; PT Indexim Coalindo</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section styles {
+    <style>
+        :root {
+            --evo-navy: #0f172a;
+            --evo-dark: #1e293b;
+            --evo-blue: #16a34a;
+            --evo-cyan: #22c55e;
+            --evo-surface: #ffffff;
+            --evo-text: #334155;
+            --evo-border: #e2e8f0;
+            --evo-focus-glow: rgba(34, 197, 94, 0.25);
+        }
+
+        .font-sans { font-family: 'Manrope', sans-serif; }
+        .font-weight-800 { font-weight: 800; }
+        .font-weight-500 { font-weight: 500; }
+        .tracking-tight { letter-spacing: -0.03em; }
+        .tracking-wide { letter-spacing: 0.05em; }
+        .tracking-widest { letter-spacing: 0.15em; }
+        .tiny { font-size: 0.75rem; }
+        .text-shadow-xl { text-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        .text-shadow-sm { text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+
+        .login-wrapper { height: 100vh; overflow-x: hidden; background: var(--evo-surface); }
+        .p-6 { padding: 4rem; }
+
+        .video-bg-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: 0; background-color: var(--evo-navy);
+        }
+        .video-bg-element {
+            position: absolute; top: 50%; left: 50%; width: 100%; height: 100%;
+            object-fit: cover; transform: translate(-50%, -50%); opacity: 0.6;
+        }
+        .video-overlay-evolution {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.7) 50%, rgba(15, 83, 42, 0.85) 100%);
+            z-index: 1;
+        }
+        .bg-pattern-grid {
+            position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 2; mask-image: linear-gradient(to bottom, black 20%, transparent 100%);
+        }
+
+        .z-index-10 { z-index: 10; }
+        .shadow-left-lg { box-shadow: -10px 0 30px rgba(0,0,0,0.05); z-index: 20; }
+
+        .glass-brand-pill {
+            background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 10px;
+        }
+        .brand-logo-icon {
+            width: 42px; height: 42px; background: linear-gradient(135deg, var(--evo-cyan), var(--evo-blue));
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: white; box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3);
+        }
+        .brand-logo-img {
+            width: 42px;
+            height: 42px;
+            object-fit: contain;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 6px;
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3);
+        }
+        .text-gradient-evolution {
+            background: linear-gradient(90deg, #fff, #86efac);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .badge-evolution {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 8px 14px; border-radius: 999px;
+            font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+            text-transform: uppercase; color: #052e16;
+            background: linear-gradient(135deg, rgba(187, 247, 208, 0.95), rgba(134, 239, 172, 0.85));
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.25);
+            border: 1px solid rgba(134, 239, 172, 0.6);
+            backdrop-filter: blur(6px);
+        }
+
+        .stat-pill {
+            display: flex; align-items: center; gap: 0.75rem;
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(255,255,255,0.12);
+            padding: 14px 20px; border-radius: 18px;
+            backdrop-filter: blur(10px);
+            min-width: 190px; transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.35);
+        }
+        .stat-pill:hover {
+            transform: translateY(-4px);
+            background: rgba(15, 23, 42, 0.8);
+            border-color: rgba(134, 239, 172, 0.4);
+            box-shadow: 0 16px 36px rgba(15, 23, 42, 0.45);
+        }
+        .stat-icon {
+            width: 42px; height: 42px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.35), rgba(20, 83, 45, 0.9));
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: #dcfce7;
+            box-shadow: inset 0 0 0 1px rgba(134, 239, 172, 0.35);
+        }
+        .stat-info { display: flex; flex-direction: column; }
+        .stat-value { font-size: 1.35rem; font-weight: 800; line-height: 1; color: #ffffff; letter-spacing: -0.01em; }
+        .stat-label { font-size: 0.7rem; text-transform: uppercase; color: rgba(255,255,255,0.7); font-weight: 600; margin-top: 4px; letter-spacing: 0.12em; }
+
+        .glass-bar {
+            background: rgba(15, 23, 42, 0.4); border-radius: 50px; padding: 8px;
+            border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(8px);
+        }
+        .status-dot-container { position: relative; width: 10px; height: 10px; }
+        .status-dot { width: 100%; height: 100%; background: #22c55e; border-radius: 50%; position: relative; z-index: 2; }
+        .status-pulse {
+            position: absolute; inset: -4px; background: #22c55e; border-radius: 50%; opacity: 0.4;
+            animation: pulse 2s infinite; z-index: 1;
+        }
+        @@keyframes pulse { 0% { transform: scale(1); opacity: 0.4; } 100% { transform: scale(2.5); opacity: 0; } }
+        .text-cyan { color: #86efac; }
+
+        .input-label {
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 8px; margin-left: 2px;
+        }
+        .input-group-evolution {
+            position: relative; display: flex; align-items: center;
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        .input-group-evolution:focus-within {
+            background: #fff; border-color: var(--evo-blue);
+            box-shadow: 0 0 0 4px var(--evo-focus-glow);
+        }
+        .input-group-icon {
+            padding: 0 16px; color: #94a3b8; font-size: 1.1rem;
+        }
+        .input-evolution {
+            border: none; background: transparent !important; height: 54px; padding-left: 0;
+            font-size: 0.95rem; font-weight: 500; color: var(--evo-dark);
+            box-shadow: none !important;
+        }
+        .text-primary-evolution { color: var(--evo-blue); text-decoration: none; }
+        .hover-underline:hover { text-decoration: underline; }
+
+        .btn-evolution {
+            background: linear-gradient(135deg, var(--evo-navy) 0%, #1f2937 100%);
+            color: white; border: none; height: 54px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.85rem;
+            border-radius: 12px; transition: all 0.3s; position: relative; overflow: hidden;
+        }
+        .btn-evolution::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%); transition: transform 0.5s;
+        }
+        .btn-evolution:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(15, 23, 42, 0.2); color: white; }
+        .btn-evolution:hover::before { transform: translateX(100%); }
+
+        .remember-check {
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .remember-check .form-check-input {
+            width: 18px; height: 18px; margin-top: 0;
+            border: 1px solid #94a3b8; box-shadow: none;
+            accent-color: var(--evo-blue);
+        }
+        .remember-check .form-check-label {
+            color: #475569; font-weight: 600; font-size: 0.85rem;
+        }
+
+        .animate-fade-down { animation: fadeDown 0.8s ease-out forwards; opacity: 0; }
+        .animate-fade-up { animation: fadeUp 0.8s ease-out 0.2s forwards; opacity: 0; }
+        [class*="animate-stagger-"] { opacity: 0; animation: fadeRight 0.8s ease-out forwards; }
+        .animate-stagger-1 { animation-delay: 0.1s; }
+        .animate-stagger-2 { animation-delay: 0.2s; }
+        .animate-stagger-3 { animation-delay: 0.3s; }
+        .animate-stagger-4 { animation-delay: 0.4s; }
+        .animate-stagger-5 { animation-delay: 0.5s; }
+
+        @@keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @@keyframes fadeRight { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+
+        @@media (max-width: 991.98px) {
+            .p-6 { padding: 2rem; }
+            .login-wrapper { height: auto; min-height: 100vh; }
+        }
+
+        .bg-light-subtle { background-color: #f8fafc; }
+    </style>
+}
+
+@section scripts {
+    <script src="~/Assets/js/sb-admin-2.min.js"></script>
+    <script>
+        (function () {
+            const target = document.getElementById('onlineUserCount');
+            if (!target) {
+                return;
+            }
+
+            async function refreshOnline() {
+                try {
+                    const response = await fetch('/Account/OnlineCount');
+                    if (!response.ok) return;
+                    const data = await response.json();
+                    if (typeof data.count === 'number') {
+                        target.textContent = data.count;
+                    }
+                } catch {
+                    // ignore
+                }
+            }
+
+            setInterval(refreshOnline, 30000);
+        })();
+    </script>
+}

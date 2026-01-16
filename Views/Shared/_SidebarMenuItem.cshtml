@@ -1,0 +1,32 @@
+@model one_db_mitra.Models.Menu.MenuItem
+@{
+    var currentPath = ViewData["CurrentPath"] as string ?? string.Empty;
+    var isActive = !string.IsNullOrWhiteSpace(Model.UrlPath)
+        && Model.UrlPath != "#"
+        && currentPath.StartsWith(Model.UrlPath, System.StringComparison.OrdinalIgnoreCase);
+    var target = Model.OpenInNewTab ? "_blank" : "_self";
+    var rel = Model.OpenInNewTab ? "noopener" : string.Empty;
+}
+
+@if (!Model.IsHidden)
+{
+    <li class="sidebar-menu-item @(isActive ? "is-active" : "")">
+        <a class="sidebar-link" href="@Model.UrlPath" target="@target" rel="@rel">
+            <i class="@Model.IconKey"></i>
+            <span>@Model.DisplayName</span>
+        </a>
+        @if (Model.Children.Any())
+        {
+            <ul class="sidebar-submenu">
+                @foreach (var child in Model.Children)
+                {
+                    var childViewData = new ViewDataDictionary(ViewData)
+                    {
+                        ["CurrentPath"] = currentPath
+                    };
+                    @await Html.PartialAsync("_SidebarMenuItem", child, childViewData)
+                }
+            </ul>
+        }
+    </li>
+}

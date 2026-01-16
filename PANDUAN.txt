@@ -1,0 +1,43 @@
+PANDUAN ADMIN - ONE DB MITRA
+
+1) Menambahkan Menu
+- Buka modul: Pengaturan -> Manajemen Menu.
+- Tambah menu baru:
+  - Kode Menu: unik (contoh: ORG_EMP).
+  - Nama Tampil: nama yang muncul di sidebar.
+  - URL: rute halaman (contoh: /OrganizationAdmin/Departments).
+  - Menu Induk: pilih jika menu ini adalah submenu.
+  - Ikon: sesuaikan jika tersedia di UI.
+- Simpan, lalu pastikan Akses Menu diatur.
+
+2) Atur Akses Menu (Role/Perusahaan)
+- Buka modul: Pengaturan -> Akses Menu (Matrix).
+- Pilih role + perusahaan.
+- Centang menu yang boleh tampil.
+- Simpan.
+
+3) Menambahkan User
+- Buka modul: Pengaturan -> Manajemen User.
+- Klik Tambah.
+- Isi username, password, peran, perusahaan, departemen, section, jabatan.
+- Simpan, lalu cek menu sidebar sesuai peran.
+
+4) Menambah Struktur Organisasi
+- Perusahaan: Pengaturan -> Perusahaan.
+- Departemen: Pengaturan -> Departemen.
+- Section: Pengaturan -> Section.
+- Jabatan: Pengaturan -> Jabatan.
+Catatan: Dropdown di form akan terkunci sesuai scope login.
+
+5) Karyawan
+- Buka modul: Karyawan (input).
+- Isi data per tab (Data Personal, Kepegawaian, Tambahan, Sertifikasi, Lampiran).
+- Upload dokumen sesuai format yang diminta.
+- Untuk import massal: gunakan menu Upload Excel dan unduh template terlebih dulu.
+
+6) Notifikasi NIK
+- Jika NIK terdeteksi blacklist/pelanggaran, sistem menampilkan notifikasi saat input.
+
+Catatan Umum
+- Jika menu tidak muncul, cek mapping di tbl_r_menu_peran.
+- Jika data tidak bisa dihapus, biasanya masih dipakai di tabel lain.
