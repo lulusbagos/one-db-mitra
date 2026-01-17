@@ -51,6 +51,8 @@ public partial class OneDbMitraContext : DbContext
 
     public virtual DbSet<tbl_r_audit_log> tbl_r_audit_log { get; set; }
 
+    public virtual DbSet<tbl_r_pengguna_audit> tbl_r_pengguna_audit { get; set; }
+
     public virtual DbSet<tbl_r_karyawan_mutasi_request> tbl_r_karyawan_mutasi_request { get; set; }
 
     public virtual DbSet<tbl_r_karyawan_dokumen> tbl_r_karyawan_dokumen { get; set; }
@@ -68,6 +70,8 @@ public partial class OneDbMitraContext : DbContext
     public virtual DbSet<tbl_r_notifikasi_nik> tbl_r_notifikasi_nik { get; set; }
 
     public virtual DbSet<tbl_r_sesi_aktif> tbl_r_sesi_aktif { get; set; }
+
+    public virtual DbSet<vw_hirarki_perusahaan_4level> vw_hirarki_perusahaan_4level { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:PrimarySqlServer");
@@ -405,6 +409,19 @@ public partial class OneDbMitraContext : DbContext
             entity.Property(e => e.changed_at).HasDefaultValueSql("(sysutcdatetime())");
         });
 
+        modelBuilder.Entity<tbl_r_pengguna_audit>(entity =>
+        {
+            entity.HasKey(e => e.audit_id).HasName("PK_tbl_r_pengguna_audit");
+            entity.ToTable("tbl_r_pengguna_audit");
+
+            entity.Property(e => e.field_name).HasMaxLength(120);
+            entity.Property(e => e.old_value).HasMaxLength(1000);
+            entity.Property(e => e.new_value).HasMaxLength(1000);
+            entity.Property(e => e.changed_by).HasMaxLength(100);
+            entity.Property(e => e.source).HasMaxLength(30);
+            entity.Property(e => e.changed_at).HasDefaultValueSql("(sysutcdatetime())");
+        });
+
         modelBuilder.Entity<tbl_r_karyawan_pendidikan>(entity =>
         {
             entity.HasKey(e => e.pendidikan_id).HasName("PK_tbl_r_karyawan_pendidikan");
@@ -472,6 +489,20 @@ public partial class OneDbMitraContext : DbContext
             entity.Property(e => e.revoked_by).HasMaxLength(100);
             entity.Property(e => e.dibuat_pada).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.is_aktif).HasDefaultValue(true);
+        });
+
+        modelBuilder.Entity<vw_hirarki_perusahaan_4level>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToView("vw_hirarki_perusahaan_4level");
+            entity.Property(e => e.id_owner).HasColumnName("id_owner");
+            entity.Property(e => e.owner).HasColumnName("owner").HasMaxLength(200);
+            entity.Property(e => e.id_main_contractor).HasColumnName("id_main_contractor");
+            entity.Property(e => e.main_contractor).HasColumnName("main_contractor").HasMaxLength(200);
+            entity.Property(e => e.id_sub_contractor).HasColumnName("id_sub_contractor");
+            entity.Property(e => e.sub_contractor).HasColumnName("sub_contractor").HasMaxLength(200);
+            entity.Property(e => e.id_vendor).HasColumnName("id_vendor");
+            entity.Property(e => e.vendor).HasColumnName("vendor").HasMaxLength(200);
         });
 
         OnModelCreatingPartial(modelBuilder);

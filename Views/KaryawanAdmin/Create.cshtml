@@ -1,6 +1,10 @@
 @model one_db_mitra.Models.Admin.KaryawanCreateViewModel
 @{
     ViewData["Title"] = "Input Data Karyawan";
+    int? lockCompanyId = ViewBag.LockCompanyId as int?;
+    int? lockDepartmentId = ViewBag.LockDepartmentId as int?;
+    int? lockSectionId = ViewBag.LockSectionId as int?;
+    int? lockPositionId = ViewBag.LockPositionId as int?;
 }
 
 <div class="ik-hero">
@@ -199,27 +203,109 @@
             <div class="row g-3">
                 <div class="col-md-4">
                     <label asp-for="CompanyId" class="form-label ik-required"></label>
-                    <select asp-for="CompanyId" class="form-select js-company-select" asp-items="Model.CompanyOptions" id="companySelect" data-placeholder="Pilih perusahaan">
-                        <option value="">--</option>
-                    </select>
+                    @if (lockCompanyId.HasValue && lockCompanyId.Value > 0)
+                    {
+                        <input type="hidden" name="CompanyId" value="@lockCompanyId.Value" />
+                    }
+                    @if (lockCompanyId.HasValue && lockCompanyId.Value > 0)
+                    {
+                        <select asp-for="CompanyId"
+                                class="form-select js-company-select"
+                                asp-items="Model.CompanyOptions"
+                                id="companySelect"
+                                data-placeholder="Pilih perusahaan"
+                                disabled="disabled">
+                            <option value="">--</option>
+                        </select>
+                    }
+                    else
+                    {
+                        <select asp-for="CompanyId"
+                                class="form-select js-company-select"
+                                asp-items="Model.CompanyOptions"
+                                id="companySelect"
+                                data-placeholder="Pilih perusahaan">
+                            <option value="">--</option>
+                        </select>
+                    }
                 </div>
                 <div class="col-md-4">
                     <label asp-for="DepartmentId" class="form-label"></label>
-                    <select asp-for="DepartmentId" class="form-select" id="departmentSelect" data-selected="@Model.DepartmentId">
-                        <option value="">--</option>
-                    </select>
+                    @if (lockDepartmentId.HasValue && lockDepartmentId.Value > 0)
+                    {
+                        <input type="hidden" name="DepartmentId" value="@lockDepartmentId.Value" />
+                    }
+                    @if (lockDepartmentId.HasValue && lockDepartmentId.Value > 0)
+                    {
+                        <select asp-for="DepartmentId"
+                                class="form-select"
+                                id="departmentSelect"
+                                data-selected="@Model.DepartmentId"
+                                disabled="disabled">
+                            <option value="">--</option>
+                        </select>
+                    }
+                    else
+                    {
+                        <select asp-for="DepartmentId"
+                                class="form-select"
+                                id="departmentSelect"
+                                data-selected="@Model.DepartmentId">
+                            <option value="">--</option>
+                        </select>
+                    }
                 </div>
                 <div class="col-md-4">
                     <label asp-for="SectionId" class="form-label"></label>
-                    <select asp-for="SectionId" class="form-select" id="sectionSelect" data-selected="@Model.SectionId">
-                        <option value="">--</option>
-                    </select>
+                    @if (lockSectionId.HasValue && lockSectionId.Value > 0)
+                    {
+                        <input type="hidden" name="SectionId" value="@lockSectionId.Value" />
+                    }
+                    @if (lockSectionId.HasValue && lockSectionId.Value > 0)
+                    {
+                        <select asp-for="SectionId"
+                                class="form-select"
+                                id="sectionSelect"
+                                data-selected="@Model.SectionId"
+                                disabled="disabled">
+                            <option value="">--</option>
+                        </select>
+                    }
+                    else
+                    {
+                        <select asp-for="SectionId"
+                                class="form-select"
+                                id="sectionSelect"
+                                data-selected="@Model.SectionId">
+                            <option value="">--</option>
+                        </select>
+                    }
                 </div>
                 <div class="col-md-4">
                     <label asp-for="PositionId" class="form-label"></label>
-                    <select asp-for="PositionId" class="form-select" id="positionSelect" data-selected="@Model.PositionId">
-                        <option value="">--</option>
-                    </select>
+                    @if (lockPositionId.HasValue && lockPositionId.Value > 0)
+                    {
+                        <input type="hidden" name="PositionId" value="@lockPositionId.Value" />
+                    }
+                    @if (lockPositionId.HasValue && lockPositionId.Value > 0)
+                    {
+                        <select asp-for="PositionId"
+                                class="form-select"
+                                id="positionSelect"
+                                data-selected="@Model.PositionId"
+                                disabled="disabled">
+                            <option value="">--</option>
+                        </select>
+                    }
+                    else
+                    {
+                        <select asp-for="PositionId"
+                                class="form-select"
+                                id="positionSelect"
+                                data-selected="@Model.PositionId">
+                            <option value="">--</option>
+                        </select>
+                    }
                 </div>
                 <div class="col-md-4">
                     <label asp-for="NoAcr" class="form-label"></label>

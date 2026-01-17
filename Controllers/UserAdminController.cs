@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using one_db_mitra.Data;
 using one_db_mitra.Models.Admin;
+using one_db_mitra.Services.CompanyHierarchy;
 
 namespace one_db_mitra.Controllers
 {
@@ -18,12 +19,14 @@ namespace one_db_mitra.Controllers
         private readonly OneDbMitraContext _context;
         private readonly Services.Audit.AuditLogger _auditLogger;
         private readonly Services.Menu.MenuProfileService _menuProfileService;
+        private readonly CompanyHierarchyService _companyHierarchyService;
 
-        public UserAdminController(OneDbMitraContext context, Services.Audit.AuditLogger auditLogger, Services.Menu.MenuProfileService menuProfileService)
+        public UserAdminController(OneDbMitraContext context, Services.Audit.AuditLogger auditLogger, Services.Menu.MenuProfileService menuProfileService, CompanyHierarchyService companyHierarchyService)
         {
             _context = context;
             _auditLogger = auditLogger;
             _menuProfileService = menuProfileService;
+            _companyHierarchyService = companyHierarchyService;
         }
 
         [HttpGet]
@@ -36,9 +39,9 @@ namespace one_db_mitra.Controllers
                 baseQuery = baseQuery.Where(user => user.is_aktif);
             }
 
-            if (scope.CompanyId > 0)
+            if (scope.AllowedCompanyIds.Count > 0)
             {
-                baseQuery = baseQuery.Where(user => user.perusahaan_id == scope.CompanyId);
+                baseQuery = baseQuery.Where(user => scope.AllowedCompanyIds.Contains(user.perusahaan_id));
             }
 
             if (scope.IsDepartmentAdmin)
@@ -81,6 +84,7 @@ namespace one_db_mitra.Controllers
                                    UserId = user.pengguna_id,
                                    Username = user.username ?? string.Empty,
                                    FullName = user.nama_lengkap ?? string.Empty,
+                                   CompanyId = user.perusahaan_id,
                                    CompanyName = company.nama_perusahaan ?? string.Empty,
                                    RoleName = string.Empty,
                                    PrimaryRoleId = user.peran_id,
@@ -120,6 +124,21 @@ namespace one_db_mitra.Controllers
                 {
                     item.RoleName = "-";
                 }
+            }
+
+            var hierarchyLookup = await _companyHierarchyService.BuildHierarchyLookupAsync(cancellationToken);
+            foreach (var item in users)
+            {
+                if (!hierarchyLookup.TryGetValue(item.CompanyId, out var badge))
+                {
+                    continue;
+                }
+
+                item.HierarchyOwner = badge.Owner;
+                item.HierarchyMainContractor = badge.MainContractor;
+                item.HierarchySubContractor = badge.SubContractor;
+                item.HierarchyVendor = badge.Vendor;
+                item.HierarchyLevel = badge.LevelIndex;
             }
 
             System.Collections.Generic.List<RoleListItem> roles;
@@ -326,6 +345,114 @@ namespace one_db_mitra.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Detail(int id, CancellationToken cancellationToken)
+        {
+            var scope = await BuildAccessScopeAsync(cancellationToken);
+            var user = await _context.tbl_m_pengguna.AsNoTracking()
+                .FirstOrDefaultAsync(u => u.pengguna_id == id, cancellationToken);
+
+            if (user is null)
+            {
+                return NotFound();
+            }
+
+            if (!await CanManageUserAsync(user, scope, cancellationToken))
+            {
+                SetAlert("Tidak memiliki akses ke user ini.", "warning");
+                return RedirectToAction(nameof(Index));
+            }
+
+            var companyName = await _context.tbl_m_perusahaan.AsNoTracking()
+                .Where(c => c.perusahaan_id == user.perusahaan_id)
+                .Select(c => c.nama_perusahaan)
+                .FirstOrDefaultAsync(cancellationToken) ?? "-";
+
+            var departmentName = user.departemen_id.HasValue
+                ? await _context.tbl_m_departemen.AsNoTracking()
+                    .Where(d => d.departemen_id == user.departemen_id)
+                    .Select(d => d.nama_departemen)
+                    .FirstOrDefaultAsync(cancellationToken)
+                : null;
+
+            var sectionName = user.seksi_id.HasValue
+                ? await _context.tbl_m_seksi.AsNoTracking()
+                    .Where(s => s.seksi_id == user.seksi_id)
+                    .Select(s => s.nama_seksi)
+                    .FirstOrDefaultAsync(cancellationToken)
+                : null;
+
+            var positionName = user.jabatan_id.HasValue
+                ? await _context.tbl_m_jabatan.AsNoTracking()
+                    .Where(p => p.jabatan_id == user.jabatan_id)
+                    .Select(p => p.nama_jabatan)
+                    .FirstOrDefaultAsync(cancellationToken)
+                : null;
+
+            var roleNames = await (from rel in _context.tbl_r_pengguna_peran.AsNoTracking()
+                                   join role in _context.tbl_m_peran.AsNoTracking() on rel.peran_id equals role.peran_id
+                                   where rel.pengguna_id == user.pengguna_id && rel.is_aktif
+                                   select role.nama_peran)
+                .Where(name => name != null)
+                .ToListAsync(cancellationToken);
+
+            if (roleNames.Count == 0 && user.peran_id > 0)
+            {
+                var fallback = await _context.tbl_m_peran.AsNoTracking()
+                    .Where(r => r.peran_id == user.peran_id)
+                    .Select(r => r.nama_peran)
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (!string.IsNullOrWhiteSpace(fallback))
+                {
+                    roleNames.Add(fallback);
+                }
+            }
+
+            var auditTrail = await _context.tbl_r_pengguna_audit.AsNoTracking()
+                .Where(a => a.pengguna_id == user.pengguna_id)
+                .OrderByDescending(a => a.changed_at)
+                .Select(a => new UserAuditItem
+                {
+                    FieldName = a.field_name,
+                    OldValue = a.old_value,
+                    NewValue = a.new_value,
+                    ChangedAt = a.changed_at,
+                    ChangedBy = a.changed_by,
+                    Source = a.source
+                })
+                .ToListAsync(cancellationToken);
+
+            var viewModel = new UserDetailViewModel
+            {
+                UserId = user.pengguna_id,
+                Username = user.username ?? string.Empty,
+                FullName = user.nama_lengkap ?? string.Empty,
+                Email = user.email,
+                CompanyId = user.perusahaan_id,
+                CompanyName = companyName ?? "-",
+                RoleName = roleNames.Count > 0 ? string.Join(", ", roleNames) : "-",
+                DepartmentName = departmentName ?? "-",
+                SectionName = sectionName ?? "-",
+                PositionName = positionName ?? "-",
+                IsActive = user.is_aktif,
+                CreatedAt = user.dibuat_pada,
+                UpdatedAt = user.diubah_pada,
+                AuditTrail = auditTrail
+            };
+
+            var hierarchyLookup = await _companyHierarchyService.BuildHierarchyLookupAsync(cancellationToken);
+            if (hierarchyLookup.TryGetValue(viewModel.CompanyId, out var badge))
+            {
+                viewModel.HierarchyOwner = badge.Owner;
+                viewModel.HierarchyMainContractor = badge.MainContractor;
+                viewModel.HierarchySubContractor = badge.SubContractor;
+                viewModel.HierarchyVendor = badge.Vendor;
+                viewModel.HierarchyLevel = badge.LevelIndex;
+            }
+
+            return View(viewModel);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UserEditViewModel model, CancellationToken cancellationToken)
@@ -379,6 +506,26 @@ namespace one_db_mitra.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            var oldRoleIds = await _context.tbl_r_pengguna_peran.AsNoTracking()
+                .Where(rel => rel.pengguna_id == user.pengguna_id && rel.is_aktif)
+                .Select(rel => rel.peran_id)
+                .ToListAsync(cancellationToken);
+            if (oldRoleIds.Count == 0 && user.peran_id > 0)
+            {
+                oldRoleIds.Add(user.peran_id);
+            }
+
+            var oldUsername = user.username;
+            var oldPassword = user.kata_sandi;
+            var oldFullName = user.nama_lengkap;
+            var oldEmail = user.email;
+            var oldCompanyId = user.perusahaan_id;
+            var oldRoleId = user.peran_id;
+            var oldDepartmentId = user.departemen_id;
+            var oldSectionId = user.seksi_id;
+            var oldPositionId = user.jabatan_id;
+            var oldIsActive = user.is_aktif;
+
             model.RoleId = await GetPrimaryRoleIdAsync(model.RoleIds, model.RoleId, cancellationToken);
             var passwordChanged = user.kata_sandi != model.Password;
             user.username = model.Username.Trim();
@@ -393,8 +540,33 @@ namespace one_db_mitra.Controllers
             user.is_aktif = model.IsActive;
             user.diubah_pada = DateTime.UtcNow;
 
+            var auditItems = new List<Models.Db.tbl_r_pengguna_audit>();
+            var changedBy = User.Identity?.Name;
+            var changedAt = DateTime.UtcNow;
+
+            TrackUserAuditChange(auditItems, user.pengguna_id, "username", oldUsername, user.username, changedBy, changedAt, "edit");
+            TrackUserAuditChange(auditItems, user.pengguna_id, "kata_sandi", oldPassword, user.kata_sandi, changedBy, changedAt, "edit");
+            TrackUserAuditChange(auditItems, user.pengguna_id, "nama_lengkap", oldFullName, user.nama_lengkap, changedBy, changedAt, "edit");
+            TrackUserAuditChange(auditItems, user.pengguna_id, "email", oldEmail, user.email, changedBy, changedAt, "edit");
+            TrackUserAuditChange(auditItems, user.pengguna_id, "perusahaan_id", oldCompanyId, user.perusahaan_id, changedBy, changedAt, "edit");
+            TrackUserAuditChange(auditItems, user.pengguna_id, "peran_id", oldRoleId, user.peran_id, changedBy, changedAt, "edit");
+            TrackUserAuditChange(auditItems, user.pengguna_id, "departemen_id", oldDepartmentId, user.departemen_id, changedBy, changedAt, "edit");
+            TrackUserAuditChange(auditItems, user.pengguna_id, "seksi_id", oldSectionId, user.seksi_id, changedBy, changedAt, "edit");
+            TrackUserAuditChange(auditItems, user.pengguna_id, "jabatan_id", oldPositionId, user.jabatan_id, changedBy, changedAt, "edit");
+            TrackUserAuditChange(auditItems, user.pengguna_id, "is_aktif", oldIsActive, user.is_aktif, changedBy, changedAt, "edit");
+
+            var newRoleIds = model.RoleIds?.Distinct().OrderBy(id => id).ToList() ?? new List<int>();
+            var oldRoleKey = string.Join(",", oldRoleIds.Distinct().OrderBy(id => id));
+            var newRoleKey = string.Join(",", newRoleIds);
+            TrackUserAuditChange(auditItems, user.pengguna_id, "role_ids", oldRoleKey, newRoleKey, changedBy, changedAt, "edit");
+
             await _context.SaveChangesAsync(cancellationToken);
             await UpsertUserRolesAsync(user.pengguna_id, model.RoleIds, cancellationToken);
+            if (auditItems.Count > 0)
+            {
+                _context.tbl_r_pengguna_audit.AddRange(auditItems);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
             if (passwordChanged)
             {
                 await QueuePasswordResetEmailAsync(user, cancellationToken);
@@ -550,8 +722,20 @@ namespace one_db_mitra.Controllers
         [HttpGet]
         public async Task<IActionResult> SectionsByDepartment(int departmentId, CancellationToken cancellationToken)
         {
-            var sections = await _context.tbl_m_seksi.AsNoTracking()
-                .Where(s => s.departemen_id == departmentId && s.is_aktif == true)
+            var scope = await BuildAccessScopeAsync(cancellationToken);
+            if (scope.IsDepartmentAdmin && scope.DepartmentId.HasValue && departmentId != scope.DepartmentId.Value)
+            {
+                return Json(Array.Empty<object>());
+            }
+
+            var sectionsQuery = _context.tbl_m_seksi.AsNoTracking()
+                .Where(s => s.departemen_id == departmentId && s.is_aktif == true);
+            if (scope.AllowedCompanyIds.Count > 0)
+            {
+                sectionsQuery = sectionsQuery.Where(s => s.perusahaan_id.HasValue && scope.AllowedCompanyIds.Contains(s.perusahaan_id.Value));
+            }
+
+            var sections = await sectionsQuery
                 .OrderBy(s => s.nama_seksi)
                 .Select(s => new { id = s.seksi_id, name = s.nama_seksi })
                 .ToListAsync(cancellationToken);
@@ -562,8 +746,25 @@ namespace one_db_mitra.Controllers
         [HttpGet]
         public async Task<IActionResult> PositionsBySection(int sectionId, CancellationToken cancellationToken)
         {
-            var positions = await _context.tbl_m_jabatan.AsNoTracking()
-                .Where(p => p.seksi_id == sectionId && p.is_aktif == true)
+            var scope = await BuildAccessScopeAsync(cancellationToken);
+            if (scope.IsDepartmentAdmin && scope.DepartmentId.HasValue)
+            {
+                var allowedSection = await _context.tbl_m_seksi.AsNoTracking()
+                    .AnyAsync(s => s.seksi_id == sectionId && s.departemen_id == scope.DepartmentId.Value, cancellationToken);
+                if (!allowedSection)
+                {
+                    return Json(Array.Empty<object>());
+                }
+            }
+
+            var positionsQuery = _context.tbl_m_jabatan.AsNoTracking()
+                .Where(p => p.seksi_id == sectionId && p.is_aktif == true);
+            if (scope.AllowedCompanyIds.Count > 0)
+            {
+                positionsQuery = positionsQuery.Where(p => p.perusahaan_id.HasValue && scope.AllowedCompanyIds.Contains(p.perusahaan_id.Value));
+            }
+
+            var positions = await positionsQuery
                 .OrderBy(p => p.nama_jabatan)
                 .Select(p => new { id = p.jabatan_id, name = p.nama_jabatan })
                 .ToListAsync(cancellationToken);
@@ -574,8 +775,15 @@ namespace one_db_mitra.Controllers
         [HttpGet]
         public async Task<IActionResult> DepartmentsByCompany(int companyId, CancellationToken cancellationToken)
         {
+            var scope = await BuildAccessScopeAsync(cancellationToken);
+            if (scope.AllowedCompanyIds.Count > 0 && !scope.AllowedCompanyIds.Contains(companyId))
+            {
+                return Json(Array.Empty<object>());
+            }
+
             var departments = await _context.tbl_m_departemen.AsNoTracking()
                 .Where(d => d.perusahaan_id == companyId && d.is_aktif == true)
+                .Where(d => !scope.IsDepartmentAdmin || d.departemen_id == scope.DepartmentId)
                 .OrderBy(d => d.nama_departemen)
                 .Select(d => new { id = d.departemen_id, name = d.nama_departemen })
                 .ToListAsync(cancellationToken);
@@ -586,7 +794,8 @@ namespace one_db_mitra.Controllers
         private async Task PopulateOptionsAsync(UserEditViewModel model, UserAccessScope scope, CancellationToken cancellationToken)
         {
             var companies = await _context.tbl_m_perusahaan.AsNoTracking()
-                .Where(c => (c.is_aktif || c.perusahaan_id == model.CompanyId) && (scope.CompanyId <= 0 || c.perusahaan_id == scope.CompanyId))
+                .Where(c => (c.is_aktif || c.perusahaan_id == model.CompanyId)
+                            && (scope.AllowedCompanyIds.Count == 0 || scope.AllowedCompanyIds.Contains(c.perusahaan_id)))
                 .OrderBy(c => c.nama_perusahaan)
                 .Select(c => new SelectListItem(c.nama_perusahaan, c.perusahaan_id.ToString()))
                 .ToListAsync(cancellationToken);
@@ -598,7 +807,10 @@ namespace one_db_mitra.Controllers
                 .ToListAsync(cancellationToken);
 
             var departments = await _context.tbl_m_departemen.AsNoTracking()
-                .Where(d => ((d.is_aktif == true) || d.departemen_id == model.DepartmentId) && (scope.IsDepartmentAdmin ? d.departemen_id == scope.DepartmentId : (scope.CompanyId <= 0 || d.perusahaan_id == scope.CompanyId)))
+                .Where(d => ((d.is_aktif == true) || d.departemen_id == model.DepartmentId)
+                            && (scope.IsDepartmentAdmin
+                                ? d.departemen_id == scope.DepartmentId
+                                : (scope.AllowedCompanyIds.Count == 0 || (d.perusahaan_id.HasValue && scope.AllowedCompanyIds.Contains(d.perusahaan_id.Value)))))
                 .OrderBy(d => d.nama_departemen)
                 .Select(d => new SelectListItem(d.nama_departemen, d.departemen_id.ToString()))
                 .ToListAsync(cancellationToken);
@@ -619,9 +831,9 @@ namespace one_db_mitra.Controllers
                     .Select(s => s.seksi_id);
                 positionsQuery = positionsQuery.Where(p => p.seksi_id.HasValue && sectionIds.Contains(p.seksi_id.Value));
             }
-            else if (scope.CompanyId > 0)
+            else if (scope.AllowedCompanyIds.Count > 0)
             {
-                positionsQuery = positionsQuery.Where(p => p.perusahaan_id == scope.CompanyId);
+                positionsQuery = positionsQuery.Where(p => p.perusahaan_id.HasValue && scope.AllowedCompanyIds.Contains(p.perusahaan_id.Value));
             }
 
             var positions = await positionsQuery
@@ -649,6 +861,7 @@ namespace one_db_mitra.Controllers
                 .FirstOrDefaultAsync(cancellationToken);
 
             var isDepartmentAdmin = departmentId.HasValue && departmentId.Value > 0;
+            var allowedCompanyIds = await _companyHierarchyService.GetDescendantCompanyIdsAsync(companyId, cancellationToken);
 
             HashSet<int> allowedRoleIds;
             if (roleId > 0 && !isDepartmentAdmin)
@@ -676,7 +889,8 @@ namespace one_db_mitra.Controllers
                 DepartmentId = departmentId,
                 IsDepartmentAdmin = isDepartmentAdmin,
                 CanManageRoles = roleLevel >= 4,
-                AllowedRoleIds = allowedRoleIds
+                AllowedRoleIds = allowedRoleIds,
+                AllowedCompanyIds = allowedCompanyIds
             };
         }
 
@@ -736,7 +950,7 @@ namespace one_db_mitra.Controllers
 
         private async Task<bool> CanManageUserAsync(Models.Db.tbl_m_pengguna user, UserAccessScope scope, CancellationToken cancellationToken)
         {
-            if (scope.CompanyId > 0 && user.perusahaan_id != scope.CompanyId)
+            if (scope.AllowedCompanyIds.Count > 0 && !scope.AllowedCompanyIds.Contains(user.perusahaan_id))
             {
                 return false;
             }
@@ -830,6 +1044,7 @@ namespace one_db_mitra.Controllers
             public bool IsDepartmentAdmin { get; set; }
             public bool CanManageRoles { get; set; }
             public HashSet<int> AllowedRoleIds { get; set; } = new HashSet<int>();
+            public HashSet<int> AllowedCompanyIds { get; set; } = new HashSet<int>();
         }
 
         private async Task<bool> ValidateHierarchyAsync(UserEditViewModel model, CancellationToken cancellationToken)
@@ -1022,6 +1237,35 @@ namespace one_db_mitra.Controllers
 
             _context.tbl_m_email_notifikasi.Add(emailLog);
             await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        private static void TrackUserAuditChange(
+            ICollection<Models.Db.tbl_r_pengguna_audit> audits,
+            int userId,
+            string field,
+            object? oldValue,
+            object? newValue,
+            string? changedBy,
+            DateTime changedAt,
+            string source)
+        {
+            var oldText = oldValue?.ToString();
+            var newText = newValue?.ToString();
+            if (string.Equals(oldText, newText, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            audits.Add(new Models.Db.tbl_r_pengguna_audit
+            {
+                pengguna_id = userId,
+                field_name = field,
+                old_value = oldText,
+                new_value = newText,
+                changed_at = changedAt,
+                changed_by = changedBy,
+                source = source
+            });
         }
     }
 }

@@ -428,6 +428,47 @@ namespace one_db_mitra.Controllers
                 .ToListAsync(cancellationToken);
             var activityHeatmap = await BuildActivityHeatmapAsync(cancellationToken);
 
+            var approvalQuery = _context.tbl_r_karyawan_mutasi_request.AsNoTracking()
+                .Where(r => r.status == "pending" || r.status == "menunggu" || r.status == "request");
+            if (!isOwner && companyId > 0)
+            {
+                approvalQuery = approvalQuery.Where(r => r.perusahaan_asal_id == companyId || r.perusahaan_tujuan_id == companyId);
+            }
+
+            var approvals = await approvalQuery
+                .OrderByDescending(r => r.tanggal_pengajuan)
+                .Take(6)
+                .Select(r => new
+                {
+                    r.request_id,
+                    r.no_nik,
+                    r.karyawan_id,
+                    r.perusahaan_asal_id,
+                    r.perusahaan_tujuan_id,
+                    r.tanggal_pengajuan,
+                    r.status
+                })
+                .ToListAsync(cancellationToken);
+
+            var approvalCompanyIds = approvals.SelectMany(a => new[] { a.perusahaan_asal_id, a.perusahaan_tujuan_id }).Distinct().ToList();
+            var approvalCompanyMap = await _context.tbl_m_perusahaan.AsNoTracking()
+                .Where(c => approvalCompanyIds.Contains(c.perusahaan_id))
+                .ToDictionaryAsync(c => c.perusahaan_id, c => c.nama_perusahaan ?? "-", cancellationToken);
+
+            var approvalItems = approvals.Select(a =>
+            {
+                approvalCompanyMap.TryGetValue(a.perusahaan_asal_id, out var asalName);
+                approvalCompanyMap.TryGetValue(a.perusahaan_tujuan_id, out var tujuanName);
+                return new Models.Menu.ApprovalTaskItem
+                {
+                    Title = $"Mutasi {a.no_nik}",
+                    Description = $"{asalName ?? "-"} → {tujuanName ?? "-"}",
+                    DueAt = a.tanggal_pengajuan.AddDays(3),
+                    Status = a.status,
+                    Link = a.karyawan_id > 0 ? $"/KaryawanAdmin/Detail/{a.karyawan_id}" : null
+                };
+            }).ToList();
+
             return new MenuAdminViewModel
             {
                 MenuTree = tree,
@@ -453,7 +494,9 @@ namespace one_db_mitra.Controllers
                 StartupPage = startupPage,
                 CompanyHierarchy = hierarchy,
                 RecentAudits = recentAudits,
-                ActivityHeatmap = activityHeatmap
+                ActivityHeatmap = activityHeatmap,
+                PendingApprovalCount = approvalItems.Count,
+                PendingApprovals = approvalItems
             };
         }
 

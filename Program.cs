@@ -9,6 +9,7 @@ using System.Security.Claims;
 using one_db_mitra.Hubs;
 using one_db_mitra.Services.AppSetting;
 using one_db_mitra.Services.Email;
+using one_db_mitra.Services.CompanyHierarchy;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<AuditLogger>();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<AppSettingService>();
+builder.Services.AddScoped<CompanyHierarchyService>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {

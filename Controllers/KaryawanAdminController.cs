@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using one_db_mitra.Data;
 using one_db_mitra.Models.Admin;
+using one_db_mitra.Services.CompanyHierarchy;
 using ClosedXML.Excel;
 
 namespace one_db_mitra.Controllers
@@ -22,13 +23,15 @@ namespace one_db_mitra.Controllers
         private readonly OneDbMitraContext _context;
         private readonly Services.Audit.AuditLogger _auditLogger;
         private readonly IMemoryCache _cache;
+        private readonly CompanyHierarchyService _companyHierarchyService;
         private const string ImportCachePrefix = "karyawan-import::";
 
-        public KaryawanAdminController(OneDbMitraContext context, Services.Audit.AuditLogger auditLogger, IMemoryCache cache)
+        public KaryawanAdminController(OneDbMitraContext context, Services.Audit.AuditLogger auditLogger, IMemoryCache cache, CompanyHierarchyService companyHierarchyService)
         {
             _context = context;
             _auditLogger = auditLogger;
             _cache = cache;
+            _companyHierarchyService = companyHierarchyService;
         }
 
         [HttpGet]
@@ -36,9 +39,9 @@ namespace one_db_mitra.Controllers
         {
             var scope = await BuildKaryawanAccessScopeAsync(cancellationToken);
             var companiesQuery = _context.tbl_m_perusahaan.AsNoTracking().AsQueryable();
-            if (!scope.IsOwner && scope.CompanyId > 0)
+            if (scope.AllowedCompanyIds.Count > 0)
             {
-                companiesQuery = companiesQuery.Where(c => c.perusahaan_id == scope.CompanyId);
+                companiesQuery = companiesQuery.Where(c => scope.AllowedCompanyIds.Contains(c.perusahaan_id));
             }
 
             ViewBag.CompanyOptions = await companiesQuery
@@ -46,13 +49,15 @@ namespace one_db_mitra.Controllers
                 .Select(c => new SelectListItem
                 {
                     Value = c.perusahaan_id.ToString(),
-                    Text = c.nama_perusahaan ?? "-"
+                    Text = c.nama_perusahaan ?? "-",
+                    Selected = scope.CompanyId > 0 && c.perusahaan_id == scope.CompanyId
                 }).ToListAsync(cancellationToken);
 
             ViewBag.ActiveCount = 0;
             ViewBag.NonActiveCount = 0;
             ViewBag.ActiveOnly = activeOnly;
-            ViewBag.IsOwner = IsOwner();
+            ViewBag.IsOwner = scope.IsOwner;
+            SetScopeViewBag(scope);
             return View(Array.Empty<KaryawanListItem>());
         }
 
@@ -61,6 +66,12 @@ namespace one_db_mitra.Controllers
             string? search,
             [FromQuery(Name = "search[value]")] string? searchValue,
             int? companyId,
+            int? departmentId,
+            int? sectionId,
+            int? positionId,
+            string? statusType,
+            DateTime? dateFrom,
+            DateTime? dateTo,
             bool activeOnly = true,
             int page = 1,
             int pageSize = 20,
@@ -87,10 +98,56 @@ namespace one_db_mitra.Controllers
                 scopedQuery = scopedQuery.Where(k => k.perusahaan_id == companyId.Value);
             }
 
+            if (departmentId.HasValue && departmentId.Value > 0)
+            {
+                scopedQuery = scopedQuery.Where(k => k.departemen_id == departmentId.Value);
+            }
+
+            if (sectionId.HasValue && sectionId.Value > 0)
+            {
+                scopedQuery = scopedQuery.Where(k => k.seksi_id == sectionId.Value);
+            }
+
+            if (positionId.HasValue && positionId.Value > 0)
+            {
+                scopedQuery = scopedQuery.Where(k => k.jabatan_id == positionId.Value);
+            }
+
+            if (dateFrom.HasValue)
+            {
+                scopedQuery = scopedQuery.Where(k => k.tanggal_masuk >= dateFrom.Value.Date);
+            }
+
+            if (dateTo.HasValue)
+            {
+                var endDate = dateTo.Value.Date.AddDays(1).AddTicks(-1);
+                scopedQuery = scopedQuery.Where(k => k.tanggal_masuk <= endDate);
+            }
+
             var baseCountQuery = scopedQuery;
-            if (activeOnly)
+            if (string.IsNullOrWhiteSpace(statusType) && activeOnly)
             {
                 baseCountQuery = baseCountQuery.Where(k => k.status_aktif);
+            }
+
+            if (!string.IsNullOrWhiteSpace(statusType))
+            {
+                var normalized = statusType.Trim().ToLowerInvariant();
+                if (normalized == "active")
+                {
+                    baseCountQuery = baseCountQuery.Where(k => k.status_aktif);
+                }
+                else if (normalized == "nonaktif")
+                {
+                    baseCountQuery = baseCountQuery.Where(k => !k.status_aktif);
+                }
+                else if (normalized == "blacklist")
+                {
+                    var blacklistIds = _context.tbl_r_karyawan_status.AsNoTracking()
+                        .Where(s => s.status == "blacklist" && s.tanggal_selesai == null)
+                        .Select(s => s.karyawan_id);
+                    baseCountQuery = baseCountQuery.Where(k => blacklistIds.Contains(k.karyawan_id));
+                }
             }
 
             var activeCount = await scopedQuery.CountAsync(k => k.status_aktif, cancellationToken);
@@ -138,9 +195,29 @@ namespace one_db_mitra.Controllers
                             pos
                         };
 
-            if (activeOnly)
+            if (string.IsNullOrWhiteSpace(statusType) && activeOnly)
             {
                 query = query.Where(row => row.k.status_aktif);
+            }
+
+            if (!string.IsNullOrWhiteSpace(statusType))
+            {
+                var normalized = statusType.Trim().ToLowerInvariant();
+                if (normalized == "active")
+                {
+                    query = query.Where(row => row.k.status_aktif);
+                }
+                else if (normalized == "nonaktif")
+                {
+                    query = query.Where(row => !row.k.status_aktif);
+                }
+                else if (normalized == "blacklist")
+                {
+                    var blacklistIds = _context.tbl_r_karyawan_status.AsNoTracking()
+                        .Where(s => s.status == "blacklist" && s.tanggal_selesai == null)
+                        .Select(s => s.karyawan_id);
+                    query = query.Where(row => blacklistIds.Contains(row.k.karyawan_id));
+                }
             }
 
             var termValue = !string.IsNullOrWhiteSpace(searchValue) ? searchValue : search;
@@ -169,6 +246,7 @@ namespace one_db_mitra.Controllers
                     KaryawanId = row.k.karyawan_id,
                     NoNik = row.k.no_nik,
                     NamaLengkap = row.p.nama_lengkap,
+                    CompanyId = row.company.perusahaan_id,
                     Email = row.p.email_pribadi,
                     Phone = row.p.hp_1,
                     CompanyName = row.company.nama_perusahaan ?? string.Empty,
@@ -229,6 +307,21 @@ namespace one_db_mitra.Controllers
                 }
             }
 
+            var hierarchyLookup = await _companyHierarchyService.BuildHierarchyLookupAsync(cancellationToken);
+            foreach (var item in data)
+            {
+                if (!hierarchyLookup.TryGetValue(item.CompanyId, out var badge))
+                {
+                    continue;
+                }
+
+                item.HierarchyOwner = badge.Owner;
+                item.HierarchyMainContractor = badge.MainContractor;
+                item.HierarchySubContractor = badge.SubContractor;
+                item.HierarchyVendor = badge.Vendor;
+                item.HierarchyLevel = badge.LevelIndex;
+            }
+
             if (draw.HasValue)
             {
                 return Json(new
@@ -260,8 +353,11 @@ namespace one_db_mitra.Controllers
         [HttpGet]
         public async Task<IActionResult> Create(CancellationToken cancellationToken)
         {
+            var scope = await BuildKaryawanAccessScopeAsync(cancellationToken);
             var model = new KaryawanCreateViewModel();
-            await PopulateOptionsAsync(model, cancellationToken);
+            ApplyScopeToModel(model, scope);
+            await PopulateOptionsAsync(model, scope, cancellationToken);
+            SetScopeViewBag(scope);
             return View(model);
         }
 
@@ -1060,6 +1156,7 @@ namespace one_db_mitra.Controllers
                                       Kecamatan = p.kecamatan,
                                       Desa = p.desa,
                                       KodePos = p.kode_pos,
+                                      CompanyId = k.perusahaan_id,
                                       CompanyName = company.nama_perusahaan ?? string.Empty,
                                       DepartmentName = dept != null ? dept.nama_departemen ?? "-" : "-",
                                       SectionName = sec != null ? sec.nama_seksi ?? "-" : "-",
@@ -1213,7 +1310,7 @@ namespace one_db_mitra.Controllers
 
             ViewBag.FilterFrom = from;
             ViewBag.FilterTo = to;
-            ViewBag.IsOwner = IsOwner();
+            ViewBag.IsOwner = scope.IsOwner;
             ViewBag.IsBlacklisted = await IsNikBlacklistedAsync(header.NoNik, cancellationToken);
             ViewBag.LastNonaktifDate = await GetLatestNonaktifDateAsync(header.NoNik, cancellationToken);
 
@@ -1224,30 +1321,36 @@ namespace one_db_mitra.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(KaryawanCreateViewModel model, CancellationToken cancellationToken)
         {
+            var scope = await BuildKaryawanAccessScopeAsync(cancellationToken);
+            ApplyScopeToModel(model, scope);
             if (!ModelState.IsValid)
             {
-                await PopulateOptionsAsync(model, cancellationToken);
+                await PopulateOptionsAsync(model, scope, cancellationToken);
+                SetScopeViewBag(scope);
                 return View(model);
             }
 
-            if (await IsNikBlacklistedAsync(model.NoNik, cancellationToken) && !IsOwner())
+            if (await IsNikBlacklistedAsync(model.NoNik, cancellationToken) && !scope.IsOwner)
             {
                 ModelState.AddModelError(nameof(model.NoNik), "NIK terdeteksi blacklist dan tidak bisa diaktifkan.");
-                await PopulateOptionsAsync(model, cancellationToken);
+                await PopulateOptionsAsync(model, scope, cancellationToken);
+                SetScopeViewBag(scope);
                 return View(model);
             }
 
             if (model.NonaktifEnabled && string.IsNullOrWhiteSpace(model.NonaktifAlasan))
             {
                 ModelState.AddModelError(nameof(model.NonaktifAlasan), "Alasan nonaktif wajib diisi.");
-                await PopulateOptionsAsync(model, cancellationToken);
+                await PopulateOptionsAsync(model, scope, cancellationToken);
+                SetScopeViewBag(scope);
                 return View(model);
             }
 
             if (model.BlacklistEnabled && string.IsNullOrWhiteSpace(model.BlacklistAlasan))
             {
                 ModelState.AddModelError(nameof(model.BlacklistAlasan), "Alasan blacklist wajib diisi.");
-                await PopulateOptionsAsync(model, cancellationToken);
+                await PopulateOptionsAsync(model, scope, cancellationToken);
+                SetScopeViewBag(scope);
                 return View(model);
             }
 
@@ -1258,7 +1361,8 @@ namespace one_db_mitra.Controllers
                 if (ktp.Length != 16 || !ktp.All(char.IsDigit))
                 {
                     ModelState.AddModelError(nameof(model.NoKtp), "No KTP WNI harus 16 digit angka.");
-                    await PopulateOptionsAsync(model, cancellationToken);
+                    await PopulateOptionsAsync(model, scope, cancellationToken);
+                    SetScopeViewBag(scope);
                     return View(model);
                 }
             }
@@ -1267,7 +1371,8 @@ namespace one_db_mitra.Controllers
                 if (string.IsNullOrWhiteSpace(ktp) || !ktp.All(char.IsLetterOrDigit))
                 {
                     ModelState.AddModelError(nameof(model.NoKtp), "No paspor WNA harus huruf/angka.");
-                    await PopulateOptionsAsync(model, cancellationToken);
+                    await PopulateOptionsAsync(model, scope, cancellationToken);
+                    SetScopeViewBag(scope);
                     return View(model);
                 }
             }
@@ -1280,7 +1385,8 @@ namespace one_db_mitra.Controllers
                     ModelState.AddModelError(error.Field, error.Message);
                 }
 
-                await PopulateOptionsAsync(model, cancellationToken);
+                await PopulateOptionsAsync(model, scope, cancellationToken);
+                SetScopeViewBag(scope);
                 return View(model);
             }
 
@@ -1289,31 +1395,34 @@ namespace one_db_mitra.Controllers
             if (existsSameCompany)
             {
                 ModelState.AddModelError(nameof(model.NoNik), "NIK sudah terdaftar di perusahaan ini.");
-                await PopulateOptionsAsync(model, cancellationToken);
+                await PopulateOptionsAsync(model, scope, cancellationToken);
+                SetScopeViewBag(scope);
                 return View(model);
             }
 
             var idKaryawan = await GenerateKaryawanIdAsync(cancellationToken);
             var history = await GetNikHistoryAsync(model.NoNik, model.CompanyId, cancellationToken);
             var lastNonaktif = await GetLatestNonaktifDateAsync(model.NoNik, cancellationToken);
-            if (history.LastCompanyId.HasValue && lastNonaktif.HasValue && !IsOwner())
+            if (history.LastCompanyId.HasValue && lastNonaktif.HasValue && !scope.IsOwner)
             {
                 var diffDays = (DateTime.UtcNow.Date - lastNonaktif.Value.Date).TotalDays;
                 if (diffDays < 90)
                 {
                     ModelState.AddModelError(nameof(model.NoNik), "Pindah perusahaan minimal 3 bulan dari tanggal nonaktif/resign.");
-                    await PopulateOptionsAsync(model, cancellationToken);
+                    await PopulateOptionsAsync(model, scope, cancellationToken);
+                    SetScopeViewBag(scope);
                     return View(model);
                 }
             }
 
-            if (history.LastCompanyId.HasValue && !lastNonaktif.HasValue && !IsOwner())
+            if (history.LastCompanyId.HasValue && !lastNonaktif.HasValue && !scope.IsOwner)
             {
                 var approved = await HasApprovedMutasiAsync(model.NoNik, history.LastCompanyId.Value, model.CompanyId, cancellationToken);
                 if (!approved)
                 {
                     ModelState.AddModelError(nameof(model.NoNik), "Mutasi belum disetujui perusahaan asal. Ajukan mutasi terlebih dahulu.");
-                    await PopulateOptionsAsync(model, cancellationToken);
+                    await PopulateOptionsAsync(model, scope, cancellationToken);
+                    SetScopeViewBag(scope);
                     return View(model);
                 }
             }
@@ -1767,7 +1876,9 @@ namespace one_db_mitra.Controllers
                 })
                 .ToListAsync(cancellationToken);
 
-            await PopulateOptionsAsync(model, cancellationToken);
+            ApplyScopeToModel(model, scope);
+            await PopulateOptionsAsync(model, scope, cancellationToken);
+            SetScopeViewBag(scope);
             return View(model);
         }
 
@@ -1791,9 +1902,11 @@ namespace one_db_mitra.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            ApplyScopeToModel(model, scope);
             if (!ModelState.IsValid)
             {
-                await PopulateOptionsAsync(model, cancellationToken);
+                await PopulateOptionsAsync(model, scope, cancellationToken);
+                SetScopeViewBag(scope);
                 return View(model);
             }
 
@@ -1815,24 +1928,27 @@ namespace one_db_mitra.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (await IsNikBlacklistedAsync(karyawan.no_nik, cancellationToken) && !IsOwner())
+            if (await IsNikBlacklistedAsync(karyawan.no_nik, cancellationToken) && !scope.IsOwner)
             {
                 ModelState.AddModelError(nameof(model.NoNik), "NIK terdeteksi blacklist dan hanya Owner yang bisa mengubah status.");
-                await PopulateOptionsAsync(model, cancellationToken);
+                await PopulateOptionsAsync(model, scope, cancellationToken);
+                SetScopeViewBag(scope);
                 return View(model);
             }
 
             if (model.NonaktifEnabled && string.IsNullOrWhiteSpace(model.NonaktifAlasan))
             {
                 ModelState.AddModelError(nameof(model.NonaktifAlasan), "Alasan nonaktif wajib diisi.");
-                await PopulateOptionsAsync(model, cancellationToken);
+                await PopulateOptionsAsync(model, scope, cancellationToken);
+                SetScopeViewBag(scope);
                 return View(model);
             }
 
             if (model.BlacklistEnabled && string.IsNullOrWhiteSpace(model.BlacklistAlasan))
             {
                 ModelState.AddModelError(nameof(model.BlacklistAlasan), "Alasan blacklist wajib diisi.");
-                await PopulateOptionsAsync(model, cancellationToken);
+                await PopulateOptionsAsync(model, scope, cancellationToken);
+                SetScopeViewBag(scope);
                 return View(model);
             }
 
@@ -1843,7 +1959,8 @@ namespace one_db_mitra.Controllers
                 if (ktp.Length != 16 || !ktp.All(char.IsDigit))
                 {
                     ModelState.AddModelError(nameof(model.NoKtp), "No KTP WNI harus 16 digit angka.");
-                    await PopulateOptionsAsync(model, cancellationToken);
+                    await PopulateOptionsAsync(model, scope, cancellationToken);
+                    SetScopeViewBag(scope);
                     return View(model);
                 }
             }
@@ -1852,7 +1969,8 @@ namespace one_db_mitra.Controllers
                 if (string.IsNullOrWhiteSpace(ktp) || !ktp.All(char.IsLetterOrDigit))
                 {
                     ModelState.AddModelError(nameof(model.NoKtp), "No paspor WNA harus huruf/angka.");
-                    await PopulateOptionsAsync(model, cancellationToken);
+                    await PopulateOptionsAsync(model, scope, cancellationToken);
+                    SetScopeViewBag(scope);
                     return View(model);
                 }
             }
@@ -1865,7 +1983,8 @@ namespace one_db_mitra.Controllers
                     ModelState.AddModelError(error.Field, error.Message);
                 }
 
-                await PopulateOptionsAsync(model, cancellationToken);
+                await PopulateOptionsAsync(model, scope, cancellationToken);
+                SetScopeViewBag(scope);
                 return View(model);
             }
 
@@ -1980,7 +2099,7 @@ namespace one_db_mitra.Controllers
             var oldSectionId = karyawan.seksi_id;
             var oldPositionId = karyawan.jabatan_id;
             var oldStatusAktif = karyawan.status_aktif;
-            if (oldCompanyId != model.CompanyId && !IsOwner())
+            if (oldCompanyId != model.CompanyId && !scope.IsOwner)
             {
                 var lastNonaktif = await GetLatestNonaktifDateAsync(karyawan.no_nik, cancellationToken);
                 if (lastNonaktif.HasValue)
@@ -1989,7 +2108,8 @@ namespace one_db_mitra.Controllers
                     if (diffDays < 90)
                     {
                         ModelState.AddModelError(nameof(model.CompanyId), "Pindah perusahaan minimal 3 bulan dari tanggal nonaktif/resign.");
-                        await PopulateOptionsAsync(model, cancellationToken);
+                        await PopulateOptionsAsync(model, scope, cancellationToken);
+                        SetScopeViewBag(scope);
                         return View(model);
                     }
                 }
@@ -2200,7 +2320,8 @@ namespace one_db_mitra.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ClearBlacklist(int id, CancellationToken cancellationToken)
         {
-            if (!IsOwner())
+            var scope = await BuildKaryawanAccessScopeAsync(cancellationToken);
+            if (!scope.IsOwner)
             {
                 TempData["AlertMessage"] = "Hanya Owner yang dapat membuka blacklist.";
                 TempData["AlertType"] = "warning";
@@ -2364,8 +2485,15 @@ namespace one_db_mitra.Controllers
         [HttpGet]
         public async Task<IActionResult> DepartmentsByCompany(int companyId, CancellationToken cancellationToken)
         {
+            var scope = await BuildKaryawanAccessScopeAsync(cancellationToken);
+            if (scope.AllowedCompanyIds.Count > 0 && !scope.AllowedCompanyIds.Contains(companyId))
+            {
+                return Json(Array.Empty<object>());
+            }
+
             var departments = await _context.tbl_m_departemen.AsNoTracking()
                 .Where(d => d.perusahaan_id == companyId && d.is_aktif == true)
+                .Where(d => !scope.DepartmentId.HasValue || scope.DepartmentId.Value == 0 || d.departemen_id == scope.DepartmentId.Value)
                 .OrderBy(d => d.nama_departemen)
                 .Select(d => new { id = d.departemen_id, name = d.nama_departemen })
                 .ToListAsync(cancellationToken);
@@ -2376,8 +2504,31 @@ namespace one_db_mitra.Controllers
         [HttpGet]
         public async Task<IActionResult> SectionsByDepartment(int departmentId, CancellationToken cancellationToken)
         {
-            var sections = await _context.tbl_m_seksi.AsNoTracking()
-                .Where(s => s.departemen_id == departmentId && s.is_aktif == true)
+            var scope = await BuildKaryawanAccessScopeAsync(cancellationToken);
+            if (scope.DepartmentId.HasValue && scope.DepartmentId.Value > 0 && departmentId != scope.DepartmentId.Value)
+            {
+                return Json(Array.Empty<object>());
+            }
+            if (scope.AllowedCompanyIds.Count > 0)
+            {
+                var allowedDept = await _context.tbl_m_departemen.AsNoTracking()
+                    .AnyAsync(d => d.departemen_id == departmentId
+                                   && d.perusahaan_id.HasValue
+                                   && scope.AllowedCompanyIds.Contains(d.perusahaan_id.Value), cancellationToken);
+                if (!allowedDept)
+                {
+                    return Json(Array.Empty<object>());
+                }
+            }
+
+            var sectionsQuery = _context.tbl_m_seksi.AsNoTracking()
+                .Where(s => s.departemen_id == departmentId && s.is_aktif == true);
+            if (!scope.IsOwner && scope.SectionId.HasValue && scope.SectionId.Value > 0)
+            {
+                sectionsQuery = sectionsQuery.Where(s => s.seksi_id == scope.SectionId.Value);
+            }
+
+            var sections = await sectionsQuery
                 .OrderBy(s => s.nama_seksi)
                 .Select(s => new { id = s.seksi_id, name = s.nama_seksi })
                 .ToListAsync(cancellationToken);
@@ -2388,8 +2539,35 @@ namespace one_db_mitra.Controllers
         [HttpGet]
         public async Task<IActionResult> PositionsBySection(int sectionId, CancellationToken cancellationToken)
         {
-            var positions = await _context.tbl_m_jabatan.AsNoTracking()
-                .Where(p => p.seksi_id == sectionId && p.is_aktif == true)
+            var scope = await BuildKaryawanAccessScopeAsync(cancellationToken);
+            if (scope.SectionId.HasValue && scope.SectionId.Value > 0 && sectionId != scope.SectionId.Value)
+            {
+                return Json(Array.Empty<object>());
+            }
+            if (scope.AllowedCompanyIds.Count > 0)
+            {
+                var allowedSection = await _context.tbl_m_seksi.AsNoTracking()
+                    .AnyAsync(s => s.seksi_id == sectionId
+                                   && s.perusahaan_id.HasValue
+                                   && scope.AllowedCompanyIds.Contains(s.perusahaan_id.Value), cancellationToken);
+                if (!allowedSection)
+                {
+                    return Json(Array.Empty<object>());
+                }
+            }
+
+            var positionsQuery = _context.tbl_m_jabatan.AsNoTracking()
+                .Where(p => p.seksi_id == sectionId && p.is_aktif == true);
+            if (!scope.IsOwner && scope.CompanyId > 0)
+            {
+                positionsQuery = positionsQuery.Where(p => p.perusahaan_id == scope.CompanyId);
+            }
+            if (!scope.IsOwner && scope.PositionId.HasValue && scope.PositionId.Value > 0)
+            {
+                positionsQuery = positionsQuery.Where(p => p.jabatan_id == scope.PositionId.Value);
+            }
+
+            var positions = await positionsQuery
                 .OrderBy(p => p.nama_jabatan)
                 .Select(p => new { id = p.jabatan_id, name = p.nama_jabatan })
                 .ToListAsync(cancellationToken);
@@ -2397,32 +2575,111 @@ namespace one_db_mitra.Controllers
             return Json(positions);
         }
 
-        private async Task PopulateOptionsAsync(KaryawanCreateViewModel model, CancellationToken cancellationToken)
+        private async Task PopulateOptionsAsync(KaryawanCreateViewModel model, KaryawanAccessScope scope, CancellationToken cancellationToken)
         {
-            model.CompanyOptions = await _context.tbl_m_perusahaan.AsNoTracking()
-                .Where(c => c.is_aktif)
+            var companyQuery = _context.tbl_m_perusahaan.AsNoTracking()
+                .Where(c => c.is_aktif || c.perusahaan_id == model.CompanyId);
+            if (scope.AllowedCompanyIds.Count > 0)
+            {
+                companyQuery = companyQuery.Where(c => scope.AllowedCompanyIds.Contains(c.perusahaan_id));
+            }
+            model.CompanyOptions = await companyQuery
                 .OrderBy(c => c.nama_perusahaan)
                 .Select(c => new SelectListItem(c.nama_perusahaan, c.perusahaan_id.ToString()))
                 .ToListAsync(cancellationToken);
 
-            model.DepartmentOptions = await _context.tbl_m_departemen.AsNoTracking()
-                .Where(d => d.is_aktif == true)
+            var departmentQuery = _context.tbl_m_departemen.AsNoTracking()
+                .Where(d => d.is_aktif == true || d.departemen_id == model.DepartmentId);
+            if (scope.AllowedCompanyIds.Count > 0)
+            {
+                departmentQuery = departmentQuery.Where(d => d.perusahaan_id.HasValue && scope.AllowedCompanyIds.Contains(d.perusahaan_id.Value));
+            }
+            if (scope.DepartmentId.HasValue && scope.DepartmentId.Value > 0)
+            {
+                departmentQuery = departmentQuery.Where(d => d.departemen_id == scope.DepartmentId.Value);
+            }
+            model.DepartmentOptions = await departmentQuery
                 .OrderBy(d => d.nama_departemen)
                 .Select(d => new SelectListItem(d.nama_departemen, d.departemen_id.ToString()))
                 .ToListAsync(cancellationToken);
 
-            model.SectionOptions = await _context.tbl_m_seksi.AsNoTracking()
-                .Where(s => s.is_aktif == true)
+            var sectionQuery = _context.tbl_m_seksi.AsNoTracking()
+                .Where(s => s.is_aktif == true || s.seksi_id == model.SectionId);
+            if (scope.AllowedCompanyIds.Count > 0)
+            {
+                sectionQuery = sectionQuery.Where(s => s.perusahaan_id.HasValue && scope.AllowedCompanyIds.Contains(s.perusahaan_id.Value));
+            }
+            if (scope.DepartmentId.HasValue && scope.DepartmentId.Value > 0)
+            {
+                sectionQuery = sectionQuery.Where(s => s.departemen_id == scope.DepartmentId.Value);
+            }
+            if (model.DepartmentId.HasValue && model.DepartmentId.Value > 0)
+            {
+                sectionQuery = sectionQuery.Where(s => s.departemen_id == model.DepartmentId.Value);
+            }
+            if (scope.SectionId.HasValue && scope.SectionId.Value > 0)
+            {
+                sectionQuery = sectionQuery.Where(s => s.seksi_id == scope.SectionId.Value);
+            }
+            model.SectionOptions = await sectionQuery
                 .OrderBy(s => s.nama_seksi)
                 .Select(s => new SelectListItem(s.nama_seksi, s.seksi_id.ToString()))
                 .ToListAsync(cancellationToken);
 
-            model.PositionOptions = await _context.tbl_m_jabatan.AsNoTracking()
-                .Where(p => p.is_aktif == true)
+            var positionQuery = _context.tbl_m_jabatan.AsNoTracking()
+                .Where(p => p.is_aktif == true || p.jabatan_id == model.PositionId);
+            if (scope.AllowedCompanyIds.Count > 0)
+            {
+                positionQuery = positionQuery.Where(p => p.perusahaan_id.HasValue && scope.AllowedCompanyIds.Contains(p.perusahaan_id.Value));
+            }
+            if (scope.SectionId.HasValue && scope.SectionId.Value > 0)
+            {
+                positionQuery = positionQuery.Where(p => p.seksi_id == scope.SectionId.Value);
+            }
+            if (model.SectionId.HasValue && model.SectionId.Value > 0)
+            {
+                positionQuery = positionQuery.Where(p => p.seksi_id == model.SectionId.Value);
+            }
+            if (scope.PositionId.HasValue && scope.PositionId.Value > 0)
+            {
+                positionQuery = positionQuery.Where(p => p.jabatan_id == scope.PositionId.Value);
+            }
+            model.PositionOptions = await positionQuery
                 .OrderBy(p => p.nama_jabatan)
                 .Select(p => new SelectListItem(p.nama_jabatan, p.jabatan_id.ToString()))
                 .ToListAsync(cancellationToken);
 
+        }
+
+        private static void ApplyScopeToModel(KaryawanCreateViewModel model, KaryawanAccessScope scope)
+        {
+            if (!scope.IsOwner && scope.CompanyId > 0)
+            {
+                model.CompanyId = scope.CompanyId;
+            }
+
+            if (scope.DepartmentId.HasValue && scope.DepartmentId.Value > 0)
+            {
+                model.DepartmentId = scope.DepartmentId;
+            }
+
+            if (scope.SectionId.HasValue && scope.SectionId.Value > 0)
+            {
+                model.SectionId = scope.SectionId;
+            }
+
+            if (scope.PositionId.HasValue && scope.PositionId.Value > 0)
+            {
+                model.PositionId = scope.PositionId;
+            }
+        }
+
+        private void SetScopeViewBag(KaryawanAccessScope scope)
+        {
+            ViewBag.LockCompanyId = scope.IsOwner ? null : (scope.CompanyId > 0 ? scope.CompanyId : (int?)null);
+            ViewBag.LockDepartmentId = scope.DepartmentId.HasValue && scope.DepartmentId.Value > 0 ? scope.DepartmentId : null;
+            ViewBag.LockSectionId = scope.SectionId.HasValue && scope.SectionId.Value > 0 ? scope.SectionId : null;
+            ViewBag.LockPositionId = scope.PositionId.HasValue && scope.PositionId.Value > 0 ? scope.PositionId : null;
         }
 
         private static void TrackAuditChange(List<Models.Db.tbl_r_karyawan_audit> audits, int karyawanId, int personalId, string noNik, string fieldName, object? oldValue, object? newValue, string? changedBy, DateTime changedAt, string source)
@@ -2487,6 +2744,12 @@ namespace one_db_mitra.Controllers
                 .Select(r => r.level_akses)
                 .FirstOrDefaultAsync(cancellationToken);
 
+            var hasDepartmentScope = departmentId.HasValue && departmentId.Value > 0;
+            var hasSectionScope = sectionId.HasValue && sectionId.Value > 0;
+            var hasPositionScope = positionId.HasValue && positionId.Value > 0;
+            var isTopLevel = !hasDepartmentScope && !hasSectionScope && !hasPositionScope;
+            var allowedCompanyIds = await _companyHierarchyService.GetDescendantCompanyIdsAsync(companyId, cancellationToken);
+
             return new KaryawanAccessScope
             {
                 RoleId = roleId,
@@ -2495,17 +2758,13 @@ namespace one_db_mitra.Controllers
                 DepartmentId = departmentId,
                 SectionId = sectionId,
                 PositionId = positionId,
-                IsOwner = IsOwner() || roleLevel >= 4
+                IsOwner = (IsOwner() || roleLevel >= 4) && isTopLevel,
+                AllowedCompanyIds = allowedCompanyIds
             };
         }
 
         private static IQueryable<Models.Db.tbl_t_karyawan> ApplyKaryawanScope(IQueryable<Models.Db.tbl_t_karyawan> query, KaryawanAccessScope scope)
         {
-            if (scope.IsOwner)
-            {
-                return query;
-            }
-
             if (scope.PositionId.HasValue && scope.PositionId.Value > 0)
             {
                 return query.Where(k => k.jabatan_id == scope.PositionId);
@@ -2521,9 +2780,9 @@ namespace one_db_mitra.Controllers
                 return query.Where(k => k.departemen_id == scope.DepartmentId);
             }
 
-            if (scope.CompanyId > 0)
+            if (scope.AllowedCompanyIds.Count > 0)
             {
-                return query.Where(k => k.perusahaan_id == scope.CompanyId);
+                return query.Where(k => scope.AllowedCompanyIds.Contains(k.perusahaan_id));
             }
 
             return query;
@@ -2695,6 +2954,7 @@ namespace one_db_mitra.Controllers
             public int? SectionId { get; set; }
             public int? PositionId { get; set; }
             public bool IsOwner { get; set; }
+            public HashSet<int> AllowedCompanyIds { get; set; } = new HashSet<int>();
         }
 
         private static bool HasPendidikanValue(KaryawanPendidikanInput item)

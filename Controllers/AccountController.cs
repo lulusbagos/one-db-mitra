@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using one_db_mitra.Data;
 using one_db_mitra.Models.Auth;
 using one_db_mitra.Services.AppSetting;
+using one_db_mitra.Services.CompanyHierarchy;
 
 namespace one_db_mitra.Controllers
 {
@@ -22,12 +23,14 @@ namespace one_db_mitra.Controllers
         private readonly OneDbMitraContext _context;
         private readonly IWebHostEnvironment _environment;
         private readonly AppSettingService _settingService;
+        private readonly CompanyHierarchyService _companyHierarchyService;
 
-        public AccountController(OneDbMitraContext context, IWebHostEnvironment environment, AppSettingService settingService)
+        public AccountController(OneDbMitraContext context, IWebHostEnvironment environment, AppSettingService settingService, CompanyHierarchyService companyHierarchyService)
         {
             _context = context;
             _environment = environment;
             _settingService = settingService;
+            _companyHierarchyService = companyHierarchyService;
         }
 
         [AllowAnonymous]
@@ -227,6 +230,106 @@ namespace one_db_mitra.Controllers
             return RedirectToAction(nameof(Login));
         }
 
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(
+            string? Username,
+            string? Email,
+            string? NoKtp,
+            DateTime? TanggalLahir,
+            CancellationToken cancellationToken = default)
+        {
+            var username = (Username ?? string.Empty).Trim();
+            var email = (Email ?? string.Empty).Trim();
+            var noKtp = (NoKtp ?? string.Empty).Trim();
+
+            var matches = new
+            {
+                username = false,
+                email = false,
+                noKtp = false,
+                tanggalLahir = false
+            };
+
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(noKtp) || !TanggalLahir.HasValue)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Lengkapi username, email, no KTP, dan tanggal lahir.",
+                    matches
+                });
+            }
+
+            var user = await _context.tbl_m_pengguna.AsNoTracking()
+                .FirstOrDefaultAsync(u => u.username == username, cancellationToken);
+            if (user is null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Username tidak ditemukan.",
+                    matches
+                });
+            }
+
+            var emailMatch = string.Equals(user.email ?? string.Empty, email, StringComparison.OrdinalIgnoreCase);
+            var personalRecord = await (from k in _context.tbl_t_karyawan.AsNoTracking()
+                                        join p in _context.tbl_m_personal.AsNoTracking() on k.personal_id equals p.personal_id
+                                        where k.no_nik == username
+                                        orderby k.created_at descending
+                                        select new { p.no_ktp, p.tanggal_lahir })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            var ktpMatch = personalRecord != null && string.Equals(personalRecord.no_ktp ?? string.Empty, noKtp, StringComparison.OrdinalIgnoreCase);
+            var birthMatch = personalRecord != null && personalRecord.tanggal_lahir.HasValue && personalRecord.tanggal_lahir.Value.Date == TanggalLahir.Value.Date;
+
+            matches = new
+            {
+                username = true,
+                email = emailMatch,
+                noKtp = ktpMatch,
+                tanggalLahir = birthMatch
+            };
+
+            if (!emailMatch || !ktpMatch || !birthMatch)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Data tidak cocok. Periksa kembali input Anda.",
+                    matches
+                });
+            }
+
+            var userToUpdate = await _context.tbl_m_pengguna
+                .FirstOrDefaultAsync(u => u.pengguna_id == user.pengguna_id, cancellationToken);
+            if (userToUpdate is null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "User tidak ditemukan.",
+                    matches
+                });
+            }
+
+            var newPassword = GeneratePassword(10);
+            userToUpdate.kata_sandi = newPassword;
+            userToUpdate.diubah_pada = DateTime.UtcNow;
+            await _context.SaveChangesAsync(cancellationToken);
+
+            await QueueForgotPasswordEmailAsync(userToUpdate, cancellationToken);
+
+            return Json(new
+            {
+                success = true,
+                message = "Password baru telah dikirim ke email terdaftar.",
+                matches
+            });
+        }
+
         private async Task QueueRegisterEmailAsync(Models.Db.tbl_m_pengguna user, string? roleName, string? companyName, int? departmentId, int? sectionId, int? positionId, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(user.email))
@@ -311,6 +414,45 @@ namespace one_db_mitra.Controllers
                 buffer[i] = chars[random.Next(chars.Length)];
             }
             return new string(buffer);
+        }
+
+        private async Task QueueForgotPasswordEmailAsync(Models.Db.tbl_m_pengguna user, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(user.email))
+            {
+                return;
+            }
+
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var loginUrl = $"{baseUrl}/Account/Login";
+
+            var message = $@"
+                <div style=""font-family: 'Segoe UI', Arial, sans-serif; color: #1f2937;"">
+                    <h2 style=""margin:0 0 12px;"">Reset Password</h2>
+                    <p>Halo <strong>{System.Net.WebUtility.HtmlEncode(user.nama_lengkap ?? user.username ?? "-")}</strong>,</p>
+                    <p>Password baru Anda:</p>
+                    <ul>
+                        <li><strong>Username:</strong> {System.Net.WebUtility.HtmlEncode(user.username ?? "-")}</li>
+                        <li><strong>Password:</strong> {System.Net.WebUtility.HtmlEncode(user.kata_sandi ?? "-")}</li>
+                    </ul>
+                    <p>Silakan login melalui tautan berikut:</p>
+                    <p><a href=""{loginUrl}"">{loginUrl}</a></p>
+                    <p style=""color:#6b7280; font-size:12px;"">Email ini tercatat otomatis oleh sistem.</p>
+                </div>";
+
+            var emailLog = new Models.Db.tbl_m_email_notifikasi
+            {
+                id = Guid.NewGuid().ToString("N"),
+                email_to = user.email.Trim(),
+                subject = "Reset Password - ONE DB MITRA",
+                pesan_html = message,
+                status = "queued",
+                created_at = DateTime.UtcNow,
+                created_by = "system"
+            };
+
+            _context.tbl_m_email_notifikasi.Add(emailLog);
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
         [Authorize]
@@ -988,22 +1130,28 @@ namespace one_db_mitra.Controllers
                 return string.Empty;
             }
 
+            var path = await _companyHierarchyService.BuildHierarchyPathAsync(companyId, cancellationToken);
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                return path;
+            }
+
             var companies = await _context.tbl_m_perusahaan.AsNoTracking()
                 .ToListAsync(cancellationToken);
             var map = companies.ToDictionary(c => c.perusahaan_id);
 
-            var path = new List<string>();
+            var legacyPath = new List<string>();
             var visited = new HashSet<int>();
             var currentId = companyId;
 
             while (currentId > 0 && map.TryGetValue(currentId, out var company) && visited.Add(currentId))
             {
-                path.Add(company.nama_perusahaan ?? string.Empty);
+                legacyPath.Add(company.nama_perusahaan ?? string.Empty);
                 currentId = company.perusahaan_induk_id ?? 0;
             }
 
-            path.Reverse();
-            return string.Join(" - ", path.Where(name => !string.IsNullOrWhiteSpace(name)));
+            legacyPath.Reverse();
+            return string.Join(" - ", legacyPath.Where(name => !string.IsNullOrWhiteSpace(name)));
         }
 
         private static string BuildDeviceLabel(string? userAgent)

@@ -134,7 +134,27 @@
                             <tr>
                                 <td>@user.Username</td>
                                 <td>@user.FullName</td>
-                                <td>@user.CompanyName</td>
+                                <td>
+                                    <div class="fw-semibold">@user.CompanyName</div>
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        @if (!string.IsNullOrWhiteSpace(user.HierarchyOwner))
+                                        {
+                                            <span class="badge text-bg-primary">Owner: @user.HierarchyOwner</span>
+                                        }
+                                        @if (user.HierarchyLevel >= 1 && !string.IsNullOrWhiteSpace(user.HierarchyMainContractor))
+                                        {
+                                            <span class="badge text-bg-info">Main: @user.HierarchyMainContractor</span>
+                                        }
+                                        @if (user.HierarchyLevel >= 2 && !string.IsNullOrWhiteSpace(user.HierarchySubContractor))
+                                        {
+                                            <span class="badge text-bg-warning">Sub: @user.HierarchySubContractor</span>
+                                        }
+                                        @if (user.HierarchyLevel >= 3 && !string.IsNullOrWhiteSpace(user.HierarchyVendor))
+                                        {
+                                            <span class="badge text-bg-secondary">Vendor: @user.HierarchyVendor</span>
+                                        }
+                                    </div>
+                                </td>
                                 <td>@user.RoleName</td>
                                 <td>@user.DepartmentName</td>
                                 <td>@user.SectionName</td>
@@ -153,6 +173,7 @@
                                 <button class="btn btn-sm btn-outline-secondary me-1" type="button" data-menu-preview="@user.UserId">
                                     Preview Menu
                                 </button>
+                                <a class="btn btn-sm btn-outline-primary me-1" asp-action="Detail" asp-route-id="@user.UserId">Detail</a>
                                 @if (ViewBag.CanImpersonate == true)
                                 {
                                     <form asp-controller="Account" asp-action="Impersonate" method="post" class="d-inline">

@@ -134,6 +134,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTXV0YXNpQWRtaW5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/NotificationCenter/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTm90aWZpY2F0aW9uQ2VudGVyXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/OrganizationAdmin/Companies.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JnYW5pemF0aW9uQWRtaW5cQ29tcGFuaWVzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -194,6 +198,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9Mb2dpbkxheW91dC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/Shared/_SettingGuide.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9TZXR0aW5nR3VpZGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/Shared/_SidebarMenuItem.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9TaWRlYmFyTWVudUl0ZW0uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -204,6 +212,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/UserAdmin/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlckFkbWluXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/UserAdmin/Detail.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlckFkbWluXERldGFpbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/4. PROJECT/2. Web/one_db_mitra/one_db_mitra/Views/UserAdmin/Edit.cshtml]

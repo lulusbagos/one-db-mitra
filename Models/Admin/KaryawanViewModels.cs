@@ -11,6 +11,7 @@ namespace one_db_mitra.Models.Admin
         public int KaryawanId { get; set; }
         public string NoNik { get; set; } = string.Empty;
         public string NamaLengkap { get; set; } = string.Empty;
+        public int CompanyId { get; set; }
         public string CompanyName { get; set; } = string.Empty;
         public string DepartmentName { get; set; } = string.Empty;
         public string SectionName { get; set; } = string.Empty;
@@ -22,6 +23,11 @@ namespace one_db_mitra.Models.Admin
         public bool IsActive { get; set; }
         public string? StatusLabel { get; set; }
         public string? StatusType { get; set; }
+        public string? HierarchyOwner { get; set; }
+        public string? HierarchyMainContractor { get; set; }
+        public string? HierarchySubContractor { get; set; }
+        public string? HierarchyVendor { get; set; }
+        public int HierarchyLevel { get; set; }
     }
 
     public class KaryawanCreateViewModel
@@ -427,10 +433,16 @@ namespace one_db_mitra.Models.Admin
         public string? Kecamatan { get; set; }
         public string? Desa { get; set; }
         public string? KodePos { get; set; }
+        public int CompanyId { get; set; }
         public string CompanyName { get; set; } = string.Empty;
         public string DepartmentName { get; set; } = string.Empty;
         public string SectionName { get; set; } = string.Empty;
         public string PositionName { get; set; } = string.Empty;
+        public string? HierarchyOwner { get; set; }
+        public string? HierarchyMainContractor { get; set; }
+        public string? HierarchySubContractor { get; set; }
+        public string? HierarchyVendor { get; set; }
+        public int HierarchyLevel { get; set; }
         public string? NoAcr { get; set; }
         public int? PohId { get; set; }
         public string? IdKaryawanIndexim { get; set; }

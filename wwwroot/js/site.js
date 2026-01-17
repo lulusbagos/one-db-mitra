@@ -432,6 +432,72 @@
         });
     })();
 
+    (function initNotificationCenter() {
+        const listEl = document.getElementById('notificationList');
+        const badgeEl = document.getElementById('notificationBadge');
+        const toggleEl = document.getElementById('notificationToggle');
+        if (!listEl || !badgeEl || !toggleEl) {
+            return;
+        }
+
+        const typeMap = {
+            danger: { cls: 'bg-danger text-white', icon: 'bi-exclamation-triangle' },
+            warning: { cls: 'bg-warning text-dark', icon: 'bi-exclamation-circle' },
+            success: { cls: 'bg-success text-white', icon: 'bi-check-circle' },
+            info: { cls: 'bg-info text-white', icon: 'bi-info-circle' }
+        };
+
+        const formatDateTime = (value) => {
+            if (!value) return '';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return value;
+            return date.toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        };
+
+        const renderItems = (items) => {
+            listEl.innerHTML = '';
+            if (!items || items.length === 0) {
+                listEl.innerHTML = '<div class="text-secondary small px-3 py-2">Belum ada notifikasi.</div>';
+                badgeEl.classList.add('d-none');
+                return;
+            }
+
+            badgeEl.classList.remove('d-none');
+
+            items.forEach(item => {
+                const cfg = typeMap[item.type] || typeMap.info;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'notification-item';
+                const createdLabel = formatDateTime(item.createdAt);
+                const dueLabel = item.dueAt ? `Due ${formatDateTime(item.dueAt)}` : '';
+                wrapper.innerHTML = `
+                    <div class="notification-icon ${cfg.cls}">
+                        <i class="bi ${cfg.icon}"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold">${item.title}</div>
+                        <div class="text-secondary small">${item.message}</div>
+                        <div class="text-secondary small mt-1">${createdLabel}${dueLabel ? ` · ${dueLabel}` : ''}</div>
+                        ${item.link ? `<a class="small" href="${item.link}">Buka</a>` : ''}
+                    </div>
+                `;
+                listEl.appendChild(wrapper);
+            });
+        };
+
+        const loadNotifications = () => {
+            fetch('/NotificationCenter/Recent')
+                .then(res => res.json())
+                .then(data => renderItems(data.items || []))
+                .catch(() => {
+                    listEl.innerHTML = '<div class="text-danger small px-3 py-2">Gagal memuat notifikasi.</div>';
+                });
+        };
+
+        toggleEl.addEventListener('click', loadNotifications);
+        loadNotifications();
+    })();
+
     (function initRealtimeNotifications() {
         if (typeof signalR === 'undefined') {
             return;

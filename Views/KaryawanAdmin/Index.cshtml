@@ -1,6 +1,7 @@
 @model IReadOnlyList<one_db_mitra.Models.Admin.KaryawanListItem>
 @using System
 @using System.Linq
+@using System.Security.Claims
 @using Microsoft.AspNetCore.Mvc.Rendering
 @{
     ViewData["Title"] = "Data Karyawan";
@@ -9,6 +10,11 @@
     var nonActiveCount = ViewBag.NonActiveCount as int? ?? 0;
     var isOwner = ViewBag.IsOwner as bool? ?? false;
     var companyOptions = ViewBag.CompanyOptions as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0";
+    int? lockCompanyId = ViewBag.LockCompanyId as int?;
+    int? lockDepartmentId = ViewBag.LockDepartmentId as int?;
+    int? lockSectionId = ViewBag.LockSectionId as int?;
+    int? lockPositionId = ViewBag.LockPositionId as int?;
 
     string GetInitials(string name)
     {
@@ -102,13 +108,77 @@
                     <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
                     <input type="text" class="form-control" id="karyawanSearch" placeholder="Cari nama, NIK, email..." />
                 </div>
-                <select class="form-select form-select-sm karyawan-filter js-company-select" id="karyawanCompanyFilter" data-placeholder="Semua Perusahaan">
+                <select class="form-select form-select-sm karyawan-filter js-company-select"
+                        id="karyawanCompanyFilter"
+                        data-placeholder="Semua Perusahaan"
+                        @(lockCompanyId.HasValue && lockCompanyId.Value > 0 ? "disabled" : null)>
                     <option value="">Semua Perusahaan</option>
                     @foreach (var option in companyOptions)
                     {
-                        <option value="@option.Value">@option.Text</option>
+                        if (option.Selected)
+                        {
+                            <option value="@option.Value" selected="selected">@option.Text</option>
+                        }
+                        else
+                        {
+                            <option value="@option.Value">@option.Text</option>
+                        }
                     }
                 </select>
+                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#karyawanAdvancedFilters">
+                    <i class="bi bi-sliders me-1"></i>Advanced
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="collapse mb-4" id="karyawanAdvancedFilters">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Departemen</label>
+                        <select class="form-select form-select-sm" id="karyawanDepartmentFilter" @(lockDepartmentId.HasValue && lockDepartmentId.Value > 0 ? "disabled" : null)>
+                            <option value="">Semua</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Section</label>
+                        <select class="form-select form-select-sm" id="karyawanSectionFilter" @(lockSectionId.HasValue && lockSectionId.Value > 0 ? "disabled" : null)>
+                            <option value="">Semua</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Jabatan</label>
+                        <select class="form-select form-select-sm" id="karyawanPositionFilter" @(lockPositionId.HasValue && lockPositionId.Value > 0 ? "disabled" : null)>
+                            <option value="">Semua</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select form-select-sm" id="karyawanStatusFilter">
+                            <option value="">Semua</option>
+                            <option value="active">Aktif</option>
+                            <option value="nonaktif">Nonaktif</option>
+                            <option value="blacklist">Blacklist</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tanggal Masuk (From)</label>
+                        <input type="date" class="form-control form-control-sm" id="karyawanDateFrom" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tanggal Masuk (To)</label>
+                        <input type="date" class="form-control form-control-sm" id="karyawanDateTo" />
+                    </div>
+                    <div class="col-md-6 d-flex gap-2 justify-content-end">
+                        <button class="btn btn-outline-secondary btn-sm" type="button" id="karyawanResetFilters">Reset</button>
+                        <button class="btn btn-primary btn-sm" type="button" id="karyawanSaveFilters">Simpan Filter</button>
+                    </div>
+                </div>
+                <div class="text-secondary small mt-2">
+                    Filter disimpan per user dan otomatis diterapkan saat membuka halaman.
+                </div>
             </div>
         </div>
     </div>
@@ -337,6 +407,11 @@
             min-width: 200px;
         }
 
+        .hierarchy-badges .badge {
+            font-size: 0.6rem;
+            letter-spacing: 0.02em;
+        }
+
         .karyawan-loading {
             position: absolute;
             inset: 0;
@@ -464,6 +539,10 @@
         const progressText = document.getElementById("karyawanProgressText");
         const loadingOverlay = document.getElementById("karyawanLoading");
         let progressTimer = null;
+        const lockCompanyId = "@(lockCompanyId?.ToString() ?? "")";
+        const lockDepartmentId = "@(lockDepartmentId?.ToString() ?? "")";
+        const lockSectionId = "@(lockSectionId?.ToString() ?? "")";
+        const lockPositionId = "@(lockPositionId?.ToString() ?? "")";
 
         const setLoading = (isLoading) => {
             if (!loadingOverlay) return;
@@ -487,6 +566,12 @@
         const activeSwitch = document.getElementById("karyawanActiveOnly");
         const companyFilter = document.getElementById("karyawanCompanyFilter");
         const searchInput = document.getElementById("karyawanSearch");
+        const departmentFilter = document.getElementById("karyawanDepartmentFilter");
+        const sectionFilter = document.getElementById("karyawanSectionFilter");
+        const positionFilter = document.getElementById("karyawanPositionFilter");
+        const statusFilter = document.getElementById("karyawanStatusFilter");
+        const dateFromFilter = document.getElementById("karyawanDateFrom");
+        const dateToFilter = document.getElementById("karyawanDateTo");
         const activeBadge = document.getElementById("activeFilterBadge");
         const summary = document.getElementById("karyawanSummary");
         const activeCountEl = document.getElementById("karyawanActiveCount");
@@ -497,6 +582,16 @@
         const statBlacklist = document.getElementById("statBlacklistCount");
         const statSafety = document.getElementById("statSafetyCount");
         const statHr = document.getElementById("statHrCount");
+
+        const applyLockValue = (select, value) => {
+            if (!select) return;
+            if (value) {
+                select.value = value;
+                select.setAttribute("disabled", "disabled");
+            } else {
+                select.removeAttribute("disabled");
+            }
+        };
 
         const table = $(".karyawan-table").DataTable({
             serverSide: true,
@@ -510,6 +605,12 @@
                 data: function (d) {
                     d.activeOnly = activeSwitch?.checked || false;
                     d.companyId = companyFilter?.value || "";
+                    d.departmentId = departmentFilter?.value || "";
+                    d.sectionId = sectionFilter?.value || "";
+                    d.positionId = positionFilter?.value || "";
+                    d.statusType = statusFilter?.value || "";
+                    d.dateFrom = dateFromFilter?.value || "";
+                    d.dateTo = dateToFilter?.value || "";
                     d.search = searchInput?.value || "";
                 },
                 dataSrc: function (json) {
@@ -544,6 +645,22 @@
                         const photo = data.photoUrl
                             ? `<img src="${data.photoUrl}" alt="Foto" class="karyawan-avatar" />`
                             : `<div class="karyawan-avatar karyawan-avatar-initial bg-soft-${tone} text-${tone}">${initials}</div>`;
+                        const badges = [];
+                        if (data.hierarchyOwner) {
+                            badges.push(`<span class="badge text-bg-primary">Owner: ${data.hierarchyOwner}</span>`);
+                        }
+                        if (data.hierarchyLevel >= 1 && data.hierarchyMainContractor) {
+                            badges.push(`<span class="badge text-bg-info">Main: ${data.hierarchyMainContractor}</span>`);
+                        }
+                        if (data.hierarchyLevel >= 2 && data.hierarchySubContractor) {
+                            badges.push(`<span class="badge text-bg-warning">Sub: ${data.hierarchySubContractor}</span>`);
+                        }
+                        if (data.hierarchyLevel >= 3 && data.hierarchyVendor) {
+                            badges.push(`<span class="badge text-bg-secondary">Vendor: ${data.hierarchyVendor}</span>`);
+                        }
+                        const hierarchyHtml = badges.length
+                            ? `<div class="d-flex flex-wrap gap-1 mt-2 hierarchy-badges">${badges.join("")}</div>`
+                            : "";
                         return `
                             <div class="d-flex align-items-center gap-3">
                                 ${photo}
@@ -553,6 +670,7 @@
                                         <span><i class="bi bi-person-badge me-1"></i>${data.noNik}</span>
                                         <span><i class="bi bi-building me-1"></i>${data.companyName}</span>
                                     </div>
+                                    ${hierarchyHtml}
                                 </div>
                             </div>
                         `;
@@ -671,6 +789,24 @@
         if (companyFilter) {
             companyFilter.addEventListener("change", () => table.ajax.reload());
         }
+        if (departmentFilter) {
+            departmentFilter.addEventListener("change", () => table.ajax.reload());
+        }
+        if (sectionFilter) {
+            sectionFilter.addEventListener("change", () => table.ajax.reload());
+        }
+        if (positionFilter) {
+            positionFilter.addEventListener("change", () => table.ajax.reload());
+        }
+        if (statusFilter) {
+            statusFilter.addEventListener("change", () => table.ajax.reload());
+        }
+        if (dateFromFilter) {
+            dateFromFilter.addEventListener("change", () => table.ajax.reload());
+        }
+        if (dateToFilter) {
+            dateToFilter.addEventListener("change", () => table.ajax.reload());
+        }
         if (activeSwitch) {
             activeSwitch.addEventListener("change", () => table.ajax.reload());
         }
@@ -692,6 +828,141 @@
         }
 
         updateExportLink();
+
+        const filterKey = `karyawanFilters_${@userId}`;
+        const saveFilters = () => {
+            const payload = {
+                search: searchInput?.value || "",
+                companyId: companyFilter?.value || "",
+                departmentId: departmentFilter?.value || "",
+                sectionId: sectionFilter?.value || "",
+                positionId: positionFilter?.value || "",
+                statusType: statusFilter?.value || "",
+                dateFrom: dateFromFilter?.value || "",
+                dateTo: dateToFilter?.value || "",
+                activeOnly: activeSwitch?.checked || false
+            };
+            localStorage.setItem(filterKey, JSON.stringify(payload));
+            showToast("Filter disimpan untuk user ini.", "success");
+        };
+
+        const applyFilters = (payload) => {
+            if (!payload) return;
+            if (searchInput) searchInput.value = payload.search || "";
+            if (companyFilter) companyFilter.value = lockCompanyId || payload.companyId || "";
+            if (departmentFilter) departmentFilter.value = lockDepartmentId || payload.departmentId || "";
+            if (sectionFilter) sectionFilter.value = lockSectionId || payload.sectionId || "";
+            if (positionFilter) positionFilter.value = lockPositionId || payload.positionId || "";
+            if (statusFilter) statusFilter.value = payload.statusType || "";
+            if (dateFromFilter) dateFromFilter.value = payload.dateFrom || "";
+            if (dateToFilter) dateToFilter.value = payload.dateTo || "";
+            if (activeSwitch) activeSwitch.checked = !!payload.activeOnly;
+            applyLockValue(companyFilter, lockCompanyId);
+            applyLockValue(departmentFilter, lockDepartmentId);
+            applyLockValue(sectionFilter, lockSectionId);
+            applyLockValue(positionFilter, lockPositionId);
+        };
+
+        const savedFilters = localStorage.getItem(filterKey);
+        if (savedFilters) {
+            try {
+                applyFilters(JSON.parse(savedFilters));
+            } catch { }
+        } else {
+            applyFilters({});
+        }
+
+        const saveButton = document.getElementById("karyawanSaveFilters");
+        const resetButton = document.getElementById("karyawanResetFilters");
+        if (saveButton) {
+            saveButton.addEventListener("click", () => {
+                saveFilters();
+                table.ajax.reload();
+            });
+        }
+        if (resetButton) {
+            resetButton.addEventListener("click", () => {
+                localStorage.removeItem(filterKey);
+                applyFilters({});
+                table.ajax.reload();
+            });
+        }
+
+        async function loadDepartments(companyId) {
+            if (!departmentFilter) return;
+            const selectedDepartmentId = lockDepartmentId || departmentFilter.value || "";
+            departmentFilter.innerHTML = '<option value="">Semua</option>';
+            sectionFilter.innerHTML = '<option value="">Semua</option>';
+            positionFilter.innerHTML = '<option value="">Semua</option>';
+            if (!companyId) return;
+            const response = await fetch(`/KaryawanAdmin/DepartmentsByCompany?companyId=${companyId}`);
+            const data = await response.json();
+            data.forEach(item => {
+                const opt = document.createElement("option");
+                opt.value = item.id;
+                opt.textContent = item.name;
+                departmentFilter.appendChild(opt);
+            });
+            if (selectedDepartmentId) {
+                departmentFilter.value = selectedDepartmentId;
+            }
+            applyLockValue(departmentFilter, lockDepartmentId);
+        }
+
+        async function loadSections(deptId) {
+            if (!sectionFilter) return;
+            const selectedSectionId = lockSectionId || sectionFilter.value || "";
+            sectionFilter.innerHTML = '<option value="">Semua</option>';
+            positionFilter.innerHTML = '<option value="">Semua</option>';
+            if (!deptId) return;
+            const response = await fetch(`/KaryawanAdmin/SectionsByDepartment?departmentId=${deptId}`);
+            const data = await response.json();
+            data.forEach(item => {
+                const opt = document.createElement("option");
+                opt.value = item.id;
+                opt.textContent = item.name;
+                sectionFilter.appendChild(opt);
+            });
+            if (selectedSectionId) {
+                sectionFilter.value = selectedSectionId;
+            }
+            applyLockValue(sectionFilter, lockSectionId);
+        }
+
+        async function loadPositions(sectionId) {
+            if (!positionFilter) return;
+            const selectedPositionId = lockPositionId || positionFilter.value || "";
+            positionFilter.innerHTML = '<option value="">Semua</option>';
+            if (!sectionId) return;
+            const response = await fetch(`/KaryawanAdmin/PositionsBySection?sectionId=${sectionId}`);
+            const data = await response.json();
+            data.forEach(item => {
+                const opt = document.createElement("option");
+                opt.value = item.id;
+                opt.textContent = item.name;
+                positionFilter.appendChild(opt);
+            });
+            if (selectedPositionId) {
+                positionFilter.value = selectedPositionId;
+            }
+            applyLockValue(positionFilter, lockPositionId);
+        }
+
+        companyFilter?.addEventListener("change", () => loadDepartments(companyFilter.value));
+        departmentFilter?.addEventListener("change", () => loadSections(departmentFilter.value));
+        sectionFilter?.addEventListener("change", () => loadPositions(sectionFilter.value));
+
+        if (companyFilter?.value) {
+            loadDepartments(companyFilter.value).then(() => {
+                if (departmentFilter?.value) {
+                    loadSections(departmentFilter.value).then(() => {
+                        if (sectionFilter?.value) {
+                            loadPositions(sectionFilter.value);
+                        }
+                    });
+                }
+            });
+        }
 
         $(".karyawan-table").on("processing.dt", function (_e, _settings, processing) {
             setLoading(processing);

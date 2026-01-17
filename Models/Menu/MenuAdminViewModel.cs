@@ -34,6 +34,8 @@ namespace one_db_mitra.Models.Menu
         public IReadOnlyList<CompanyHierarchyItem> CompanyHierarchy { get; set; } = Array.Empty<CompanyHierarchyItem>();
         public IReadOnlyList<AuditLogItem> RecentAudits { get; set; } = Array.Empty<AuditLogItem>();
         public IReadOnlyList<ActivityDayItem> ActivityHeatmap { get; set; } = Array.Empty<ActivityDayItem>();
+        public int PendingApprovalCount { get; set; }
+        public IReadOnlyList<ApprovalTaskItem> PendingApprovals { get; set; } = Array.Empty<ApprovalTaskItem>();
     }
 
     public class HealthStatusViewModel
@@ -84,6 +86,15 @@ namespace one_db_mitra.Models.Menu
     {
         public DateTime Date { get; set; }
         public int Count { get; set; }
+    }
+
+    public class ApprovalTaskItem
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public DateTime DueAt { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public string? Link { get; set; }
     }
 
     public class MenuFormModel

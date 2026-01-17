@@ -81,6 +81,24 @@
                         <span class="badge text-bg-light">@Model.DepartmentName</span>
                         <span class="badge text-bg-light">@Model.SectionName</span>
                     </div>
+                    <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+                        @if (!string.IsNullOrWhiteSpace(Model.HierarchyOwner))
+                        {
+                            <span class="badge text-bg-primary">Owner: @Model.HierarchyOwner</span>
+                        }
+                        @if (Model.HierarchyLevel >= 1 && !string.IsNullOrWhiteSpace(Model.HierarchyMainContractor))
+                        {
+                            <span class="badge text-bg-info">Main: @Model.HierarchyMainContractor</span>
+                        }
+                        @if (Model.HierarchyLevel >= 2 && !string.IsNullOrWhiteSpace(Model.HierarchySubContractor))
+                        {
+                            <span class="badge text-bg-warning">Sub: @Model.HierarchySubContractor</span>
+                        }
+                        @if (Model.HierarchyLevel >= 3 && !string.IsNullOrWhiteSpace(Model.HierarchyVendor))
+                        {
+                            <span class="badge text-bg-secondary">Vendor: @Model.HierarchyVendor</span>
+                        }
+                    </div>
                     <div class="d-flex justify-content-center gap-2">
                         <span class="badge @(Model.IsActive ? "text-bg-success" : "text-bg-secondary")">
                             @(Model.IsActive ? "Aktif" : "Nonaktif")
@@ -511,6 +529,47 @@
                                 </div>
                             }
                         </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-lg rounded-4 mt-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Audit Trail (Per Field)</h6>
+                    <span class="badge text-bg-light">@auditTrail.Count</span>
+                </div>
+                <div class="card-body table-responsive">
+                    @if (!auditTrail.Any())
+                    {
+                        <div class="text-secondary">Belum ada perubahan tercatat.</div>
+                    }
+                    else
+                    {
+                        <table class="table table-striped align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Old</th>
+                                    <th>New</th>
+                                    <th>Waktu</th>
+                                    <th>Oleh</th>
+                                    <th>Sumber</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in auditTrail)
+                                {
+                                    <tr>
+                                        <td>@item.FieldName</td>
+                                        <td>@(string.IsNullOrWhiteSpace(item.OldValue) ? "-" : item.OldValue)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(item.NewValue) ? "-" : item.NewValue)</td>
+                                        <td>@item.ChangedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                                        <td>@(string.IsNullOrWhiteSpace(item.ChangedBy) ? "-" : item.ChangedBy)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(item.Source) ? "-" : item.Source)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     }
                 </div>
             </div>

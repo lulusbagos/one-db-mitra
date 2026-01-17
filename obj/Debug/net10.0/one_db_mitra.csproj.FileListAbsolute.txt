@@ -148,6 +148,7 @@ D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\one_db_mitra.cs
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\one_db_mitra.MvcApplicationPartsAssemblyInfo.cache
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\one_db_mitra.RazorAssemblyInfo.cache
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\one_db_mitra.RazorAssemblyInfo.cs
+D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\one_db_mitra.sourcelink.json
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\rjimswa.dswa.cache.json
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
@@ -229,6 +230,7 @@ D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\zu4l
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\3tea0jju4w-{0}-7fg0hl6hkg-7fg0hl6hkg.gz
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\3nyics4p3u-{0}-hiqumc4mhz-hiqumc4mhz.gz
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\4q9rv13u4x-{0}-61n19gt1b8-61n19gt1b8.gz
+D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\woo1l6tr1x-{0}-xooqb3lz0h-xooqb3lz0h.gz
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\2x0dbpwn2n-{0}-bqjiyaj88i-bqjiyaj88i.gz
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\h29f8xr128-{0}-c2jlpeoesf-c2jlpeoesf.gz
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\uza7dilh91-{0}-erw9l3u2r3-erw9l3u2r3.gz
@@ -301,6 +303,4 @@ D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\refint\one_db_m
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\one_db_mitra.pdb
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\one_db_mitra.genruntimeconfig.cache
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\ref\one_db_mitra.dll
-D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\one_db_mitra.sourcelink.json
-D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\841fzhkz5o-{0}-y71hyiyj1n-y71hyiyj1n.gz
-D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\woo1l6tr1x-{0}-2j1s21avbc-2j1s21avbc.gz
+D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\841fzhkz5o-{0}-omixk5dxsz-omixk5dxsz.gz

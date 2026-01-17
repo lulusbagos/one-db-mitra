@@ -17,6 +17,7 @@ namespace one_db_mitra.Models.Admin
         public int UserId { get; set; }
         public string Username { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
+        public int CompanyId { get; set; }
         public string CompanyName { get; set; } = string.Empty;
         public string RoleName { get; set; } = string.Empty;
         public int PrimaryRoleId { get; set; }
@@ -25,6 +26,11 @@ namespace one_db_mitra.Models.Admin
         public string PositionName { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public bool IsOnline { get; set; }
+        public string? HierarchyOwner { get; set; }
+        public string? HierarchyMainContractor { get; set; }
+        public string? HierarchySubContractor { get; set; }
+        public string? HierarchyVendor { get; set; }
+        public int HierarchyLevel { get; set; }
     }
 
     public class UserEditViewModel
@@ -85,5 +91,38 @@ namespace one_db_mitra.Models.Admin
         public int AccessLevel { get; set; }
         public bool IsActive { get; set; }
         public string StartupUrl { get; set; } = string.Empty;
+    }
+
+    public class UserDetailViewModel
+    {
+        public int UserId { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string? Email { get; set; }
+        public int CompanyId { get; set; }
+        public string CompanyName { get; set; } = string.Empty;
+        public string RoleName { get; set; } = string.Empty;
+        public string DepartmentName { get; set; } = string.Empty;
+        public string SectionName { get; set; } = string.Empty;
+        public string PositionName { get; set; } = string.Empty;
+        public string? HierarchyOwner { get; set; }
+        public string? HierarchyMainContractor { get; set; }
+        public string? HierarchySubContractor { get; set; }
+        public string? HierarchyVendor { get; set; }
+        public int HierarchyLevel { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public IReadOnlyList<UserAuditItem> AuditTrail { get; set; } = Array.Empty<UserAuditItem>();
+    }
+
+    public class UserAuditItem
+    {
+        public string FieldName { get; set; } = string.Empty;
+        public string? OldValue { get; set; }
+        public string? NewValue { get; set; }
+        public DateTime ChangedAt { get; set; }
+        public string? ChangedBy { get; set; }
+        public string? Source { get; set; }
     }
 }

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using one_db_mitra.Data;
 using one_db_mitra.Models.Admin;
+using one_db_mitra.Services.CompanyHierarchy;
 
 namespace one_db_mitra.Controllers
 {
@@ -17,11 +18,13 @@ namespace one_db_mitra.Controllers
     {
         private readonly OneDbMitraContext _context;
         private readonly Services.Audit.AuditLogger _auditLogger;
+        private readonly CompanyHierarchyService _companyHierarchyService;
 
-        public OrganizationAdminController(OneDbMitraContext context, Services.Audit.AuditLogger auditLogger)
+        public OrganizationAdminController(OneDbMitraContext context, Services.Audit.AuditLogger auditLogger, CompanyHierarchyService companyHierarchyService)
         {
             _context = context;
             _auditLogger = auditLogger;
+            _companyHierarchyService = companyHierarchyService;
         }
 
         [HttpGet]
@@ -1471,8 +1474,12 @@ namespace one_db_mitra.Controllers
                 .Select(r => r.level_akses)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            var isOwner = IsOwner() || roleLevel >= 4;
+            var isTopLevel = !(departmentId.HasValue && departmentId.Value > 0)
+                             && !(sectionId.HasValue && sectionId.Value > 0)
+                             && !(positionId.HasValue && positionId.Value > 0);
+            var isOwner = (IsOwner() || roleLevel >= 4) && isTopLevel;
             var isDepartmentAdmin = departmentId.HasValue && departmentId.Value > 0;
+            var allowedCompanyIds = await _companyHierarchyService.GetDescendantCompanyIdsAsync(companyId, cancellationToken);
 
             return new OrgAccessScope
             {
@@ -1483,20 +1490,21 @@ namespace one_db_mitra.Controllers
                 SectionId = sectionId,
                 PositionId = positionId,
                 IsOwner = isOwner,
-                IsDepartmentAdmin = isDepartmentAdmin
+                IsDepartmentAdmin = isDepartmentAdmin,
+                AllowedCompanyIds = allowedCompanyIds
             };
         }
 
         private static IQueryable<Models.Db.tbl_m_perusahaan> ApplyCompanyScope(IQueryable<Models.Db.tbl_m_perusahaan> query, OrgAccessScope scope)
         {
+            if (scope.AllowedCompanyIds.Count > 0)
+            {
+                return query.Where(c => scope.AllowedCompanyIds.Contains(c.perusahaan_id));
+            }
+
             if (scope.IsOwner)
             {
                 return query;
-            }
-
-            if (scope.CompanyId > 0)
-            {
-                return query.Where(c => c.perusahaan_id == scope.CompanyId);
             }
 
             return query.Where(c => false);
@@ -1504,19 +1512,19 @@ namespace one_db_mitra.Controllers
 
         private static IQueryable<Models.Db.tbl_m_departemen> ApplyDepartmentScope(IQueryable<Models.Db.tbl_m_departemen> query, OrgAccessScope scope)
         {
-            if (scope.IsOwner)
-            {
-                return query;
-            }
-
             if (scope.DepartmentId.HasValue && scope.DepartmentId.Value > 0)
             {
                 return query.Where(d => d.departemen_id == scope.DepartmentId.Value);
             }
 
-            if (scope.CompanyId > 0)
+            if (scope.AllowedCompanyIds.Count > 0)
             {
-                return query.Where(d => d.perusahaan_id == scope.CompanyId);
+                return query.Where(d => d.perusahaan_id.HasValue && scope.AllowedCompanyIds.Contains(d.perusahaan_id.Value));
+            }
+
+            if (scope.IsOwner)
+            {
+                return query;
             }
 
             return query.Where(d => false);
@@ -1524,11 +1532,6 @@ namespace one_db_mitra.Controllers
 
         private static IQueryable<Models.Db.tbl_m_seksi> ApplySectionScope(IQueryable<Models.Db.tbl_m_seksi> query, OrgAccessScope scope)
         {
-            if (scope.IsOwner)
-            {
-                return query;
-            }
-
             if (scope.SectionId.HasValue && scope.SectionId.Value > 0)
             {
                 return query.Where(s => s.seksi_id == scope.SectionId.Value);
@@ -1539,9 +1542,14 @@ namespace one_db_mitra.Controllers
                 return query.Where(s => s.departemen_id == scope.DepartmentId.Value);
             }
 
-            if (scope.CompanyId > 0)
+            if (scope.AllowedCompanyIds.Count > 0)
             {
-                return query.Where(s => s.perusahaan_id == scope.CompanyId);
+                return query.Where(s => s.perusahaan_id.HasValue && scope.AllowedCompanyIds.Contains(s.perusahaan_id.Value));
+            }
+
+            if (scope.IsOwner)
+            {
+                return query;
             }
 
             return query.Where(s => false);
@@ -1549,11 +1557,6 @@ namespace one_db_mitra.Controllers
 
         private IQueryable<Models.Db.tbl_m_jabatan> ApplyPositionScope(IQueryable<Models.Db.tbl_m_jabatan> query, OrgAccessScope scope)
         {
-            if (scope.IsOwner)
-            {
-                return query;
-            }
-
             if (scope.PositionId.HasValue && scope.PositionId.Value > 0)
             {
                 return query.Where(p => p.jabatan_id == scope.PositionId.Value);
@@ -1570,9 +1573,14 @@ namespace one_db_mitra.Controllers
                     .Any(s => s.seksi_id == p.seksi_id && s.departemen_id == scope.DepartmentId.Value));
             }
 
-            if (scope.CompanyId > 0)
+            if (scope.AllowedCompanyIds.Count > 0)
             {
-                return query.Where(p => p.perusahaan_id == scope.CompanyId);
+                return query.Where(p => p.perusahaan_id.HasValue && scope.AllowedCompanyIds.Contains(p.perusahaan_id.Value));
+            }
+
+            if (scope.IsOwner)
+            {
+                return query;
             }
 
             return query.Where(p => false);
@@ -1600,7 +1608,7 @@ namespace one_db_mitra.Controllers
         {
             if (scope.IsOwner)
             {
-                return "Scope: Owner · Semua Perusahaan";
+                return "Scope: Owner - seluruh hirarki perusahaan";
             }
 
             string? companyName = null;
@@ -1662,6 +1670,7 @@ namespace one_db_mitra.Controllers
             public int? PositionId { get; set; }
             public bool IsOwner { get; set; }
             public bool IsDepartmentAdmin { get; set; }
+            public HashSet<int> AllowedCompanyIds { get; set; } = new HashSet<int>();
         }
     }
 }

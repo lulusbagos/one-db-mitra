@@ -1,0 +1,67 @@
+@model one_db_mitra.Models.Admin.NotificationIndexViewModel
+@{
+    ViewData["Title"] = "Notification Center";
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <p class="text-uppercase text-secondary small mb-1">Pengaturan</p>
+            <h2 class="mb-0">Notification Center</h2>
+            <p class="text-secondary mb-0">Inbox notifikasi untuk approval, email, dan alert sistem.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">Daftar Notifikasi</h6>
+            <span class="badge text-bg-light">@Model.Items.Count</span>
+        </div>
+        <div class="card-body table-responsive">
+            @if (Model.Items.Count == 0)
+            {
+                <div class="text-secondary">Belum ada notifikasi.</div>
+            }
+            else
+            {
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Jenis</th>
+                            <th>Judul</th>
+                            <th>Pesan</th>
+                            <th>Due</th>
+                            <th>Waktu</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            var badgeClass = item.Type switch
+                            {
+                                "danger" => "text-bg-danger",
+                                "warning" => "text-bg-warning",
+                                "success" => "text-bg-success",
+                                _ => "text-bg-info"
+                            };
+                            <tr>
+                                <td><span class="badge @badgeClass">@item.Category</span></td>
+                                <td>@item.Title</td>
+                                <td>@item.Message</td>
+                                <td>@(item.DueAt.HasValue ? item.DueAt.Value.ToLocalTime().ToString("dd MMM yyyy") : "-")</td>
+                                <td>@item.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                                <td class="text-end">
+                                    @if (!string.IsNullOrWhiteSpace(item.Link))
+                                    {
+                                        <a class="btn btn-sm btn-outline-primary" href="@item.Link">Buka</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>

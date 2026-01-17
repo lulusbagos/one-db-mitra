@@ -168,6 +168,21 @@
                         <input id="globalSearchInput" type="text" placeholder="Cari user, role, menu..." autocomplete="off" />
                         <div class="search-dropdown" id="globalSearchDropdown"></div>
                     </div>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary position-relative" data-bs-toggle="dropdown" id="notificationToggle">
+                            <i class="bi bi-bell"></i>
+                            <span class="badge bg-danger position-absolute top-0 start-100 translate-middle p-1 rounded-circle d-none" id="notificationBadge"></span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end p-0 notification-dropdown">
+                            <div class="dropdown-header d-flex align-items-center justify-content-between">
+                                <span>Notification Center</span>
+                                <a class="small text-decoration-none" href="/NotificationCenter/Index">Lihat semua</a>
+                            </div>
+                            <div id="notificationList" class="notification-list">
+                                <div class="text-secondary small px-3 py-2">Memuat notifikasi...</div>
+                            </div>
+                        </div>
+                    </div>
                     @if (isImpersonating)
                     {
                         <div class="d-flex align-items-center gap-2">
