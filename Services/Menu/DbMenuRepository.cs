@@ -35,21 +35,29 @@ namespace one_db_mitra.Services.Menu
                 return Array.Empty<MenuItem>();
             }
 
+            var allMenus = await _context.tbl_m_menu
+                .AsNoTracking()
+                .Where(menu => menu.is_aktif)
+                .ToListAsync(cancellationToken);
+
             var roleMenuIds = await _context.tbl_r_menu_peran
                 .AsNoTracking()
                 .Where(rel => rel.is_aktif && roleIds.Contains(rel.peran_id))
                 .Select(rel => rel.menu_id)
                 .ToListAsync(cancellationToken);
 
+            if (ShouldLimitAdminMenus(scope))
+            {
+                roleMenuIds = allMenus
+                    .Where(menu => IsLimitedAdminMenu(menu.kode_menu))
+                    .Select(menu => menu.menu_id)
+                    .ToList();
+            }
+
             if (roleMenuIds.Count == 0)
             {
                 return Array.Empty<MenuItem>();
             }
-
-            var allMenus = await _context.tbl_m_menu
-                .AsNoTracking()
-                .Where(menu => menu.is_aktif)
-                .ToListAsync(cancellationToken);
 
             var roleLookup = await (from rel in _context.tbl_r_menu_peran.AsNoTracking()
                                     join role in _context.tbl_m_peran.AsNoTracking() on rel.peran_id equals role.peran_id
@@ -114,6 +122,30 @@ namespace one_db_mitra.Services.Menu
                 .ToList();
 
             return BuildMenuTree(items);
+        }
+
+        private static bool ShouldLimitAdminMenus(MenuScope scope)
+        {
+            if (scope.RoleId == 1 && scope.DepartmentId.HasValue)
+            {
+                return true;
+            }
+
+            return scope.RoleId is 2 or 3 or 4;
+        }
+
+        private static bool IsLimitedAdminMenu(string? menuCode)
+        {
+            if (string.IsNullOrWhiteSpace(menuCode))
+            {
+                return false;
+            }
+
+            return menuCode.Equals("DASHBOARD", StringComparison.OrdinalIgnoreCase)
+                   || menuCode.Equals("USER_MGMT", StringComparison.OrdinalIgnoreCase)
+                   || menuCode.Equals("AUDIT_LOG", StringComparison.OrdinalIgnoreCase)
+                   || menuCode.Equals("ORG", StringComparison.OrdinalIgnoreCase)
+                   || menuCode.Equals("ORG_COMPANY", StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task<MenuOperationResult> AddMenuAsync(MenuEditRequest request, CancellationToken cancellationToken = default)

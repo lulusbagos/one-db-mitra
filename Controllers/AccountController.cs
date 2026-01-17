@@ -42,6 +42,8 @@ namespace one_db_mitra.Controllers
             var activeWindow = DateTime.UtcNow.AddMinutes(-30);
             ViewBag.ActiveSessionCount = await _context.tbl_r_sesi_aktif.AsNoTracking()
                 .CountAsync(s => s.is_aktif && s.last_seen >= activeWindow, cancellationToken);
+            ViewBag.RegisterMessage = TempData["RegisterMessage"] as string;
+            ViewBag.RegisterType = TempData["RegisterType"] as string ?? "success";
             ViewData["ReturnUrl"] = returnUrl;
             return View(new LoginViewModel());
         }
@@ -59,9 +61,12 @@ namespace one_db_mitra.Controllers
                 return View(model);
             }
 
+            var loginId = (model.Username ?? string.Empty).Trim().ToLowerInvariant();
             var user = await _context.tbl_m_pengguna
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.username == model.Username && u.kata_sandi == model.Password && u.is_aktif, cancellationToken);
+                .FirstOrDefaultAsync(u => u.is_aktif
+                    && u.kata_sandi == model.Password
+                    && ((u.username ?? string.Empty).ToLower() == loginId || (u.email ?? string.Empty).ToLower() == loginId), cancellationToken);
 
             if (user is null)
             {
@@ -98,6 +103,214 @@ namespace one_db_mitra.Controllers
             }
 
             return RedirectToAction("Index", "MenuAdmin");
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(Models.Auth.RegisterViewModel model, CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["RegisterMessage"] = "Lengkapi data pendaftaran terlebih dahulu.";
+                TempData["RegisterType"] = "danger";
+                return RedirectToAction(nameof(Login));
+            }
+
+            var noNik = model.NoNik.Trim();
+            var noKtp = model.NoKtp.Trim();
+            var email = model.Email.Trim();
+            var emailLower = email.ToLowerInvariant();
+
+            var existingUser = await _context.tbl_m_pengguna.AsNoTracking()
+                .AnyAsync(u => u.username == noNik || (u.email ?? string.Empty).ToLower() == emailLower, cancellationToken);
+            if (existingUser)
+            {
+                TempData["RegisterMessage"] = "Akun dengan NIK atau email ini sudah terdaftar.";
+                TempData["RegisterType"] = "danger";
+                return RedirectToAction(nameof(Login));
+            }
+
+            var record = await (from k in _context.tbl_t_karyawan.AsNoTracking()
+                                join p in _context.tbl_m_personal.AsNoTracking() on k.personal_id equals p.personal_id
+                                where k.no_nik == noNik
+                                      && p.no_ktp == noKtp
+                                      && p.tanggal_lahir == model.TanggalLahir
+                                orderby k.created_at descending
+                                select new { k, p })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (record is null)
+            {
+                TempData["RegisterMessage"] = "Data tidak ditemukan. Pastikan NIK, KTP, dan tanggal lahir benar.";
+                TempData["RegisterType"] = "danger";
+                return RedirectToAction(nameof(Login));
+            }
+
+            if (!record.k.status_aktif)
+            {
+                TempData["RegisterMessage"] = "Karyawan tidak aktif. Hubungi admin perusahaan.";
+                TempData["RegisterType"] = "danger";
+                return RedirectToAction(nameof(Login));
+            }
+
+            var company = await _context.tbl_m_perusahaan.AsNoTracking()
+                .FirstOrDefaultAsync(c => c.perusahaan_id == record.k.perusahaan_id, cancellationToken);
+            if (company is null)
+            {
+                TempData["RegisterMessage"] = "Perusahaan belum terdaftar di sistem.";
+                TempData["RegisterType"] = "danger";
+                return RedirectToAction(nameof(Login));
+            }
+
+            if (!company.tipe_perusahaan_id.HasValue)
+            {
+                TempData["RegisterMessage"] = "Tipe perusahaan belum ditentukan. Hubungi admin.";
+                TempData["RegisterType"] = "danger";
+                return RedirectToAction(nameof(Login));
+            }
+
+            var tipe = await _context.tbl_m_tipe_perusahaan.AsNoTracking()
+                .FirstOrDefaultAsync(t => t.tipe_perusahaan_id == company.tipe_perusahaan_id.Value, cancellationToken);
+            if (tipe is null)
+            {
+                TempData["RegisterMessage"] = "Tipe perusahaan tidak ditemukan.";
+                TempData["RegisterType"] = "danger";
+                return RedirectToAction(nameof(Login));
+            }
+
+            var roleName = tipe.nama_tipe?.Trim() ?? string.Empty;
+            var role = await _context.tbl_m_peran.AsNoTracking()
+                .FirstOrDefaultAsync(r => r.is_aktif && (r.nama_peran ?? string.Empty).ToLower() == roleName.ToLower(), cancellationToken);
+            if (role is null)
+            {
+                TempData["RegisterMessage"] = "Role untuk tipe perusahaan belum tersedia.";
+                TempData["RegisterType"] = "danger";
+                return RedirectToAction(nameof(Login));
+            }
+
+            var positionName = record.k.jabatan_id.HasValue
+                ? await _context.tbl_m_jabatan.AsNoTracking()
+                    .Where(j => j.jabatan_id == record.k.jabatan_id)
+                    .Select(j => j.nama_jabatan)
+                    .FirstOrDefaultAsync(cancellationToken)
+                : null;
+
+            var isHrAdmin = ContainsHrKeyword(positionName);
+            var departemenId = isHrAdmin ? null : record.k.departemen_id;
+            var seksiId = isHrAdmin ? null : record.k.seksi_id;
+
+            var password = GeneratePassword(10);
+
+            var user = new Models.Db.tbl_m_pengguna
+            {
+                username = noNik,
+                kata_sandi = password,
+                nama_lengkap = record.p.nama_lengkap,
+                email = email,
+                perusahaan_id = record.k.perusahaan_id,
+                peran_id = role.peran_id,
+                departemen_id = departemenId,
+                seksi_id = seksiId,
+                jabatan_id = record.k.jabatan_id,
+                is_aktif = true,
+                dibuat_pada = DateTime.UtcNow
+            };
+
+            _context.tbl_m_pengguna.Add(user);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            await QueueRegisterEmailAsync(user, role.nama_peran, company.nama_perusahaan, departemenId, seksiId, record.k.jabatan_id, cancellationToken);
+
+            TempData["RegisterMessage"] = "Akun berhasil dibuat. Silakan cek email untuk detail login.";
+            TempData["RegisterType"] = "success";
+            return RedirectToAction(nameof(Login));
+        }
+
+        private async Task QueueRegisterEmailAsync(Models.Db.tbl_m_pengguna user, string? roleName, string? companyName, int? departmentId, int? sectionId, int? positionId, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(user.email))
+            {
+                return;
+            }
+
+            var departmentName = departmentId.HasValue
+                ? await _context.tbl_m_departemen.AsNoTracking()
+                    .Where(d => d.departemen_id == departmentId.Value)
+                    .Select(d => d.nama_departemen)
+                    .FirstOrDefaultAsync(cancellationToken)
+                : null;
+            var sectionName = sectionId.HasValue
+                ? await _context.tbl_m_seksi.AsNoTracking()
+                    .Where(s => s.seksi_id == sectionId.Value)
+                    .Select(s => s.nama_seksi)
+                    .FirstOrDefaultAsync(cancellationToken)
+                : null;
+            var positionName = positionId.HasValue
+                ? await _context.tbl_m_jabatan.AsNoTracking()
+                    .Where(j => j.jabatan_id == positionId.Value)
+                    .Select(j => j.nama_jabatan)
+                    .FirstOrDefaultAsync(cancellationToken)
+                : null;
+
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var loginUrl = $"{baseUrl}/Account/Login";
+
+            var message = $@"
+                <div style=""font-family: 'Segoe UI', Arial, sans-serif; color: #1f2937;"">
+                    <h2 style=""margin:0 0 12px;"">Akun Anda sudah dibuat</h2>
+                    <p>Halo <strong>{System.Net.WebUtility.HtmlEncode(user.nama_lengkap ?? user.username ?? "-")}</strong>,</p>
+                    <p>Berikut detail akses Anda:</p>
+                    <ul>
+                        <li><strong>Username:</strong> {System.Net.WebUtility.HtmlEncode(user.username ?? "-")}</li>
+                        <li><strong>Password:</strong> {System.Net.WebUtility.HtmlEncode(user.kata_sandi ?? "-")}</li>
+                        <li><strong>Role:</strong> {System.Net.WebUtility.HtmlEncode(roleName ?? "-")}</li>
+                        <li><strong>Perusahaan:</strong> {System.Net.WebUtility.HtmlEncode(companyName ?? "-")}</li>
+                        <li><strong>Departemen:</strong> {System.Net.WebUtility.HtmlEncode(departmentName ?? "-")}</li>
+                        <li><strong>Section:</strong> {System.Net.WebUtility.HtmlEncode(sectionName ?? "-")}</li>
+                        <li><strong>Jabatan:</strong> {System.Net.WebUtility.HtmlEncode(positionName ?? "-")}</li>
+                    </ul>
+                    <p>Silakan login melalui tautan berikut:</p>
+                    <p><a href=""{loginUrl}"">{loginUrl}</a></p>
+                    <p style=""color:#6b7280; font-size:12px;"">Email ini tercatat otomatis oleh sistem.</p>
+                </div>";
+
+            var emailLog = new Models.Db.tbl_m_email_notifikasi
+            {
+                id = Guid.NewGuid().ToString("N"),
+                email_to = user.email.Trim(),
+                subject = "Akun ONE DB MITRA - Detail Login",
+                pesan_html = message,
+                status = "queued",
+                created_at = DateTime.UtcNow,
+                created_by = "system"
+            };
+
+            _context.tbl_m_email_notifikasi.Add(emailLog);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        private static bool ContainsHrKeyword(string? positionName)
+        {
+            if (string.IsNullOrWhiteSpace(positionName))
+            {
+                return false;
+            }
+
+            var text = positionName.ToLowerInvariant();
+            return text.Contains("human") || text.Contains("hr") || text.Contains("resource");
+        }
+
+        private static string GeneratePassword(int length)
+        {
+            const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+            var random = new Random();
+            var buffer = new char[length];
+            for (var i = 0; i < length; i++)
+            {
+                buffer[i] = chars[random.Next(chars.Length)];
+            }
+            return new string(buffer);
         }
 
         [Authorize]

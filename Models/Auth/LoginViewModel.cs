@@ -5,6 +5,7 @@ namespace one_db_mitra.Models.Auth
     public class LoginViewModel
     {
         [Required(ErrorMessage = "Username wajib diisi.")]
+        [Display(Name = "No NIK / Email")]
         [StringLength(100)]
         public string Username { get; set; } = string.Empty;
 

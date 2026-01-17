@@ -199,7 +199,7 @@
             <div class="row g-3">
                 <div class="col-md-4">
                     <label asp-for="CompanyId" class="form-label ik-required"></label>
-                    <select asp-for="CompanyId" class="form-select" asp-items="Model.CompanyOptions" id="companySelect">
+                    <select asp-for="CompanyId" class="form-select js-company-select" asp-items="Model.CompanyOptions" id="companySelect" data-placeholder="Pilih perusahaan">
                         <option value="">--</option>
                     </select>
                 </div>

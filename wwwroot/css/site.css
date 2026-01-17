@@ -1179,3 +1179,27 @@ body.is-loading .app-content .detail-item * {
     animation: none !important;
   }
 }
+
+.select2-container--default .select2-selection--single {
+  height: 38px;
+  border: 1px solid #ced4da;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  padding-left: 0;
+  line-height: 1.4;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+  height: 36px;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field {
+  border-radius: 0.5rem;
+  border: 1px solid #cbd5f5;
+  padding: 0.4rem 0.75rem;
+}

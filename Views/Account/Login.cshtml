@@ -115,12 +115,18 @@
                         <p class="text-muted small">Masuk ke dashboard @appName.</p>
                     </div>
 
+                    <div class="login-switcher mb-4">
+                        <button type="button" class="switcher-btn active" data-target="#loginPanel">Masuk</button>
+                        <button type="button" class="switcher-btn" data-target="#registerPanel">Daftar</button>
+                    </div>
+
                     @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
                     {
                         <div class="alert alert-danger">@Model.ErrorMessage</div>
                     }
 
-                    <form method="post" asp-action="Login" asp-controller="Account">
+                    <div id="loginPanel">
+                        <form method="post" asp-action="Login" asp-controller="Account">
                         @Html.AntiForgeryToken()
 
                         <div class="form-group mb-4">
@@ -152,7 +158,54 @@
                         <button type="submit" class="btn btn-evolution btn-block btn-lg shadow-lg">
                             <span class="position-relative z-index-1">Sign In <i class="fas fa-arrow-right ml-2 tiny"></i></span>
                         </button>
-                    </form>
+                        </form>
+                    </div>
+
+                    <div id="registerPanel" class="d-none">
+                        @if (!string.IsNullOrWhiteSpace(ViewBag.RegisterMessage as string))
+                        {
+                            <div class="alert alert-@(ViewBag.RegisterType ?? "success")">
+                                @ViewBag.RegisterMessage
+                            </div>
+                        }
+                        <div class="alert alert-info small">
+                            Daftar dengan No NIK, No KTP, dan Tanggal Lahir yang sesuai data karyawan.
+                        </div>
+                        <form method="post" asp-action="Register" asp-controller="Account">
+                            @Html.AntiForgeryToken()
+                            <div class="form-group mb-3">
+                                <label class="input-label">No NIK</label>
+                                <div class="input-group-evolution">
+                                    <span class="input-group-icon"><i class="far fa-id-badge"></i></span>
+                                    <input name="NoNik" class="form-control input-evolution" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="input-label">No KTP</label>
+                                <div class="input-group-evolution">
+                                    <span class="input-group-icon"><i class="far fa-id-card"></i></span>
+                                    <input name="NoKtp" class="form-control input-evolution" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="input-label">Tanggal Lahir</label>
+                                <div class="input-group-evolution">
+                                    <span class="input-group-icon"><i class="far fa-calendar"></i></span>
+                                    <input name="TanggalLahir" type="date" class="form-control input-evolution" />
+                                </div>
+                            </div>
+                            <div class="form-group mb-4">
+                                <label class="input-label">Email</label>
+                                <div class="input-group-evolution">
+                                    <span class="input-group-icon"><i class="far fa-envelope"></i></span>
+                                    <input name="Email" type="email" class="form-control input-evolution" autocomplete="email" />
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-evolution btn-block btn-lg shadow-lg">
+                                <span class="position-relative z-index-1">Daftar Akun <i class="fas fa-arrow-right ml-2 tiny"></i></span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
@@ -322,6 +375,32 @@
         .btn-evolution:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(15, 23, 42, 0.2); color: white; }
         .btn-evolution:hover::before { transform: translateX(100%); }
 
+        .login-switcher {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: #f1f5f9;
+            border-radius: 14px;
+            padding: 6px;
+            gap: 6px;
+        }
+        .switcher-btn {
+            border: none;
+            background: transparent;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+        .switcher-btn.active {
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+        }
+
         .remember-check {
             display: flex; align-items: center; gap: 0.5rem;
         }
@@ -379,6 +458,31 @@
             }
 
             setInterval(refreshOnline, 30000);
+        })();
+
+        (function () {
+            const buttons = document.querySelectorAll('.switcher-btn');
+            const panels = {
+                login: document.getElementById('loginPanel'),
+                register: document.getElementById('registerPanel')
+            };
+            const hasRegisterMessage = "@(string.IsNullOrWhiteSpace(ViewBag.RegisterMessage as string) ? "0" : "1")";
+
+            if (!panels.login || !panels.register || buttons.length === 0) {
+                return;
+            }
+
+            function setActive(targetId) {
+                panels.login.classList.toggle('d-none', targetId !== '#loginPanel');
+                panels.register.classList.toggle('d-none', targetId !== '#registerPanel');
+                buttons.forEach(btn => btn.classList.toggle('active', btn.dataset.target === targetId));
+            }
+
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => setActive(btn.dataset.target || '#loginPanel'));
+            });
+
+            setActive(hasRegisterMessage === "1" ? '#registerPanel' : '#loginPanel');
         })();
     </script>
 }

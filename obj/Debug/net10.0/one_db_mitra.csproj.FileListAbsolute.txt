@@ -228,9 +228,7 @@ D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\ugih
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\zu4l1xu4jd-{0}-wnux8pv31v-wnux8pv31v.gz
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\3tea0jju4w-{0}-7fg0hl6hkg-7fg0hl6hkg.gz
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\3nyics4p3u-{0}-hiqumc4mhz-hiqumc4mhz.gz
-D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\841fzhkz5o-{0}-xb75b6gxzz-xb75b6gxzz.gz
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\4q9rv13u4x-{0}-61n19gt1b8-61n19gt1b8.gz
-D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\woo1l6tr1x-{0}-2okya6t3ev-2okya6t3ev.gz
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\2x0dbpwn2n-{0}-bqjiyaj88i-bqjiyaj88i.gz
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\h29f8xr128-{0}-c2jlpeoesf-c2jlpeoesf.gz
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\uza7dilh91-{0}-erw9l3u2r3-erw9l3u2r3.gz
@@ -304,3 +302,5 @@ D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\one_db_mitra.pd
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\one_db_mitra.genruntimeconfig.cache
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\ref\one_db_mitra.dll
 D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\one_db_mitra.sourcelink.json
+D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\841fzhkz5o-{0}-y71hyiyj1n-y71hyiyj1n.gz
+D:\4. PROJECT\2. Web\one_db_mitra\one_db_mitra\obj\Debug\net10.0\compressed\woo1l6tr1x-{0}-2j1s21avbc-2j1s21avbc.gz

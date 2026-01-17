@@ -102,7 +102,7 @@
                     <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
                     <input type="text" class="form-control" id="karyawanSearch" placeholder="Cari nama, NIK, email..." />
                 </div>
-                <select class="form-select form-select-sm karyawan-filter" id="karyawanCompanyFilter">
+                <select class="form-select form-select-sm karyawan-filter js-company-select" id="karyawanCompanyFilter" data-placeholder="Semua Perusahaan">
                     <option value="">Semua Perusahaan</option>
                     @foreach (var option in companyOptions)
                     {

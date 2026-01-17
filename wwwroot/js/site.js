@@ -409,6 +409,29 @@
         });
     })();
 
+    (function initCompanySelects() {
+        if (!$.fn.select2) {
+            return;
+        }
+
+        const selects = $('.js-company-select');
+        if (!selects.length) {
+            return;
+        }
+
+        selects.each(function () {
+            const $select = $(this);
+            if ($select.data('select2')) {
+                return;
+            }
+            $select.select2({
+                width: '100%',
+                placeholder: $select.data('placeholder') || 'Pilih perusahaan',
+                allowClear: true
+            });
+        });
+    })();
+
     (function initRealtimeNotifications() {
         if (typeof signalR === 'undefined') {
             return;

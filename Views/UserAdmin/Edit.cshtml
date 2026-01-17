@@ -49,12 +49,12 @@
                         <label asp-for="CompanyId" class="form-label"></label>
                         @if (isDepartmentAdmin)
                         {
-                            <select asp-for="CompanyId" class="form-select" asp-items="Model.CompanyOptions" disabled></select>
+                            <select asp-for="CompanyId" class="form-select js-company-select" asp-items="Model.CompanyOptions" data-placeholder="Pilih perusahaan" disabled></select>
                             <input type="hidden" asp-for="CompanyId" />
                         }
                         else
                         {
-                            <select asp-for="CompanyId" class="form-select" asp-items="Model.CompanyOptions"></select>
+                            <select asp-for="CompanyId" class="form-select js-company-select" asp-items="Model.CompanyOptions" data-placeholder="Pilih perusahaan"></select>
                         }
                     </div>
                     <div class="col-md-6">
