@@ -3,9 +3,9 @@
     ViewData["Title"] = "Manajemen Perusahaan";
     var guideItems = new[]
     {
-        "Tambah perusahaan baru lalu isi tipe dan induk jika ada.",
+        "Pengajuan perusahaan dilakukan melalui menu Pengajuan Perusahaan.",
         "Gunakan filter aktif untuk fokus pada perusahaan yang masih berlaku.",
-        "Pastikan hierarki induk benar agar akses turunannya akurat."
+        "Data perusahaan lama yang belum lengkap akan diberi tanda merah."
     };
 }
 
@@ -14,7 +14,7 @@
         <div>
             <p class="text-uppercase text-secondary small mb-1">Pengaturan</p>
             <h2 class="mb-1">Manajemen Perusahaan</h2>
-            <p class="text-secondary mb-0">Kelola perusahaan dan hierarki induk.</p>
+            <p class="text-secondary mb-0">Daftar perusahaan berdasarkan hirarki dan tipe.</p>
         </div>
         <div class="d-flex flex-wrap gap-2 align-items-center">
             <form method="get" class="d-flex flex-wrap align-items-center gap-2">
@@ -35,9 +35,6 @@
                     <i class="bi bi-shield-lock me-1"></i>@scopeInfo
                 </span>
             }
-            <a class="btn btn-primary" asp-action="CreateCompany">
-                <i class="bi bi-plus-lg me-2"></i>Tambah Perusahaan
-            </a>
         </div>
     </div>
     @await Html.PartialAsync("_SettingGuide", guideItems, new ViewDataDictionary(ViewData)
@@ -53,6 +50,7 @@
             <table class="table table-striped align-middle mb-0">
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Kode</th>
                         <th>Nama</th>
                         <th>Tipe</th>
@@ -65,7 +63,7 @@
                     @if (Model.Count == 0)
                     {
                         <tr>
-                            <td colspan="6" class="text-center text-secondary py-4">Belum ada perusahaan. Tambahkan perusahaan pertama.</td>
+                            <td colspan="7" class="text-center text-secondary py-4">Belum ada data perusahaan.</td>
                         </tr>
                     }
                     else
@@ -73,9 +71,19 @@
                         @foreach (var company in Model)
                         {
                             <tr>
+                                <td>@company.CompanyId</td>
                                 <td>@company.CompanyCode</td>
-                                <td>@company.CompanyName</td>
-                                <td>@company.CompanyTypeName</td>
+                                <td>
+                                    <div class="fw-semibold">@company.CompanyName</div>
+                                    @if (company.DokumenBelumLengkap)
+                                    {
+                                        <div class="small text-danger">@company.RemarkDokumen</div>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@company.CompanyTypeName</div>
+                                    <div class="small text-secondary">ID: @(company.CompanyTypeId?.ToString() ?? "-")</div>
+                                </td>
                                 <td>@company.ParentCompanyName</td>
                                 <td>
                                     <span class="badge @(company.IsActive ? "text-bg-success" : "text-bg-secondary")">

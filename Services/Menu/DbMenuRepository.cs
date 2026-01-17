@@ -46,10 +46,12 @@ namespace one_db_mitra.Services.Menu
                 .Select(rel => rel.menu_id)
                 .ToListAsync(cancellationToken);
 
-            if (ShouldLimitAdminMenus(scope))
+            var restrictedMenuCodes = await GetRestrictedMenuCodesAsync(scope, cancellationToken);
+            if (restrictedMenuCodes is not null)
             {
                 roleMenuIds = allMenus
-                    .Where(menu => IsLimitedAdminMenu(menu.kode_menu))
+                    .Where(menu => !string.IsNullOrWhiteSpace(menu.kode_menu)
+                                   && restrictedMenuCodes.Contains(menu.kode_menu))
                     .Select(menu => menu.menu_id)
                     .ToList();
             }
@@ -124,28 +126,80 @@ namespace one_db_mitra.Services.Menu
             return BuildMenuTree(items);
         }
 
-        private static bool ShouldLimitAdminMenus(MenuScope scope)
+        private async Task<HashSet<string>?> GetRestrictedMenuCodesAsync(MenuScope scope, CancellationToken cancellationToken)
         {
-            if (scope.RoleId == 1 && scope.DepartmentId.HasValue)
+            if (scope is null || scope.CompanyId <= 0)
             {
-                return true;
+                return null;
             }
 
-            return scope.RoleId is 2 or 3 or 4;
-        }
-
-        private static bool IsLimitedAdminMenu(string? menuCode)
-        {
-            if (string.IsNullOrWhiteSpace(menuCode))
+            var hasDepartment = scope.DepartmentId.HasValue && scope.DepartmentId.Value > 0;
+            var isOwnerRole = scope.RoleId == 1;
+            if (isOwnerRole && !hasDepartment)
             {
-                return false;
+                return null;
             }
 
-            return menuCode.Equals("DASHBOARD", StringComparison.OrdinalIgnoreCase)
-                   || menuCode.Equals("USER_MGMT", StringComparison.OrdinalIgnoreCase)
-                   || menuCode.Equals("AUDIT_LOG", StringComparison.OrdinalIgnoreCase)
-                   || menuCode.Equals("ORG", StringComparison.OrdinalIgnoreCase)
-                   || menuCode.Equals("ORG_COMPANY", StringComparison.OrdinalIgnoreCase);
+            if (isOwnerRole && hasDepartment)
+            {
+                var departmentName = await _context.tbl_m_departemen.AsNoTracking()
+                    .Where(d => d.departemen_id == scope.DepartmentId!.Value)
+                    .Select(d => d.nama_departemen)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                var menuCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "DASHBOARD",
+                    "USER_MGMT",
+                    "AUDIT_LOG",
+                    "ORG",
+                    "ORG_COMPANY"
+                };
+
+                if (!string.IsNullOrWhiteSpace(departmentName)
+                    && departmentName.IndexOf("safety", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    menuCodes.Add("PENG");
+                    menuCodes.Add("PENGAJUAN");
+                }
+
+                return menuCodes;
+            }
+
+            if (!hasDepartment)
+            {
+                var companyType = await (from company in _context.tbl_m_perusahaan.AsNoTracking()
+                                         join type in _context.tbl_m_tipe_perusahaan.AsNoTracking()
+                                             on company.tipe_perusahaan_id equals type.tipe_perusahaan_id into typeJoin
+                                         from type in typeJoin.DefaultIfEmpty()
+                                         where company.perusahaan_id == scope.CompanyId
+                                         select type != null ? type.nama_tipe : null)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (!string.IsNullOrWhiteSpace(companyType)
+                    && companyType.IndexOf("Main Contractor", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        "PENG",
+                        "PENGAJUAN",
+                    };
+                }
+            }
+
+            if (scope.RoleId is 2 or 3 or 4)
+            {
+                return new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "DASHBOARD",
+                    "USER_MGMT",
+                    "AUDIT_LOG",
+                    "ORG",
+                    "ORG_COMPANY"
+                };
+            }
+
+            return null;
         }
 
         public async Task<MenuOperationResult> AddMenuAsync(MenuEditRequest request, CancellationToken cancellationToken = default)

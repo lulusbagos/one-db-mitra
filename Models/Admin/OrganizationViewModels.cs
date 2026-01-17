@@ -10,9 +10,12 @@ namespace one_db_mitra.Models.Admin
         public int CompanyId { get; set; }
         public string CompanyCode { get; set; } = string.Empty;
         public string CompanyName { get; set; } = string.Empty;
+        public int? CompanyTypeId { get; set; }
         public string CompanyTypeName { get; set; } = string.Empty;
         public string ParentCompanyName { get; set; } = "-";
         public bool IsActive { get; set; }
+        public bool DokumenBelumLengkap { get; set; }
+        public string? RemarkDokumen { get; set; }
     }
 
     public class DepartmentListItem

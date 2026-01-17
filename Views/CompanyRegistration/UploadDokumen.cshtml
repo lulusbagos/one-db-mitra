@@ -1,0 +1,163 @@
+@model one_db_mitra.Models.Admin.PengajuanPerusahaanCreateViewModel
+@{
+    ViewData["Title"] = "Lengkapi Dokumen Pengajuan";
+    var groups = Model.Dokumen.GroupBy(d => d.Grup).ToList();
+}
+
+@section Styles {
+    <style>
+        .doc-card { border-radius: 16px; border: 1px solid #e2e8f0; }
+        .doc-title { font-weight: 700; color: #0f172a; }
+        .doc-badge { font-size: 0.75rem; }
+        .upload-chip {
+            background: #f8fafc;
+            border: 1px dashed #94a3b8;
+            border-radius: 12px;
+            padding: 0.75rem;
+        }
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.25rem;
+        }
+        .doc-tile {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 1.5rem;
+            background: #f8fafc;
+            text-align: center;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        .doc-tile:hover {
+            border-color: #0ea5a3;
+            background: #ecfeff;
+            transform: translateY(-1px);
+        }
+        .doc-tile input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .doc-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 16px rgba(15, 118, 110, 0.12);
+            margin-bottom: 0.75rem;
+            color: #0f766e;
+            font-size: 1.4rem;
+        }
+        .doc-name {
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .doc-desc {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 0.35rem;
+        }
+        .doc-foot {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+    </style>
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 mb-4">
+        <div>
+            <p class="text-uppercase text-secondary small mb-1">Pengajuan</p>
+            <h2 class="doc-title mb-1">@Model.NamaPerusahaan</h2>
+            <p class="text-secondary mb-0">Unggah dokumen sesuai rekomendasi Safety.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" asp-action="Index">Kembali</a>
+            @if ((bool?)ViewBag.IsOwner ?? false)
+            {
+                <a class="btn btn-outline-primary" asp-action="Review" asp-route-id="@Model.PengajuanId">Timeline Review</a>
+            }
+        </div>
+    </div>
+
+    <div class="card doc-card">
+        <div class="card-body p-4">
+            @if (!Model.Dokumen.Any(d => d.Wajib))
+            {
+                <div class="alert alert-info small">
+                    Dokumen pada tahap awal bersifat opsional. Safety akan memilih dokumen wajib setelah review awal.
+                </div>
+            }
+            <form asp-action="UploadDokumen" asp-route-id="@Model.PengajuanId" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="PengajuanId" />
+
+                @for (var g = 0; g < groups.Count; g++)
+                {
+                    var group = groups[g];
+                    <div class="mb-4">
+                        <h6 class="text-uppercase text-secondary small mb-3">@group.Key</h6>
+                        <div class="doc-grid">
+                            @{
+                                var items = group.ToList();
+                            }
+                            @for (var i = 0; i < items.Count; i++)
+                            {
+                                var item = items[i];
+                                var index = Model.Dokumen.IndexOf(item);
+                                var icon = GetDocIcon(item.NamaDokumen);
+                                <div class="doc-tile">
+                                    <input type="hidden" name="Dokumen[@index].ReqId" value="@item.ReqId" />
+                                    <input type="hidden" name="Dokumen[@index].DocTypeId" value="@item.DocTypeId" />
+                                    <input type="hidden" name="Dokumen[@index].Grup" value="@item.Grup" />
+                                    <input type="hidden" name="Dokumen[@index].NamaDokumen" value="@item.NamaDokumen" />
+                                    <input type="file" name="Dokumen[@index].UploadFile" />
+                                    <div class="doc-icon"><i class="bi @icon"></i></div>
+                                    <div class="doc-name">Klik untuk unggah</div>
+                                    <div class="doc-desc">@item.NamaDokumen</div>
+                                    <div class="doc-foot">Format PDF (opsional)</div>
+                                    @if (!string.IsNullOrWhiteSpace(item.FileUrl))
+                                    {
+                                        <div class="mt-2">
+                                            <a class="btn btn-sm btn-outline-primary" href="@item.FileUrl" target="_blank">Lihat file</a>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">Simpan Dokumen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private static string GetDocIcon(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return "bi-file-earmark";
+        }
+
+        var lower = name.ToLowerInvariant();
+        if (lower.Contains("npwp")) return "bi-credit-card";
+        if (lower.Contains("kbli")) return "bi-journal-text";
+        if (lower.Contains("kontrak") || lower.Contains("spk") || lower.Contains("po")) return "bi-file-earmark-text";
+        if (lower.Contains("struktur")) return "bi-diagram-3";
+        if (lower.Contains("pjo")) return "bi-file-earmark-person";
+        if (lower.Contains("bpjs")) return "bi-shield-check";
+        if (lower.Contains("org")) return "bi-person-badge";
+        if (lower.Contains("skt") || lower.Contains("nib") || lower.Contains("iujp")) return "bi-file-earmark-check";
+        return "bi-file-earmark";
+    }
+}

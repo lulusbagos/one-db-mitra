@@ -1,0 +1,299 @@
+@model one_db_mitra.Models.Admin.PengajuanPerusahaanCreateViewModel
+@{
+    ViewData["Title"] = "Pengajuan Perusahaan Baru";
+}
+
+@section Styles {
+    <style>
+        :root {
+            --reg-primary: #0ea5a3;
+            --reg-dark: #0f766e;
+            --reg-soft: #ccfbf1;
+        }
+        .reg-card {
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 24px rgba(15, 118, 110, 0.08);
+        }
+        .reg-title {
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .reg-subtitle {
+            color: #64748b;
+        }
+        .reg-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .reg-input {
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            padding: 0.75rem 0.9rem;
+        }
+        .reg-input:focus {
+            border-color: var(--reg-primary);
+            box-shadow: 0 0 0 0.2rem rgba(20, 184, 166, 0.2);
+        }
+        .btn-reg {
+            background: linear-gradient(135deg, var(--reg-primary), var(--reg-dark));
+            border: none;
+            color: #fff;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+        }
+        .btn-reg:hover {
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .reg-note {
+            background: #f8fafc;
+            border-left: 4px solid var(--reg-primary);
+            padding: 1rem;
+            border-radius: 12px;
+        }
+    </style>
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 mb-4">
+        <div>
+            <p class="text-uppercase text-secondary small mb-1">Pengajuan</p>
+            <h2 class="reg-title mb-1">Pengajuan Perusahaan Baru</h2>
+            <p class="reg-subtitle mb-0">Isi data perusahaan, lalu lanjutkan ke upload dokumen wajib.</p>
+        </div>
+        <a class="btn btn-outline-secondary" asp-action="Index">Kembali</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <div class="card reg-card">
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="NamaPerusahaan" class="reg-label"></label>
+                                <input asp-for="NamaPerusahaan" class="form-control reg-input" />
+                                <span asp-validation-for="NamaPerusahaan" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="EmailPerusahaan" class="reg-label"></label>
+                                <input asp-for="EmailPerusahaan" class="form-control reg-input" />
+                                <span asp-validation-for="EmailPerusahaan" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="TipePerusahaanId" class="reg-label"></label>
+                                <input class="form-control reg-input" value="@(ViewBag.TargetTypeName ?? "-")" readonly />
+                                <input type="hidden" asp-for="TipePerusahaanId" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="PerusahaanIndukId" class="reg-label"></label>
+                                <input class="form-control reg-input" value="@(ViewBag.ParentCompanyName ?? "-")" readonly />
+                                <input type="hidden" asp-for="PerusahaanIndukId" />
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="AlamatLengkap" class="reg-label"></label>
+                                <textarea asp-for="AlamatLengkap" class="form-control reg-input" rows="2"></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Telepon" class="reg-label"></label>
+                                <input asp-for="Telepon" class="form-control reg-input" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="ContactPerson" class="reg-label"></label>
+                                <input asp-for="ContactPerson" class="form-control reg-input" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="NomorKontrak" class="reg-label"></label>
+                                <input asp-for="NomorKontrak" class="form-control reg-input" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="DurasiKontrak" class="reg-label"></label>
+                                <input asp-for="DurasiKontrak" class="form-control reg-input" />
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="ProvinsiName" class="reg-label"></label>
+                                <select id="provinsiSelect" class="form-select reg-input"></select>
+                                <input asp-for="ProvinsiName" type="hidden" id="provinsiName" />
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="RegencyName" class="reg-label"></label>
+                                <select id="kabupatenSelect" class="form-select reg-input" disabled="disabled"></select>
+                                <input asp-for="RegencyName" type="hidden" id="kabupatenName" />
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="DistrictName" class="reg-label"></label>
+                                <select id="kecamatanSelect" class="form-select reg-input" disabled="disabled"></select>
+                                <input asp-for="DistrictName" type="hidden" id="kecamatanName" />
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="VillageName" class="reg-label"></label>
+                                <select id="desaSelect" class="form-select reg-input" disabled="disabled"></select>
+                                <input asp-for="VillageName" type="hidden" id="desaName" />
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="CatatanPengaju" class="reg-label"></label>
+                                <textarea asp-for="CatatanPengaju" class="form-control reg-input" rows="2" placeholder="Catatan tambahan untuk tim safety"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="submit" class="btn btn-reg">Lanjutkan ke Dokumen</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="reg-note">
+                <h6 class="mb-2 text-dark">Catatan penting</h6>
+                <ul class="mb-0 small text-secondary">
+                    <li>Dokumen wajib diunggah setelah pengajuan tersimpan.</li>
+                    <li>Safety akan memberi rekomendasi dokumen yang perlu dilengkapi.</li>
+                    <li>Progress review terlihat di halaman pengajuan.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const apiBase = "/Wilayah";
+        const provinsiSelect = document.getElementById("provinsiSelect");
+        const kabupatenSelect = document.getElementById("kabupatenSelect");
+        const kecamatanSelect = document.getElementById("kecamatanSelect");
+        const desaSelect = document.getElementById("desaSelect");
+        const provinsiName = document.getElementById("provinsiName");
+        const kabupatenName = document.getElementById("kabupatenName");
+        const kecamatanName = document.getElementById("kecamatanName");
+        const desaName = document.getElementById("desaName");
+
+        function setOptions(select, items, placeholder) {
+            select.innerHTML = "";
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent = placeholder;
+            select.appendChild(defaultOption);
+            items.forEach(item => {
+                const option = document.createElement("option");
+                option.value = item.id;
+                option.textContent = item.name;
+                select.appendChild(option);
+            });
+            select.disabled = items.length === 0;
+        }
+
+        async function loadProvinsi() {
+            try {
+                const response = await fetch(`${apiBase}/Provinsi`);
+                if (!response.ok) {
+                    setOptions(provinsiSelect, [], "Gagal memuat provinsi");
+                    return;
+                }
+                const data = await response.json();
+                setOptions(provinsiSelect, data, "Pilih provinsi");
+            } catch {
+                setOptions(provinsiSelect, [], "Gagal memuat provinsi");
+            }
+        }
+
+        async function loadKabupaten(provinsiId) {
+            try {
+                const response = await fetch(`${apiBase}/Kabupaten/${provinsiId}`);
+                if (!response.ok) {
+                    setOptions(kabupatenSelect, [], "Gagal memuat kabupaten");
+                    return;
+                }
+                const data = await response.json();
+                setOptions(kabupatenSelect, data, "Pilih kabupaten");
+                setOptions(kecamatanSelect, [], "Pilih kecamatan");
+                setOptions(desaSelect, [], "Pilih desa");
+            } catch {
+                setOptions(kabupatenSelect, [], "Gagal memuat kabupaten");
+            }
+        }
+
+        async function loadKecamatan(regencyId) {
+            try {
+                const response = await fetch(`${apiBase}/Kecamatan/${regencyId}`);
+                if (!response.ok) {
+                    setOptions(kecamatanSelect, [], "Gagal memuat kecamatan");
+                    return;
+                }
+                const data = await response.json();
+                setOptions(kecamatanSelect, data, "Pilih kecamatan");
+                setOptions(desaSelect, [], "Pilih desa");
+            } catch {
+                setOptions(kecamatanSelect, [], "Gagal memuat kecamatan");
+            }
+        }
+
+        async function loadDesa(districtId) {
+            try {
+                const response = await fetch(`${apiBase}/Desa/${districtId}`);
+                if (!response.ok) {
+                    setOptions(desaSelect, [], "Gagal memuat desa");
+                    return;
+                }
+                const data = await response.json();
+                setOptions(desaSelect, data, "Pilih desa");
+            } catch {
+                setOptions(desaSelect, [], "Gagal memuat desa");
+            }
+        }
+
+        provinsiSelect.addEventListener("change", () => {
+            const selected = provinsiSelect.options[provinsiSelect.selectedIndex];
+            provinsiName.value = selected.textContent || "";
+            kabupatenName.value = "";
+            kecamatanName.value = "";
+            desaName.value = "";
+            if (provinsiSelect.value) {
+                loadKabupaten(provinsiSelect.value);
+            } else {
+                setOptions(kabupatenSelect, [], "Pilih kabupaten");
+                setOptions(kecamatanSelect, [], "Pilih kecamatan");
+                setOptions(desaSelect, [], "Pilih desa");
+            }
+        });
+
+        kabupatenSelect.addEventListener("change", () => {
+            const selected = kabupatenSelect.options[kabupatenSelect.selectedIndex];
+            kabupatenName.value = selected.textContent || "";
+            kecamatanName.value = "";
+            desaName.value = "";
+            if (kabupatenSelect.value) {
+                loadKecamatan(kabupatenSelect.value);
+            } else {
+                setOptions(kecamatanSelect, [], "Pilih kecamatan");
+                setOptions(desaSelect, [], "Pilih desa");
+            }
+        });
+
+        kecamatanSelect.addEventListener("change", () => {
+            const selected = kecamatanSelect.options[kecamatanSelect.selectedIndex];
+            kecamatanName.value = selected.textContent || "";
+            desaName.value = "";
+            if (kecamatanSelect.value) {
+                loadDesa(kecamatanSelect.value);
+            } else {
+                setOptions(desaSelect, [], "Pilih desa");
+            }
+        });
+
+        desaSelect.addEventListener("change", () => {
+            const selected = desaSelect.options[desaSelect.selectedIndex];
+            desaName.value = selected.textContent || "";
+        });
+
+        loadProvinsi();
+    </script>
+}

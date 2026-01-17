@@ -3,71 +3,56 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-namespace one_db_mitra.Controllers
+namespace one_db_mitra.Controllers;
+
+[Route("Wilayah")]
+public class WilayahController : Controller
 {
-    [Route("api/wilayah")]
-    public class WilayahController : Controller
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    public WilayahController(IHttpClientFactory httpClientFactory)
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        _httpClientFactory = httpClientFactory;
+    }
 
-        public WilayahController(IHttpClientFactory httpClientFactory)
+    [HttpGet("Provinsi")]
+    public async Task<IActionResult> Provinsi(CancellationToken cancellationToken)
+    {
+        return await ProxyAsync("https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json", cancellationToken);
+    }
+
+    [HttpGet("Kabupaten/{provinsiId}")]
+    public async Task<IActionResult> Kabupaten(string provinsiId, CancellationToken cancellationToken)
+    {
+        return await ProxyAsync($"https://emsifa.github.io/api-wilayah-indonesia/api/regencies/{provinsiId}.json", cancellationToken);
+    }
+
+    [HttpGet("Kecamatan/{kabupatenId}")]
+    public async Task<IActionResult> Kecamatan(string kabupatenId, CancellationToken cancellationToken)
+    {
+        return await ProxyAsync($"https://emsifa.github.io/api-wilayah-indonesia/api/districts/{kabupatenId}.json", cancellationToken);
+    }
+
+    [HttpGet("Desa/{kecamatanId}")]
+    public async Task<IActionResult> Desa(string kecamatanId, CancellationToken cancellationToken)
+    {
+        return await ProxyAsync($"https://emsifa.github.io/api-wilayah-indonesia/api/villages/{kecamatanId}.json", cancellationToken);
+    }
+
+    private async Task<IActionResult> ProxyAsync(string url, CancellationToken cancellationToken)
+    {
+        var client = _httpClientFactory.CreateClient();
+        using var response = await client.GetAsync(url, cancellationToken);
+        if (!response.IsSuccessStatusCode)
         {
-            _httpClientFactory = httpClientFactory;
+            return Content("[]", "application/json");
         }
 
-        [HttpGet("provinsi")]
-        public async Task<IActionResult> Provinsi(CancellationToken cancellationToken)
+        var payload = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (string.IsNullOrWhiteSpace(payload))
         {
-            return await ProxyAsync("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json", cancellationToken);
+            return Content("[]", "application/json");
         }
-
-        [HttpGet("kabupaten")]
-        public async Task<IActionResult> Kabupaten(string provinsiId, CancellationToken cancellationToken)
-        {
-            if (string.IsNullOrWhiteSpace(provinsiId))
-            {
-                return BadRequest(new { message = "provinsiId wajib diisi." });
-            }
-
-            var url = $"https://www.emsifa.com/api-wilayah-indonesia/api/regencies/{provinsiId}.json";
-            return await ProxyAsync(url, cancellationToken);
-        }
-
-        [HttpGet("kecamatan")]
-        public async Task<IActionResult> Kecamatan(string kabupatenId, CancellationToken cancellationToken)
-        {
-            if (string.IsNullOrWhiteSpace(kabupatenId))
-            {
-                return BadRequest(new { message = "kabupatenId wajib diisi." });
-            }
-
-            var url = $"https://www.emsifa.com/api-wilayah-indonesia/api/districts/{kabupatenId}.json";
-            return await ProxyAsync(url, cancellationToken);
-        }
-
-        [HttpGet("desa")]
-        public async Task<IActionResult> Desa(string kecamatanId, CancellationToken cancellationToken)
-        {
-            if (string.IsNullOrWhiteSpace(kecamatanId))
-            {
-                return BadRequest(new { message = "kecamatanId wajib diisi." });
-            }
-
-            var url = $"https://www.emsifa.com/api-wilayah-indonesia/api/villages/{kecamatanId}.json";
-            return await ProxyAsync(url, cancellationToken);
-        }
-
-        private async Task<IActionResult> ProxyAsync(string url, CancellationToken cancellationToken)
-        {
-            var client = _httpClientFactory.CreateClient();
-            using var response = await client.GetAsync(url, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-            {
-                return StatusCode((int)response.StatusCode, new { message = "Gagal mengambil data wilayah." });
-            }
-
-            var json = await response.Content.ReadAsStringAsync(cancellationToken);
-            return Content(json, "application/json");
-        }
+        return Content(payload, "application/json");
     }
 }

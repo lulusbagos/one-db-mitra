@@ -42,6 +42,23 @@ namespace one_db_mitra.Controllers
         private async Task<IReadOnlyList<NotificationItem>> BuildNotificationsAsync(int take, CancellationToken cancellationToken)
         {
             var companyId = GetClaimInt("company_id");
+            var roleId = GetClaimInt("role_id");
+            var departmentId = GetClaimInt("department_id");
+
+            var roleLevel = await _context.tbl_m_peran.AsNoTracking()
+                .Where(r => r.peran_id == roleId)
+                .Select(r => r.level_akses)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            var departmentName = departmentId > 0
+                ? await _context.tbl_m_departemen.AsNoTracking()
+                    .Where(d => d.departemen_id == departmentId)
+                    .Select(d => d.nama_departemen)
+                    .FirstOrDefaultAsync(cancellationToken)
+                : null;
+            var isSafetyDept = !string.IsNullOrWhiteSpace(departmentName)
+                && departmentName.IndexOf("safety", StringComparison.OrdinalIgnoreCase) >= 0;
+            var isOwnerReviewer = roleLevel >= 4 && (departmentId == 0 || isSafetyDept);
 
             var approvalsQuery = _context.tbl_r_karyawan_mutasi_request.AsNoTracking()
                 .Where(r => r.status == "pending" || r.status == "menunggu" || r.status == "request");
@@ -127,9 +144,45 @@ namespace one_db_mitra.Controllers
                 })
                 .ToListAsync(cancellationToken);
 
+            var pengajuanQuery = _context.tbl_r_pengajuan_perusahaan.AsNoTracking();
+            if (isOwnerReviewer)
+            {
+                pengajuanQuery = pengajuanQuery.Where(p => p.status_pengajuan == "pengajuan_awal"
+                                                          || p.status_pengajuan == "menunggu_dokumen"
+                                                          || p.status_pengajuan == "review_akhir"
+                                                          || p.status_pengajuan == "perlu_perbaikan");
+            }
+            else if (companyId > 0)
+            {
+                pengajuanQuery = pengajuanQuery.Where(p => p.perusahaan_id == companyId);
+            }
+            else
+            {
+                pengajuanQuery = pengajuanQuery.Where(p => false);
+            }
+
+            var pengajuanItems = await pengajuanQuery
+                .OrderByDescending(p => p.created_at)
+                .Take(take)
+                .Select(p => new NotificationItem
+                {
+                    Id = $"pengajuan:{p.pengajuan_id}",
+                    Title = "Pengajuan Perusahaan",
+                    Message = $"{p.nama_perusahaan} - {p.status_pengajuan}",
+                    Type = p.status_pengajuan == "pengajuan_awal" ? "warning" :
+                        p.status_pengajuan == "perlu_perbaikan" ? "info" :
+                        p.status_pengajuan.StartsWith("approved") ? "success" : "secondary",
+                    Category = "pengajuan",
+                    CreatedAt = p.created_at,
+                    DueAt = p.created_at.AddDays(3),
+                    Link = $"/CompanyRegistration/Review/{p.pengajuan_id}"
+                })
+                .ToListAsync(cancellationToken);
+
             var allItems = approvalItems
                 .Concat(emailItems)
                 .Concat(nikItems)
+                .Concat(pengajuanItems)
                 .OrderByDescending(i => i.CreatedAt)
                 .Take(take)
                 .ToList();

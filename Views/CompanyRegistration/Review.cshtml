@@ -1,0 +1,238 @@
+@model one_db_mitra.Models.Admin.PengajuanReviewViewModel
+@{
+    ViewData["Title"] = "Review Pengajuan Perusahaan";
+}
+
+@section Styles {
+    <style>
+        .review-card { border-radius: 16px; border: 1px solid #e2e8f0; }
+        .timeline {
+            border-left: 2px solid #e2e8f0;
+            padding-left: 1.5rem;
+        }
+        .timeline-item { position: relative; margin-bottom: 1.25rem; }
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            left: -9px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #14b8a6;
+        }
+        .stepper {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .stepper .chip {
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            border: 1px solid #e2e8f0;
+        }
+        .chip-active {
+            background: #14b8a6;
+            color: #fff;
+            border-color: #14b8a6;
+        }
+        .chip-warn {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #f59e0b;
+        }
+        .chip-muted {
+            background: #f8fafc;
+            color: #64748b;
+        }
+    </style>
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 mb-4">
+        <div>
+            <p class="text-uppercase text-secondary small mb-1">Review Safety</p>
+            <h2 class="mb-1">@Model.NamaPerusahaan</h2>
+            <p class="text-secondary mb-0">Kode pengajuan: @Model.KodePengajuan</p>
+        </div>
+        <a class="btn btn-outline-secondary" asp-action="Index">Kembali</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-7">
+            <div class="card review-card mb-4">
+                <div class="card-body p-4">
+                    @if (!string.IsNullOrWhiteSpace(Model.CatatanPengaju))
+                    {
+                        <div class="alert alert-light border small mb-3">
+                            <strong>Catatan Pengaju:</strong> @Model.CatatanPengaju
+                        </div>
+                    }
+                    <h6 class="fw-semibold mb-3">Status Proses</h6>
+                    @{
+                        var status = Model.StatusPengajuan ?? "pengajuan_awal";
+                        var approved = status == "approved" || status == "approved_remark";
+                        var needFix = status == "perlu_perbaikan";
+                        var rejected = status == "ditolak";
+                        var reviewUlang = status == "review_akhir";
+                        var menunggu = status == "menunggu_dokumen";
+                    }
+                    <div class="stepper mb-4">
+                        <span class="chip chip-active">Pengajuan Awal</span>
+                        <span class="chip @(menunggu ? "chip-active" : needFix ? "chip-warn" : "chip-muted")">Rekomendasi</span>
+                        <span class="chip @(reviewUlang ? "chip-active" : "chip-muted")">Review Ulang</span>
+                        <span class="chip @(approved ? "chip-active" : rejected ? "chip-warn" : "chip-muted")">Keputusan</span>
+                    </div>
+
+                    <h6 class="fw-semibold mb-3">Dokumen Pengajuan</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Wajib</th>
+                                    <th>Dokumen</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (var i = 0; i < Model.Dokumen.Count; i++)
+                                {
+                                    var doc = Model.Dokumen[i];
+                                    var statusBadge = TimelineBadge(doc.Status);
+                                    <tr>
+                                        <td>
+                                            <input type="hidden" name="Dokumen[@i].ReqId" value="@doc.ReqId" />
+                                            <input type="hidden" name="Dokumen[@i].DocTypeId" value="@doc.DocTypeId" />
+                                            <input type="hidden" name="Dokumen[@i].SelectedRequired" value="false" />
+                                            <input type="checkbox" name="Dokumen[@i].SelectedRequired" value="true" @(doc.SelectedRequired ? "checked" : null) />
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold">@doc.NamaDokumen</div>
+                                            <div class="small text-secondary">@doc.Deskripsi</div>
+                                        </td>
+                                        <td><span class="badge @statusBadge">@doc.Status</span></td>
+                                        <td class="text-end">
+                                            @if (!string.IsNullOrWhiteSpace(doc.FileUrl))
+                                            {
+                                                <a class="btn btn-sm btn-outline-primary" href="@doc.FileUrl" target="_blank">Lihat</a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.PublicLinkUrl))
+                    {
+                        <div class="alert alert-info small mt-3">
+                            Link publik untuk melengkapi dokumen: <a href="@Model.PublicLinkUrl" target="_blank">@Model.PublicLinkUrl</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-action="GenerateLink" asp-route-id="@Model.PengajuanId" method="post" class="mt-3">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-primary btn-sm">Buat Link Publik</button>
+                        </form>
+                    }
+                </div>
+            </div>
+
+            <div class="card review-card">
+                <div class="card-body p-4">
+                    <h6 class="fw-semibold mb-3">Keputusan Review</h6>
+                    <form asp-action="Review" asp-route-id="@Model.PengajuanId" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="PengajuanId" value="@Model.PengajuanId" />
+                        <div class="mb-3">
+                            <label asp-for="TipePerusahaanId" class="form-label">Tipe Perusahaan (Safety menetapkan)</label>
+                            <select asp-for="TipePerusahaanId" class="form-select" asp-items="Model.TipePerusahaanOptions">
+                                <option value="">Pilih tipe</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="RiskCategory" class="form-label"></label>
+                            <input asp-for="RiskCategory" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="CatatanReview" class="form-label"></label>
+                            <textarea asp-for="CatatanReview" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input asp-for="ApprovedWithRemark" class="form-check-input" />
+                            <label asp-for="ApprovedWithRemark" class="form-check-label"></label>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="RemarkApprove" class="form-label"></label>
+                            <textarea asp-for="RemarkApprove" class="form-control" rows="2"></textarea>
+                            <span asp-validation-for="RemarkApprove" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="BuktiApproveUrl" class="form-label"></label>
+                            <input asp-for="BuktiApproveUrl" class="form-control" />
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end">
+                            <button type="submit" name="actionType" value="rekomendasi" class="btn btn-outline-primary">Kirim Rekomendasi</button>
+                            <button type="submit" name="actionType" value="revisi" class="btn btn-outline-warning">Perlu Perbaikan</button>
+                            <button type="submit" name="actionType" value="reject" class="btn btn-outline-danger">Reject</button>
+                            <button type="submit" name="actionType" value="approve" class="btn btn-success">Approve</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-5">
+            <div class="card review-card">
+                <div class="card-body p-4">
+                    <h6 class="fw-semibold mb-3">Timeline Approval</h6>
+                    <div class="timeline">
+                        @if (Model.Timeline.Count == 0)
+                        {
+                            <div class="text-secondary small">Belum ada aktivitas.</div>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model.Timeline)
+                            {
+                                <div class="timeline-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fw-semibold">@item.Judul</span>
+                                        <span class="badge text-bg-light">@item.Waktu.ToString("dd MMM yyyy HH:mm")</span>
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(item.Catatan))
+                                    {
+                                        <div class="small text-secondary">@item.Catatan</div>
+                                    }
+                                    <div class="mt-2">
+                                        <span class="badge text-bg-@item.StatusBadge">@item.StatusBadge</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private static string TimelineBadge(string status)
+    {
+        return status switch
+        {
+            "uploaded" => "text-bg-success",
+            "required" => "text-bg-secondary",
+            _ => "text-bg-warning"
+        };
+    }
+}

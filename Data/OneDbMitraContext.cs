@@ -69,7 +69,23 @@ public partial class OneDbMitraContext : DbContext
 
     public virtual DbSet<tbl_r_notifikasi_nik> tbl_r_notifikasi_nik { get; set; }
 
+    public virtual DbSet<tbl_r_pengajuan_perusahaan> tbl_r_pengajuan_perusahaan { get; set; }
+
+    public virtual DbSet<tbl_r_pengajuan_perusahaan_dokumen> tbl_r_pengajuan_perusahaan_dokumen { get; set; }
+
+    public virtual DbSet<tbl_r_pengajuan_perusahaan_dokumen_tipe> tbl_r_pengajuan_perusahaan_dokumen_tipe { get; set; }
+
+    public virtual DbSet<tbl_r_pengajuan_perusahaan_dokumen_wajib> tbl_r_pengajuan_perusahaan_dokumen_wajib { get; set; }
+
+    public virtual DbSet<tbl_r_pengajuan_perusahaan_link> tbl_r_pengajuan_perusahaan_link { get; set; }
+
+    public virtual DbSet<tbl_r_pengajuan_perusahaan_log> tbl_r_pengajuan_perusahaan_log { get; set; }
+
+    public virtual DbSet<tbl_r_pengajuan_perusahaan_review> tbl_r_pengajuan_perusahaan_review { get; set; }
+
     public virtual DbSet<tbl_r_sesi_aktif> tbl_r_sesi_aktif { get; set; }
+
+    public virtual DbSet<vw_hirarki_perusahaan_arrow> vw_hirarki_perusahaan_arrow { get; set; }
 
     public virtual DbSet<vw_hirarki_perusahaan_4level> vw_hirarki_perusahaan_4level { get; set; }
 
@@ -479,6 +495,90 @@ public partial class OneDbMitraContext : DbContext
             entity.Property(e => e.dibuat_pada).HasDefaultValueSql("(sysutcdatetime())");
         });
 
+        modelBuilder.Entity<tbl_r_pengajuan_perusahaan>(entity =>
+        {
+            entity.HasKey(e => e.pengajuan_id).HasName("PK_tbl_r_pengajuan_perusahaan");
+            entity.Property(e => e.kode_pengajuan).HasMaxLength(50);
+            entity.Property(e => e.nama_perusahaan).HasMaxLength(200);
+            entity.Property(e => e.email_perusahaan).HasMaxLength(200);
+            entity.Property(e => e.telepon).HasMaxLength(50);
+            entity.Property(e => e.contact_person).HasMaxLength(100);
+            entity.Property(e => e.nomor_kontrak).HasMaxLength(100);
+            entity.Property(e => e.durasi_kontrak).HasMaxLength(50);
+            entity.Property(e => e.provinsi_code).HasMaxLength(50);
+            entity.Property(e => e.provinsi_name).HasMaxLength(100);
+            entity.Property(e => e.regency_code).HasMaxLength(50);
+            entity.Property(e => e.regency_name).HasMaxLength(100);
+            entity.Property(e => e.district_code).HasMaxLength(50);
+            entity.Property(e => e.district_name).HasMaxLength(100);
+            entity.Property(e => e.village_code).HasMaxLength(50);
+            entity.Property(e => e.village_name).HasMaxLength(100);
+            entity.Property(e => e.reviewer_id).HasMaxLength(50);
+            entity.Property(e => e.reviewer_nik).HasMaxLength(50);
+            entity.Property(e => e.status_pengajuan).HasMaxLength(30);
+            entity.Property(e => e.risk_category).HasMaxLength(50);
+            entity.Property(e => e.created_by).HasMaxLength(100);
+            entity.Property(e => e.updated_by).HasMaxLength(100);
+            entity.Property(e => e.created_at).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.is_aktif).HasDefaultValue(true);
+            entity.Property(e => e.is_legacy).HasDefaultValue(false);
+        });
+
+        modelBuilder.Entity<tbl_r_pengajuan_perusahaan_dokumen_tipe>(entity =>
+        {
+            entity.HasKey(e => e.doc_type_id).HasName("PK_tbl_r_pengajuan_perusahaan_dokumen_tipe");
+            entity.Property(e => e.grup).HasMaxLength(100);
+            entity.Property(e => e.nama_dokumen).HasMaxLength(200);
+            entity.Property(e => e.deskripsi).HasMaxLength(600);
+            entity.Property(e => e.is_aktif).HasDefaultValue(true);
+        });
+
+        modelBuilder.Entity<tbl_r_pengajuan_perusahaan_dokumen_wajib>(entity =>
+        {
+            entity.HasKey(e => e.req_id).HasName("PK_tbl_r_pengajuan_perusahaan_dokumen_wajib");
+            entity.Property(e => e.status).HasMaxLength(30);
+            entity.Property(e => e.wajib).HasDefaultValue(true);
+        });
+
+        modelBuilder.Entity<tbl_r_pengajuan_perusahaan_dokumen>(entity =>
+        {
+            entity.HasKey(e => e.dokumen_id).HasName("PK_tbl_r_pengajuan_perusahaan_dokumen");
+            entity.Property(e => e.nama_file).HasMaxLength(260);
+            entity.Property(e => e.path_file).HasMaxLength(500);
+            entity.Property(e => e.uploaded_by).HasMaxLength(100);
+            entity.Property(e => e.status).HasMaxLength(30);
+        });
+
+        modelBuilder.Entity<tbl_r_pengajuan_perusahaan_review>(entity =>
+        {
+            entity.HasKey(e => e.review_id).HasName("PK_tbl_r_pengajuan_perusahaan_review");
+            entity.Property(e => e.reviewer_id).HasMaxLength(50);
+            entity.Property(e => e.reviewer_nik).HasMaxLength(50);
+            entity.Property(e => e.risk_category).HasMaxLength(50);
+            entity.Property(e => e.action_from).HasMaxLength(50);
+            entity.Property(e => e.status_review).HasMaxLength(30);
+            entity.Property(e => e.approved_with_remark).HasDefaultValue(false);
+            entity.Property(e => e.bukti_approve_url).HasMaxLength(300);
+            entity.Property(e => e.action_date).HasDefaultValueSql("(sysutcdatetime())");
+        });
+
+        modelBuilder.Entity<tbl_r_pengajuan_perusahaan_log>(entity =>
+        {
+            entity.HasKey(e => e.log_id).HasName("PK_tbl_r_pengajuan_perusahaan_log");
+            entity.Property(e => e.aktivitas).HasMaxLength(200);
+            entity.Property(e => e.performed_by).HasMaxLength(100);
+            entity.Property(e => e.timestamp).HasDefaultValueSql("(sysutcdatetime())");
+        });
+
+        modelBuilder.Entity<tbl_r_pengajuan_perusahaan_link>(entity =>
+        {
+            entity.HasKey(e => e.link_id).HasName("PK_tbl_r_pengajuan_perusahaan_link");
+            entity.Property(e => e.token).HasMaxLength(120);
+            entity.Property(e => e.status).HasMaxLength(30);
+            entity.Property(e => e.created_by).HasMaxLength(100);
+            entity.Property(e => e.created_at).HasDefaultValueSql("(sysutcdatetime())");
+        });
+
         modelBuilder.Entity<tbl_r_sesi_aktif>(entity =>
         {
             entity.HasKey(e => e.sesi_id).HasName("PK__sesi_akt__79F7091E2E6E3C59");
@@ -489,6 +589,17 @@ public partial class OneDbMitraContext : DbContext
             entity.Property(e => e.revoked_by).HasMaxLength(100);
             entity.Property(e => e.dibuat_pada).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.is_aktif).HasDefaultValue(true);
+        });
+
+        modelBuilder.Entity<vw_hirarki_perusahaan_arrow>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToView("vw_hirarki_perusahaan_arrow");
+            entity.Property(e => e.id_perusahaan).HasColumnName("id_perusahaan");
+            entity.Property(e => e.kode_perusahaan).HasColumnName("kode_perusahaan");
+            entity.Property(e => e.nama_perusahaan).HasColumnName("nama_perusahaan");
+            entity.Property(e => e.id_jenis_perusahaan).HasColumnName("id_jenis_perusahaan");
+            entity.Property(e => e.nama_tipe).HasColumnName("nama_tipe");
         });
 
         modelBuilder.Entity<vw_hirarki_perusahaan_4level>(entity =>

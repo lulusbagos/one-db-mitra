@@ -38,31 +38,71 @@ namespace one_db_mitra.Controllers
             }
 
             ViewBag.ScopeInfo = await BuildScopeInfoAsync(scope, cancellationToken);
-            var baseQuery = ApplyCompanyScope(_context.tbl_m_perusahaan.AsNoTracking().AsQueryable(), scope);
+            var baseQuery = _context.vw_hirarki_perusahaan_arrow.AsNoTracking().AsQueryable();
+            if (scope.AllowedCompanyIds.Count > 0)
+            {
+                baseQuery = baseQuery.Where(company => scope.AllowedCompanyIds.Contains(company.id_perusahaan));
+            }
+            else if (!scope.IsOwner)
+            {
+                if (scope.CompanyId > 0)
+                {
+                    baseQuery = baseQuery.Where(company => company.id_perusahaan == scope.CompanyId);
+                }
+                else
+                {
+                    baseQuery = baseQuery.Where(company => false);
+                }
+            }
+
             if (activeOnly)
             {
-                baseQuery = baseQuery.Where(company => company.is_aktif);
+                baseQuery = from view in baseQuery
+                            join company in _context.tbl_m_perusahaan.AsNoTracking()
+                                on view.id_perusahaan equals company.perusahaan_id
+                            where company.is_aktif
+                            select view;
             }
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var term = search.Trim();
-                baseQuery = baseQuery.Where(company => company.nama_perusahaan != null && company.nama_perusahaan.Contains(term));
+                baseQuery = baseQuery.Where(company =>
+                    (company.nama_perusahaan != null && company.nama_perusahaan.Contains(term))
+                    || (company.kode_perusahaan != null && company.kode_perusahaan.Contains(term)));
             }
 
-            var companies = await (from company in baseQuery
-                                   join type in _context.tbl_m_tipe_perusahaan.AsNoTracking() on company.tipe_perusahaan_id equals type.tipe_perusahaan_id
-                                   join parent in _context.tbl_m_perusahaan.AsNoTracking() on company.perusahaan_induk_id equals parent.perusahaan_id into parentJoin
+            var companies = await (from view in baseQuery
+                                   join company in _context.tbl_m_perusahaan.AsNoTracking()
+                                       on view.id_perusahaan equals company.perusahaan_id
+                                   join parent in _context.tbl_m_perusahaan.AsNoTracking()
+                                       on company.perusahaan_induk_id equals parent.perusahaan_id into parentJoin
                                    from parent in parentJoin.DefaultIfEmpty()
-                                   orderby company.perusahaan_id descending
+                                   orderby view.id_perusahaan descending
                                    select new CompanyListItem
                                    {
-                                       CompanyId = company.perusahaan_id,
-                                       CompanyCode = company.kode_perusahaan ?? string.Empty,
-                                       CompanyName = company.nama_perusahaan ?? string.Empty,
-                                       CompanyTypeName = type.nama_tipe ?? string.Empty,
+                                       CompanyId = view.id_perusahaan,
+                                       CompanyCode = view.kode_perusahaan ?? string.Empty,
+                                       CompanyName = view.nama_perusahaan ?? string.Empty,
+                                       CompanyTypeId = view.id_jenis_perusahaan,
+                                       CompanyTypeName = view.nama_tipe ?? "-",
                                        ParentCompanyName = parent != null ? parent.nama_perusahaan ?? "-" : "-",
                                        IsActive = company.is_aktif
                                    }).ToListAsync(cancellationToken);
+
+            var approvedCompanies = await _context.tbl_r_pengajuan_perusahaan.AsNoTracking()
+                .Where(p => p.status_pengajuan == "approved" || p.status_pengajuan == "approved_remark")
+                .Select(p => p.perusahaan_id ?? 0)
+                .ToListAsync(cancellationToken);
+            var approvedSet = new HashSet<int>(approvedCompanies);
+
+            foreach (var item in companies)
+            {
+                if (!approvedSet.Contains(item.CompanyId))
+                {
+                    item.DokumenBelumLengkap = true;
+                    item.RemarkDokumen = "Data belum lengkap (legacy)";
+                }
+            }
 
             ViewBag.ActiveOnly = activeOnly;
             ViewBag.CurrentSearch = search;
@@ -72,60 +112,15 @@ namespace one_db_mitra.Controllers
         [HttpGet]
         public async Task<IActionResult> CreateCompany(CancellationToken cancellationToken)
         {
-            var scope = await BuildOrgScopeAsync(cancellationToken);
-            if (!scope.IsOwner)
-            {
-                SetAlert("Hanya Owner yang dapat menambah perusahaan.", "warning");
-                return RedirectToAction(nameof(Companies));
-            }
-
-            var model = new CompanyEditViewModel { IsActive = true };
-            await PopulateCompanyOptionsAsync(model, cancellationToken);
-            return View(model);
+            SetAlert("Penambahan perusahaan dilakukan melalui menu Pengajuan Perusahaan.", "warning");
+            return RedirectToAction(nameof(Companies));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateCompany(CompanyEditViewModel model, CancellationToken cancellationToken)
         {
-            var scope = await BuildOrgScopeAsync(cancellationToken);
-            if (!scope.IsOwner)
-            {
-                SetAlert("Hanya Owner yang dapat menambah perusahaan.", "warning");
-                return RedirectToAction(nameof(Companies));
-            }
-
-            if (!ModelState.IsValid)
-            {
-                await PopulateCompanyOptionsAsync(model, cancellationToken);
-                return View(model);
-            }
-
-            var exists = await _context.tbl_m_perusahaan.AsNoTracking()
-                .AnyAsync(c => c.nama_perusahaan == model.CompanyName, cancellationToken);
-            if (exists)
-            {
-                ModelState.AddModelError(nameof(model.CompanyName), "Nama perusahaan sudah digunakan.");
-                await PopulateCompanyOptionsAsync(model, cancellationToken);
-                return View(model);
-            }
-
-            var entity = new Models.Db.tbl_m_perusahaan
-            {
-                kode_perusahaan = string.IsNullOrWhiteSpace(model.CompanyCode) ? null : model.CompanyCode.Trim(),
-                nama_perusahaan = model.CompanyName.Trim(),
-                alamat_perusahaan = string.IsNullOrWhiteSpace(model.CompanyAddress) ? null : model.CompanyAddress.Trim(),
-                status_perusahaan = string.IsNullOrWhiteSpace(model.CompanyStatus) ? null : model.CompanyStatus.Trim(),
-                tipe_perusahaan_id = model.CompanyTypeId,
-                perusahaan_induk_id = model.ParentCompanyId,
-                is_aktif = model.IsActive,
-                dibuat_pada = DateTime.UtcNow
-            };
-
-            _context.tbl_m_perusahaan.Add(entity);
-            await _context.SaveChangesAsync(cancellationToken);
-            await _auditLogger.LogAsync("CREATE", "perusahaan", entity.perusahaan_id.ToString(), $"Tambah perusahaan {entity.nama_perusahaan}", cancellationToken);
-            SetAlert("Perusahaan berhasil ditambahkan.");
+            SetAlert("Penambahan perusahaan dilakukan melalui menu Pengajuan Perusahaan.", "warning");
             return RedirectToAction(nameof(Companies));
         }
 
