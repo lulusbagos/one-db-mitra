@@ -466,6 +466,30 @@
                         <div class="small text-secondary" id="dokumenCount">Belum ada file.</div>
                     </div>
                 </div>
+                <div class="col-md-6">
+                    <div class="upload-card">
+                        <div class="upload-icon"><i class="bi bi-person-vcard"></i></div>
+                        <div class="upload-title">KTP</div>
+                        <div class="text-secondary small mb-2">Opsional (PDF/JPG/PNG).</div>
+                        <input asp-for="KtpFile" class="upload-input-hidden" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="upload-card">
+                        <div class="upload-icon"><i class="bi bi-heart-pulse"></i></div>
+                        <div class="upload-title">MCU</div>
+                        <div class="text-secondary small mb-2">Opsional (PDF/JPG/PNG).</div>
+                        <input asp-for="McuFile" class="upload-input-hidden" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="upload-card">
+                        <div class="upload-icon"><i class="bi bi-paperclip"></i></div>
+                        <div class="upload-title">Other</div>
+                        <div class="text-secondary small mb-2">Opsional (PDF/JPG/PNG).</div>
+                        <input asp-for="OtherFile" class="upload-input-hidden" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+                    </div>
+                </div>
             </div>
         </div>
 

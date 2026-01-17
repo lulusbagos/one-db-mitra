@@ -1452,6 +1452,7 @@ namespace one_db_mitra.Controllers
 
             await SavePendidikanItemsAsync(personal.personal_id, model.PendidikanItems, cancellationToken);
 
+            var hasDocs = false;
             if (model.DokumenFiles.Count > 0)
             {
                 foreach (var file in model.DokumenFiles.Where(f => f is not null && f.Length > 0))
@@ -1470,7 +1471,16 @@ namespace one_db_mitra.Controllers
                         created_at = DateTime.UtcNow,
                         created_by = User.Identity?.Name
                     });
+                    hasDocs = true;
                 }
+            }
+
+            hasDocs |= await SaveDocumentAsync(karyawan.karyawan_id, model.KtpFile, "KTP", cancellationToken);
+            hasDocs |= await SaveDocumentAsync(karyawan.karyawan_id, model.McuFile, "MCU", cancellationToken);
+            hasDocs |= await SaveDocumentAsync(karyawan.karyawan_id, model.OtherFile, "Other", cancellationToken);
+
+            if (hasDocs)
+            {
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
@@ -2053,6 +2063,10 @@ namespace one_db_mitra.Controllers
                     });
                 }
             }
+
+            await SaveDocumentAsync(karyawan.karyawan_id, model.KtpFile, "KTP", cancellationToken);
+            await SaveDocumentAsync(karyawan.karyawan_id, model.McuFile, "MCU", cancellationToken);
+            await SaveDocumentAsync(karyawan.karyawan_id, model.OtherFile, "Other", cancellationToken);
 
             if (oldCompanyId != model.CompanyId ||
                 oldDepartmentId != model.DepartmentId ||
@@ -3029,6 +3043,31 @@ namespace one_db_mitra.Controllers
             await file.CopyToAsync(stream, cancellationToken);
 
             return $"/uploads/{folder}/{safeName}";
+        }
+
+        private async Task<bool> SaveDocumentAsync(int karyawanId, Microsoft.AspNetCore.Http.IFormFile? file, string label, CancellationToken cancellationToken)
+        {
+            if (file is null || file.Length == 0)
+            {
+                return false;
+            }
+
+            var filePath = await SaveFileAsync(file, "karyawan_docs", cancellationToken);
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return false;
+            }
+
+            _context.tbl_r_karyawan_dokumen.Add(new Models.Db.tbl_r_karyawan_dokumen
+            {
+                karyawan_id = karyawanId,
+                nama_dokumen = label,
+                file_path = filePath,
+                created_at = DateTime.UtcNow,
+                created_by = User.Identity?.Name
+            });
+
+            return true;
         }
 
         private async Task<string> GenerateKaryawanIdAsync(CancellationToken cancellationToken)

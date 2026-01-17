@@ -324,6 +324,15 @@ namespace one_db_mitra.Models.Admin
         [Display(Name = "Foto Karyawan")]
         public IFormFile? FotoFile { get; set; }
 
+        [Display(Name = "Lampiran KTP")]
+        public IFormFile? KtpFile { get; set; }
+
+        [Display(Name = "Lampiran MCU")]
+        public IFormFile? McuFile { get; set; }
+
+        [Display(Name = "Lampiran Lainnya")]
+        public IFormFile? OtherFile { get; set; }
+
         [Display(Name = "Dokumen Pendukung")]
         public List<IFormFile> DokumenFiles { get; set; } = new();
 
