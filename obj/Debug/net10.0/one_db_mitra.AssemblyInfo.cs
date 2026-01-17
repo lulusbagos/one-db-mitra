@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("one_db_mitra")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b44ae10fedae6da928d7ef7c46e899f70560a982")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1b4f56837c77f0f350076478f67ce426c88cd785")]
 [assembly: System.Reflection.AssemblyProductAttribute("one_db_mitra")]
 [assembly: System.Reflection.AssemblyTitleAttribute("one_db_mitra")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

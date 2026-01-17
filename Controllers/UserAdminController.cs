@@ -126,19 +126,20 @@ namespace one_db_mitra.Controllers
                 }
             }
 
-            var hierarchyLookup = await _companyHierarchyService.BuildHierarchyLookupAsync(cancellationToken);
-            foreach (var item in users)
+            if (users.Count > 0)
             {
-                if (!hierarchyLookup.TryGetValue(item.CompanyId, out var badge))
+                var hierarchyLookup = await _companyHierarchyService.BuildHierarchyLookupAsync(cancellationToken);
+                foreach (var item in users)
                 {
-                    continue;
+                    if (hierarchyLookup.TryGetValue(item.CompanyId, out var badge))
+                    {
+                        item.HierarchyOwner = badge.Owner;
+                        item.HierarchyMainContractor = badge.MainContractor;
+                        item.HierarchySubContractor = badge.SubContractor;
+                        item.HierarchyVendor = badge.Vendor;
+                        item.HierarchyLevel = badge.LevelIndex;
+                    }
                 }
-
-                item.HierarchyOwner = badge.Owner;
-                item.HierarchyMainContractor = badge.MainContractor;
-                item.HierarchySubContractor = badge.SubContractor;
-                item.HierarchyVendor = badge.Vendor;
-                item.HierarchyLevel = badge.LevelIndex;
             }
 
             System.Collections.Generic.List<RoleListItem> roles;
@@ -561,7 +562,7 @@ namespace one_db_mitra.Controllers
             TrackUserAuditChange(auditItems, user.pengguna_id, "role_ids", oldRoleKey, newRoleKey, changedBy, changedAt, "edit");
 
             await _context.SaveChangesAsync(cancellationToken);
-            await UpsertUserRolesAsync(user.pengguna_id, model.RoleIds, cancellationToken);
+            await UpsertUserRolesAsync(user.pengguna_id, newRoleIds, cancellationToken);
             if (auditItems.Count > 0)
             {
                 _context.tbl_r_pengguna_audit.AddRange(auditItems);

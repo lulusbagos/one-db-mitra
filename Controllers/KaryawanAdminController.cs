@@ -307,19 +307,20 @@ namespace one_db_mitra.Controllers
                 }
             }
 
-            var hierarchyLookup = await _companyHierarchyService.BuildHierarchyLookupAsync(cancellationToken);
-            foreach (var item in data)
+            if (data.Count > 0)
             {
-                if (!hierarchyLookup.TryGetValue(item.CompanyId, out var badge))
+                var hierarchyLookup = await _companyHierarchyService.BuildHierarchyLookupAsync(cancellationToken);
+                foreach (var item in data)
                 {
-                    continue;
+                    if (hierarchyLookup.TryGetValue(item.CompanyId, out var badge))
+                    {
+                        item.HierarchyOwner = badge.Owner;
+                        item.HierarchyMainContractor = badge.MainContractor;
+                        item.HierarchySubContractor = badge.SubContractor;
+                        item.HierarchyVendor = badge.Vendor;
+                        item.HierarchyLevel = badge.LevelIndex;
+                    }
                 }
-
-                item.HierarchyOwner = badge.Owner;
-                item.HierarchyMainContractor = badge.MainContractor;
-                item.HierarchySubContractor = badge.SubContractor;
-                item.HierarchyVendor = badge.Vendor;
-                item.HierarchyLevel = badge.LevelIndex;
             }
 
             if (draw.HasValue)
