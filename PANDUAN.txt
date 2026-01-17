@@ -1,43 +1,49 @@
 PANDUAN ADMIN - ONE DB MITRA
 
 1) Menambahkan Menu
-- Buka modul: Pengaturan -> Manajemen Menu.
-- Tambah menu baru:
-  - Kode Menu: unik (contoh: ORG_EMP).
-  - Nama Tampil: nama yang muncul di sidebar.
-  - URL: rute halaman (contoh: /OrganizationAdmin/Departments).
-  - Menu Induk: pilih jika menu ini adalah submenu.
-  - Ikon: sesuaikan jika tersedia di UI.
-- Simpan, lalu pastikan Akses Menu diatur.
+- Modul: Pengaturan -> Manajemen Menu.
+- Isi: Kode Menu (unik), Nama Tampil, URL, Menu Induk (jika submenu), Ikon.
+- Simpan, lalu atur aksesnya di Akses Menu.
 
 2) Atur Akses Menu (Role/Perusahaan)
-- Buka modul: Pengaturan -> Akses Menu (Matrix).
-- Pilih role + perusahaan.
-- Centang menu yang boleh tampil.
-- Simpan.
+- Modul: Pengaturan -> Akses Menu (Matrix).
+- Pilih role + perusahaan, centang menu yang boleh tampil, lalu Simpan.
 
 3) Menambahkan User
-- Buka modul: Pengaturan -> Manajemen User.
-- Klik Tambah.
+- Modul: Pengaturan -> Manajemen User.
 - Isi username, password, peran, perusahaan, departemen, section, jabatan.
 - Simpan, lalu cek menu sidebar sesuai peran.
+- Catatan: admin tanpa departemen_id dianggap admin perusahaan.
 
-4) Menambah Struktur Organisasi
+4) Struktur Organisasi
 - Perusahaan: Pengaturan -> Perusahaan.
+  - Field tambahan: Kode Perusahaan, Alamat, Status Perusahaan.
+  - Hirarki induk diatur via Perusahaan Induk (perusahaan_induk_id).
 - Departemen: Pengaturan -> Departemen.
+  - Field tambahan: Kode Departemen, Keterangan.
 - Section: Pengaturan -> Section.
+  - Field tambahan: Kode Section, Keterangan.
 - Jabatan: Pengaturan -> Jabatan.
-Catatan: Dropdown di form akan terkunci sesuai scope login.
+  - Field tambahan: Kode Jabatan, Keterangan.
+- Dropdown form otomatis terkunci sesuai scope login.
 
 5) Karyawan
-- Buka modul: Karyawan (input).
-- Isi data per tab (Data Personal, Kepegawaian, Tambahan, Sertifikasi, Lampiran).
-- Upload dokumen sesuai format yang diminta.
-- Untuk import massal: gunakan menu Upload Excel dan unduh template terlebih dulu.
+- Modul: Karyawan (input).
+- Isi per tab: Data Personal, Kepegawaian, Tambahan, Vaksinasi, Pelanggaran, Lampiran.
+- Upload dokumen sesuai format.
+- Import massal: gunakan Upload Excel + unduh template dulu.
+- Validasi duplikasi no_ktp/no_kk/no_nik.
+- Tidak ada tombol delete karyawan; hanya edit, nonaktif, atau blacklist.
 
 6) Notifikasi NIK
 - Jika NIK terdeteksi blacklist/pelanggaran, sistem menampilkan notifikasi saat input.
 
+7) Mutasi Karyawan
+- Approval flow: request -> approve -> execute.
+- Jika belum nonaktif, perusahaan asal harus approve.
+- Jika kurang dari 3 bulan sejak nonaktif/resign, hanya Owner yang bisa override.
+
 Catatan Umum
-- Jika menu tidak muncul, cek mapping di tbl_r_menu_peran.
-- Jika data tidak bisa dihapus, biasanya masih dipakai di tabel lain.
+- Menu tidak muncul: cek mapping di tbl_r_menu_peran / tbl_r_menu_perusahaan.
+- Data tidak bisa dihapus: biasanya masih dipakai di tabel lain (cek detail alert).
+- Jika daftar departemen/jabatan kosong: pastikan status_aktif sudah terisi '1'.

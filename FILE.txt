@@ -1,31 +1,32 @@
 ONE DB MITRA - RINGKASAN PROYEK
 
 Tujuan
-- Aplikasi admin berbasis ASP.NET Core MVC + EF Core.
+- Aplikasi admin ASP.NET Core MVC + EF Core (DB-first).
 - Semua menu dan akses ditentukan dari database (bukan hardcode).
-- Bahasa tabel Indonesia; tidak memakai FK di DB (relasi di aplikasi).
+- Relasi tidak memakai FK di DB (ditangani di aplikasi).
 
 Struktur Hirarki
 - Hirarki perusahaan: Owner -> Main Contractor -> Sub Contractor -> Vendor.
 - Hirarki organisasi internal: Perusahaan -> Departemen -> Seksi -> Jabatan.
+- Hirarki perusahaan dibentuk dari kolom tbl_m_perusahaan.perusahaan_induk_id (bebas level/cabang).
 
 Peran dan Akses
 - Owner bisa melihat semua data di bawahnya.
-- Admin perusahaan hanya lihat data perusahaannya.
-- Admin departemen hanya lihat departemen sendiri.
+- Admin perusahaan (user tanpa departemen_id) melihat seluruh data di bawah perusahaannya.
+- Admin departemen hanya melihat data departemennya sendiri.
 - Admin peran hanya bisa membuat user di level sama/di bawahnya.
 - Admin departemen tidak boleh membuat peran baru, hanya user di departemennya.
 - Menu akses per role diatur oleh Owner saja.
+- Badge "Scope" tampil di topbar semua halaman.
 
 Menu dan Navigasi
-- Menu sidebar dibentuk dari tabel menu dan mapping akses role/perusahaan.
-- Menu dapat ditambah/kurangi dari DB tanpa redeploy.
+- Menu sidebar dibentuk dari tbl_m_menu + mapping tbl_r_menu_peran / tbl_r_menu_perusahaan.
+- Menu bisa ditambah/kurangi dari DB tanpa redeploy.
 - Role-based menu rendering (hanya yang diizinkan).
 
 User Management
-- User bisa multi-role.
-- Ada role switcher di topbar untuk ganti role aktif.
-- Password disimpan plaintext sesuai permintaan.
+- User bisa multi-role + role switcher di topbar.
+- Password disimpan plaintext (sesuai permintaan).
 - Foto profil tersimpan di wwwroot/uploads/profile.
 
 Karyawan (HR)
@@ -37,10 +38,6 @@ Karyawan (HR)
 - Pindah perusahaan minimal 3 bulan dari tanggal resign/nonaktif.
 - Jika kurang dari 3 bulan, hanya Owner yang bisa override.
 - Riwayat penempatan/karyawan dicatat untuk tracking perpindahan.
-
-Pendidikan dan Dokumen
-- Pendidikan bisa lebih dari satu per karyawan (tabel detail).
-- Dokumen karyawan dapat diupload (lampiran).
 - Excel upload + template download untuk input massal.
 - Validasi duplikasi no_ktp/no_kk/no_nik.
 
@@ -48,6 +45,18 @@ Email Notifikasi
 - SMTP setting di tbl_m_email_setting.
 - Email queue di tbl_m_email_notifikasi.
 - Saat buat user/reset password, simpan notifikasi dan kirim via background worker.
+
+Skema DB Terkait Organisasi (per 2026-01-16)
+- tbl_m_perusahaan: id, kode_perusahaan, nama_perusahaan, alamat_perusahaan, status_perusahaan,
+  tipe_perusahaan_id, perusahaan_induk_id, status_aktif (bit), created_at, updated_at, deleted_at.
+- tbl_m_departemen: id, kode_departemen, nama_departemen, keterangan, status_aktif (varchar),
+  id_perusahaan, created_at.
+- tbl_m_seksi: id, kode_seksi, nama_seksi, keterangan, status_seksi, id_departemen,
+  id_perusahaan, status_aktif (bit), created_at, updated_at, deleted_at.
+- tbl_m_jabatan: id, kode_jabatan, nama_jabatan, keterangan, status_jabatan, status_aktif (varchar),
+  id_perusahaan, id_seksi, created_at, updated_at, deleted_at.
+- Catatan: status_aktif di departemen/jabatan bertipe varchar; aplikasi mengonversi ke bool.
+- Catatan: id_seksi pada jabatan bisa NULL; UI jabatan sudah pakai left join agar tetap tampil.
 
 UI/UX
 - Tema, font, dan layout modern.

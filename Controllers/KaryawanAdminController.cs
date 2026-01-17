@@ -301,8 +301,11 @@ namespace one_db_mitra.Controllers
                 "WargaNegara",
                 "NoKtp",
                 "NoNik",
+                "NoAcr",
                 "NamaLengkap",
                 "NamaAlias",
+                "NamaIbu",
+                "NamaAyah",
                 "JenisKelamin",
                 "TempatLahir",
                 "TanggalLahir",
@@ -317,6 +320,7 @@ namespace one_db_mitra.Controllers
                 "NamaSekolah",
                 "Fakultas",
                 "Jurusan",
+                "FilePendukung",
                 "NoKk",
                 "EmailPribadi",
                 "Hp1",
@@ -335,18 +339,36 @@ namespace one_db_mitra.Controllers
                 "SectionName",
                 "PositionId",
                 "PositionName",
+                "PosisiId",
+                "IdGrade",
                 "Grade",
+                "IdKlasifikasi",
                 "Klasifikasi",
+                "IdStatusKaryawan",
                 "GolonganTipe",
+                "IdRoster",
                 "RosterKerja",
+                "IdPoh",
                 "PointOfHire",
+                "IdPaybase",
+                "IdJenisPajak",
+                "IdLokasiPenerimaan",
                 "LokasiPenerimaan",
+                "IdLokasiKerja",
                 "LokasiKerja",
+                "IdResidence",
                 "StatusResidence",
                 "DateOfHire",
                 "TanggalMasuk",
                 "TanggalAktif",
+                "TanggalNonAktifKaryawan",
+                "AlasanNonAktifKaryawan",
+                "IdJenisPerjanjian",
+                "NoPerjanjian",
+                "TanggalIjinMulai",
+                "TanggalIjinAkhir",
                 "EmailKantor",
+                "PerusahaanMId",
                 "IsActive"
             };
 
@@ -363,14 +385,18 @@ namespace one_db_mitra.Controllers
                 "WNI",
                 "1234567890123456",
                 "NIK001",
+                "ACR001",
                 "Nama Contoh",
                 "Alias Contoh",
+                "Ibu Contoh",
+                "Ayah Contoh",
                 "Laki-laki",
                 "Samarinda",
                 "1990-01-01",
                 "1",
                 "1",
                 "MENIKAH",
+                "",
                 "",
                 "",
                 "",
@@ -397,18 +423,36 @@ namespace one_db_mitra.Controllers
                 "PIT A",
                 "",
                 "OPERATOR",
+                "",
+                "",
                 "3 SETARA",
+                "",
                 "TEKNISI",
+                "",
                 "NON STAF",
+                "",
                 "10:2",
+                "",
                 "LOCAL",
+                "",
+                "",
+                "",
                 "RING I (KALIORANG/KARANGAN/KAUBUN/SANGKULIRANG)",
+                "",
                 "SANGATTA (IC)",
+                "",
                 "RESIDENT (MESS)",
                 "2024-01-15",
                 "2024-01-15",
                 "2024-01-15",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
                 "contoh@company.com",
+                "",
                 "1"
             };
 
@@ -460,8 +504,11 @@ namespace one_db_mitra.Controllers
                                   p.warga_negara,
                                   p.no_ktp,
                                   k.no_nik,
+                                  k.no_acr,
                                   p.nama_lengkap,
                                   p.nama_alias,
+                                  p.nama_ibu,
+                                  p.nama_ayah,
                                   p.jenis_kelamin,
                                   p.tempat_lahir,
                                   p.tanggal_lahir,
@@ -472,6 +519,11 @@ namespace one_db_mitra.Controllers
                                   p.no_bpjs_tk,
                                   p.no_bpjs_kes,
                                   p.no_bpjs_pensiun,
+                                  p.id_pendidikan,
+                                  p.nama_sekolah,
+                                  p.fakultas,
+                                  p.jurusan,
+                                  p.file_pendukung,
                                   pendidikan,
                                   p.no_kk,
                                   p.email_pribadi,
@@ -491,18 +543,36 @@ namespace one_db_mitra.Controllers
                                   seksi_nama = sec != null ? sec.nama_seksi : null,
                                   jabatan_id = pos != null ? pos.jabatan_id : (int?)null,
                                   jabatan_nama = pos != null ? pos.nama_jabatan : null,
+                                  k.posisi_id,
+                                  k.grade_id,
                                   k.grade,
+                                  k.klasifikasi_id,
                                   k.klasifikasi,
+                                  k.status_karyawan_id,
                                   k.golongan_tipe,
+                                  k.roster_id,
                                   k.roster_kerja,
+                                  k.poh_id,
                                   k.point_of_hire,
+                                  k.paybase_id,
+                                  k.jenis_pajak_id,
+                                  k.lokasi_penerimaan_id,
                                   k.lokasi_penerimaan,
+                                  k.lokasi_kerja_id,
                                   k.lokasi_kerja,
+                                  k.residence_id,
                                   k.status_residence,
                                   k.date_of_hire,
                                   k.tanggal_masuk,
                                   k.tanggal_aktif,
+                                  k.tanggal_non_aktif,
+                                  k.alasan_non_aktif,
+                                  k.jenis_perjanjian_id,
+                                  k.no_perjanjian,
+                                  k.tanggal_ijin_mulai,
+                                  k.tanggal_ijin_akhir,
                                   k.email_kantor,
+                                  k.perusahaan_m_id,
                                   k.status_aktif
                               }).ToListAsync(cancellationToken);
 
@@ -514,8 +584,11 @@ namespace one_db_mitra.Controllers
                 "WargaNegara",
                 "NoKtp",
                 "NoNik",
+                "NoAcr",
                 "NamaLengkap",
                 "NamaAlias",
+                "NamaIbu",
+                "NamaAyah",
                 "JenisKelamin",
                 "TempatLahir",
                 "TanggalLahir",
@@ -530,6 +603,7 @@ namespace one_db_mitra.Controllers
                 "NamaSekolah",
                 "Fakultas",
                 "Jurusan",
+                "FilePendukung",
                 "NoKk",
                 "EmailPribadi",
                 "Hp1",
@@ -548,18 +622,36 @@ namespace one_db_mitra.Controllers
                 "SectionName",
                 "PositionId",
                 "PositionName",
+                "PosisiId",
+                "IdGrade",
                 "Grade",
+                "IdKlasifikasi",
                 "Klasifikasi",
+                "IdStatusKaryawan",
                 "GolonganTipe",
+                "IdRoster",
                 "RosterKerja",
+                "IdPoh",
                 "PointOfHire",
+                "IdPaybase",
+                "IdJenisPajak",
+                "IdLokasiPenerimaan",
                 "LokasiPenerimaan",
+                "IdLokasiKerja",
                 "LokasiKerja",
+                "IdResidence",
                 "StatusResidence",
                 "DateOfHire",
                 "TanggalMasuk",
                 "TanggalAktif",
+                "TanggalNonAktifKaryawan",
+                "AlasanNonAktifKaryawan",
+                "IdJenisPerjanjian",
+                "NoPerjanjian",
+                "TanggalIjinMulai",
+                "TanggalIjinAkhir",
                 "EmailKantor",
+                "PerusahaanMId",
                 "IsActive"
             };
 
@@ -577,53 +669,75 @@ namespace one_db_mitra.Controllers
                 sheet.Cell(rowIndex, 1).Value = row.warga_negara ?? "WNI";
                 sheet.Cell(rowIndex, 2).Value = row.no_ktp ?? string.Empty;
                 sheet.Cell(rowIndex, 3).Value = row.no_nik;
-                sheet.Cell(rowIndex, 4).Value = row.nama_lengkap;
-                sheet.Cell(rowIndex, 5).Value = row.nama_alias ?? string.Empty;
-                sheet.Cell(rowIndex, 6).Value = row.jenis_kelamin ?? string.Empty;
-                sheet.Cell(rowIndex, 7).Value = row.tempat_lahir ?? string.Empty;
-                sheet.Cell(rowIndex, 8).Value = row.tanggal_lahir?.ToString("yyyy-MM-dd") ?? string.Empty;
-                sheet.Cell(rowIndex, 9).Value = row.id_agama?.ToString() ?? string.Empty;
-                sheet.Cell(rowIndex, 10).Value = row.id_status_nikah?.ToString() ?? string.Empty;
-                sheet.Cell(rowIndex, 11).Value = row.status_nikah ?? string.Empty;
-                sheet.Cell(rowIndex, 12).Value = row.no_npwp ?? string.Empty;
-                sheet.Cell(rowIndex, 13).Value = row.no_bpjs_tk ?? string.Empty;
-                sheet.Cell(rowIndex, 14).Value = row.no_bpjs_kes ?? string.Empty;
-                sheet.Cell(rowIndex, 15).Value = row.no_bpjs_pensiun ?? string.Empty;
-                sheet.Cell(rowIndex, 16).Value = row.pendidikan?.id_pendidikan?.ToString() ?? string.Empty;
-                sheet.Cell(rowIndex, 17).Value = row.pendidikan?.nama_sekolah ?? string.Empty;
-                sheet.Cell(rowIndex, 18).Value = row.pendidikan?.fakultas ?? string.Empty;
-                sheet.Cell(rowIndex, 19).Value = row.pendidikan?.jurusan ?? string.Empty;
-                sheet.Cell(rowIndex, 20).Value = row.no_kk ?? string.Empty;
-                sheet.Cell(rowIndex, 21).Value = row.email_pribadi ?? string.Empty;
-                sheet.Cell(rowIndex, 22).Value = row.hp_1 ?? string.Empty;
-                sheet.Cell(rowIndex, 23).Value = row.hp_2 ?? string.Empty;
-                sheet.Cell(rowIndex, 24).Value = row.alamat ?? string.Empty;
-                sheet.Cell(rowIndex, 25).Value = row.provinsi ?? string.Empty;
-                sheet.Cell(rowIndex, 26).Value = row.kabupaten ?? string.Empty;
-                sheet.Cell(rowIndex, 27).Value = row.kecamatan ?? string.Empty;
-                sheet.Cell(rowIndex, 28).Value = row.desa ?? string.Empty;
-                sheet.Cell(rowIndex, 29).Value = row.kode_pos ?? string.Empty;
-                sheet.Cell(rowIndex, 30).Value = row.perusahaan_id;
-                sheet.Cell(rowIndex, 31).Value = row.nama_perusahaan ?? string.Empty;
-                sheet.Cell(rowIndex, 32).Value = row.departemen_id?.ToString() ?? string.Empty;
-                sheet.Cell(rowIndex, 33).Value = row.departemen_nama ?? string.Empty;
-                sheet.Cell(rowIndex, 34).Value = row.seksi_id?.ToString() ?? string.Empty;
-                sheet.Cell(rowIndex, 35).Value = row.seksi_nama ?? string.Empty;
-                sheet.Cell(rowIndex, 36).Value = row.jabatan_id?.ToString() ?? string.Empty;
-                sheet.Cell(rowIndex, 37).Value = row.jabatan_nama ?? string.Empty;
-                sheet.Cell(rowIndex, 38).Value = row.grade ?? string.Empty;
-                sheet.Cell(rowIndex, 39).Value = row.klasifikasi ?? string.Empty;
-                sheet.Cell(rowIndex, 40).Value = row.golongan_tipe ?? string.Empty;
-                sheet.Cell(rowIndex, 41).Value = row.roster_kerja ?? string.Empty;
-                sheet.Cell(rowIndex, 42).Value = row.point_of_hire ?? string.Empty;
-                sheet.Cell(rowIndex, 43).Value = row.lokasi_penerimaan ?? string.Empty;
-                sheet.Cell(rowIndex, 44).Value = row.lokasi_kerja ?? string.Empty;
-                sheet.Cell(rowIndex, 45).Value = row.status_residence ?? string.Empty;
-                sheet.Cell(rowIndex, 46).Value = row.date_of_hire?.ToString("yyyy-MM-dd") ?? string.Empty;
-                sheet.Cell(rowIndex, 47).Value = row.tanggal_masuk?.ToString("yyyy-MM-dd") ?? string.Empty;
-                sheet.Cell(rowIndex, 48).Value = row.tanggal_aktif?.ToString("yyyy-MM-dd") ?? string.Empty;
-                sheet.Cell(rowIndex, 49).Value = row.email_kantor ?? string.Empty;
-                sheet.Cell(rowIndex, 50).Value = row.status_aktif ? "1" : "0";
+                sheet.Cell(rowIndex, 4).Value = row.no_acr ?? string.Empty;
+                sheet.Cell(rowIndex, 5).Value = row.nama_lengkap;
+                sheet.Cell(rowIndex, 6).Value = row.nama_alias ?? string.Empty;
+                sheet.Cell(rowIndex, 7).Value = row.nama_ibu ?? string.Empty;
+                sheet.Cell(rowIndex, 8).Value = row.nama_ayah ?? string.Empty;
+                sheet.Cell(rowIndex, 9).Value = row.jenis_kelamin ?? string.Empty;
+                sheet.Cell(rowIndex, 10).Value = row.tempat_lahir ?? string.Empty;
+                sheet.Cell(rowIndex, 11).Value = row.tanggal_lahir?.ToString("yyyy-MM-dd") ?? string.Empty;
+                sheet.Cell(rowIndex, 12).Value = row.id_agama?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 13).Value = row.id_status_nikah?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 14).Value = row.status_nikah ?? string.Empty;
+                sheet.Cell(rowIndex, 15).Value = row.no_npwp ?? string.Empty;
+                sheet.Cell(rowIndex, 16).Value = row.no_bpjs_tk ?? string.Empty;
+                sheet.Cell(rowIndex, 17).Value = row.no_bpjs_kes ?? string.Empty;
+                sheet.Cell(rowIndex, 18).Value = row.no_bpjs_pensiun ?? string.Empty;
+                sheet.Cell(rowIndex, 19).Value = (row.id_pendidikan ?? row.pendidikan?.id_pendidikan)?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 20).Value = row.nama_sekolah ?? row.pendidikan?.nama_sekolah ?? string.Empty;
+                sheet.Cell(rowIndex, 21).Value = row.fakultas ?? row.pendidikan?.fakultas ?? string.Empty;
+                sheet.Cell(rowIndex, 22).Value = row.jurusan ?? row.pendidikan?.jurusan ?? string.Empty;
+                sheet.Cell(rowIndex, 23).Value = row.file_pendukung ?? string.Empty;
+                sheet.Cell(rowIndex, 24).Value = row.no_kk ?? string.Empty;
+                sheet.Cell(rowIndex, 25).Value = row.email_pribadi ?? string.Empty;
+                sheet.Cell(rowIndex, 26).Value = row.hp_1 ?? string.Empty;
+                sheet.Cell(rowIndex, 27).Value = row.hp_2 ?? string.Empty;
+                sheet.Cell(rowIndex, 28).Value = row.alamat ?? string.Empty;
+                sheet.Cell(rowIndex, 29).Value = row.provinsi ?? string.Empty;
+                sheet.Cell(rowIndex, 30).Value = row.kabupaten ?? string.Empty;
+                sheet.Cell(rowIndex, 31).Value = row.kecamatan ?? string.Empty;
+                sheet.Cell(rowIndex, 32).Value = row.desa ?? string.Empty;
+                sheet.Cell(rowIndex, 33).Value = row.kode_pos ?? string.Empty;
+                sheet.Cell(rowIndex, 34).Value = row.perusahaan_id;
+                sheet.Cell(rowIndex, 35).Value = row.nama_perusahaan ?? string.Empty;
+                sheet.Cell(rowIndex, 36).Value = row.departemen_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 37).Value = row.departemen_nama ?? string.Empty;
+                sheet.Cell(rowIndex, 38).Value = row.seksi_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 39).Value = row.seksi_nama ?? string.Empty;
+                sheet.Cell(rowIndex, 40).Value = row.jabatan_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 41).Value = row.jabatan_nama ?? string.Empty;
+                sheet.Cell(rowIndex, 42).Value = row.posisi_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 43).Value = row.grade_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 44).Value = row.grade ?? string.Empty;
+                sheet.Cell(rowIndex, 45).Value = row.klasifikasi_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 46).Value = row.klasifikasi ?? string.Empty;
+                sheet.Cell(rowIndex, 47).Value = row.status_karyawan_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 48).Value = row.golongan_tipe ?? string.Empty;
+                sheet.Cell(rowIndex, 49).Value = row.roster_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 50).Value = row.roster_kerja ?? string.Empty;
+                sheet.Cell(rowIndex, 51).Value = row.poh_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 52).Value = row.point_of_hire ?? string.Empty;
+                sheet.Cell(rowIndex, 53).Value = row.paybase_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 54).Value = row.jenis_pajak_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 55).Value = row.lokasi_penerimaan_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 56).Value = row.lokasi_penerimaan ?? string.Empty;
+                sheet.Cell(rowIndex, 57).Value = row.lokasi_kerja_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 58).Value = row.lokasi_kerja ?? string.Empty;
+                sheet.Cell(rowIndex, 59).Value = row.residence_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 60).Value = row.status_residence ?? string.Empty;
+                sheet.Cell(rowIndex, 61).Value = row.date_of_hire?.ToString("yyyy-MM-dd") ?? string.Empty;
+                sheet.Cell(rowIndex, 62).Value = row.tanggal_masuk?.ToString("yyyy-MM-dd") ?? string.Empty;
+                sheet.Cell(rowIndex, 63).Value = row.tanggal_aktif?.ToString("yyyy-MM-dd") ?? string.Empty;
+                sheet.Cell(rowIndex, 64).Value = row.tanggal_non_aktif?.ToString("yyyy-MM-dd") ?? string.Empty;
+                sheet.Cell(rowIndex, 65).Value = row.alasan_non_aktif?.ToString("yyyy-MM-dd") ?? string.Empty;
+                sheet.Cell(rowIndex, 66).Value = row.jenis_perjanjian_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 67).Value = row.no_perjanjian ?? string.Empty;
+                sheet.Cell(rowIndex, 68).Value = row.tanggal_ijin_mulai?.ToString("yyyy-MM-dd") ?? string.Empty;
+                sheet.Cell(rowIndex, 69).Value = row.tanggal_ijin_akhir?.ToString("yyyy-MM-dd") ?? string.Empty;
+                sheet.Cell(rowIndex, 70).Value = row.email_kantor ?? string.Empty;
+                sheet.Cell(rowIndex, 71).Value = row.perusahaan_m_id?.ToString() ?? string.Empty;
+                sheet.Cell(rowIndex, 72).Value = row.status_aktif ? "1" : "0";
                 rowIndex++;
             }
 
@@ -792,8 +906,11 @@ namespace one_db_mitra.Controllers
                     WargaNegara = wargaNormalized,
                     NoKtp = noKtp,
                     NoNik = noNik,
+                    NoAcr = GetCell(row, headerMap, "NoAcr"),
                     NamaLengkap = namaLengkap,
                     NamaAlias = GetCell(row, headerMap, "NamaAlias"),
+                    NamaIbu = GetCell(row, headerMap, "NamaIbu"),
+                    NamaAyah = GetCell(row, headerMap, "NamaAyah"),
                     JenisKelamin = GetCell(row, headerMap, "JenisKelamin"),
                     TempatLahir = GetCell(row, headerMap, "TempatLahir"),
                     TanggalLahir = GetCellDate(row, headerMap, "TanggalLahir"),
@@ -803,7 +920,8 @@ namespace one_db_mitra.Controllers
                     NoKk = GetCell(row, headerMap, "NoKk"),
                     EmailPribadi = GetCell(row, headerMap, "EmailPribadi"),
                     Hp1 = GetCell(row, headerMap, "Hp1"),
-                    Hp2 = GetCell(row, headerMap, "Hp2"),                    NoNpwp = GetCell(row, headerMap,                "NoNpwp"),
+                    Hp2 = GetCell(row, headerMap, "Hp2"),
+                    NoNpwp = GetCell(row, headerMap, "NoNpwp"),
                     NoBpjsTk = GetCell(row, headerMap, "NoBpjsTk"),
                     NoBpjsKes = GetCell(row, headerMap, "NoBpjsKes"),
                     NoBpjsPensiun = GetCell(row, headerMap, "NoBpjsPensiun"),
@@ -811,6 +929,7 @@ namespace one_db_mitra.Controllers
                     NamaSekolah = GetCell(row, headerMap, "NamaSekolah"),
                     Fakultas = GetCell(row, headerMap, "Fakultas"),
                     Jurusan = GetCell(row, headerMap, "Jurusan"),
+                    FilePendukung = GetCell(row, headerMap, "FilePendukung"),
                     Alamat = GetCell(row, headerMap, "Alamat"),
                     Provinsi = GetCell(row, headerMap, "Provinsi"),
                     Kabupaten = GetCell(row, headerMap, "Kabupaten"),
@@ -821,18 +940,36 @@ namespace one_db_mitra.Controllers
                     DepartmentId = ResolveOptionalId(GetCellIntNullable(row, headerMap, "DepartmentId"), await ResolveDepartmentIdAsync(companyId, GetCell(row, headerMap, "DepartmentName"), cancellationToken)),
                     SectionId = ResolveOptionalId(GetCellIntNullable(row, headerMap, "SectionId"), await ResolveSectionIdAsync(companyId, GetCell(row, headerMap, "DepartmentName"), GetCell(row, headerMap, "SectionName"), cancellationToken)),
                     PositionId = ResolveOptionalId(GetCellIntNullable(row, headerMap, "PositionId"), await ResolvePositionIdAsync(companyId, GetCell(row, headerMap, "DepartmentName"), GetCell(row, headerMap, "SectionName"), GetCell(row, headerMap, "PositionName"), cancellationToken)),
+                    PosisiId = GetCellIntNullable(row, headerMap, "PosisiId"),
+                    IdGrade = GetCellIntNullable(row, headerMap, "IdGrade"),
                     Grade = GetCell(row, headerMap, "Grade"),
+                    IdKlasifikasi = GetCellIntNullable(row, headerMap, "IdKlasifikasi"),
                     Klasifikasi = GetCell(row, headerMap, "Klasifikasi"),
+                    IdStatusKaryawan = GetCellIntNullable(row, headerMap, "IdStatusKaryawan"),
                     GolonganTipe = GetCell(row, headerMap, "GolonganTipe"),
+                    IdRoster = GetCellIntNullable(row, headerMap, "IdRoster"),
                     RosterKerja = GetCell(row, headerMap, "RosterKerja"),
+                    PohId = GetCellIntNullable(row, headerMap, "IdPoh"),
                     PointOfHire = GetCell(row, headerMap, "PointOfHire"),
+                    IdPaybase = GetCellIntNullable(row, headerMap, "IdPaybase"),
+                    IdJenisPajak = GetCellIntNullable(row, headerMap, "IdJenisPajak"),
+                    IdLokasiPenerimaan = GetCellIntNullable(row, headerMap, "IdLokasiPenerimaan"),
                     LokasiPenerimaan = GetCell(row, headerMap, "LokasiPenerimaan"),
+                    IdLokasiKerja = GetCellIntNullable(row, headerMap, "IdLokasiKerja"),
                     LokasiKerja = GetCell(row, headerMap, "LokasiKerja"),
+                    IdResidence = GetCellIntNullable(row, headerMap, "IdResidence"),
                     StatusResidence = GetCell(row, headerMap, "StatusResidence"),
                     DateOfHire = GetCellDate(row, headerMap, "DateOfHire"),
                     TanggalMasuk = GetCellDate(row, headerMap, "TanggalMasuk"),
                     TanggalAktif = GetCellDate(row, headerMap, "TanggalAktif"),
+                    TanggalNonAktifKaryawan = GetCellDate(row, headerMap, "TanggalNonAktifKaryawan"),
+                    AlasanNonAktifKaryawan = GetCellDate(row, headerMap, "AlasanNonAktifKaryawan"),
+                    IdJenisPerjanjian = GetCellIntNullable(row, headerMap, "IdJenisPerjanjian"),
+                    NoPerjanjian = GetCell(row, headerMap, "NoPerjanjian"),
+                    TanggalIjinMulai = GetCellDate(row, headerMap, "TanggalIjinMulai"),
+                    TanggalIjinAkhir = GetCellDate(row, headerMap, "TanggalIjinAkhir"),
                     EmailKantor = GetCell(row, headerMap, "EmailKantor"),
+                    PerusahaanMId = GetCellIntNullable(row, headerMap, "PerusahaanMId"),
                     IsActive = GetCellBool(row, headerMap, "IsActive", true)
                 }, existingKaryawanSameCompany, cancellationToken);
 
@@ -900,6 +1037,8 @@ namespace one_db_mitra.Controllers
                                       EmailKantor = k.email_kantor,
                                       Phone = p.hp_1,
                                       PhoneAlt = p.hp_2,
+                                      NamaIbu = p.nama_ibu,
+                                      NamaAyah = p.nama_ayah,
                                       JenisKelamin = p.jenis_kelamin,
                                       TempatLahir = p.tempat_lahir,
                                       TanggalLahir = p.tanggal_lahir,
@@ -910,6 +1049,11 @@ namespace one_db_mitra.Controllers
                                       NoBpjsTk = p.no_bpjs_tk,
                                       NoBpjsKes = p.no_bpjs_kes,
                                       NoBpjsPensiun = p.no_bpjs_pensiun,
+                                      IdPendidikan = p.id_pendidikan,
+                                      NamaSekolah = p.nama_sekolah,
+                                      Fakultas = p.fakultas,
+                                      Jurusan = p.jurusan,
+                                      FilePendukung = p.file_pendukung,
                                       Alamat = p.alamat,
                                       Provinsi = p.provinsi,
                                       Kabupaten = p.kabupaten,
@@ -921,19 +1065,37 @@ namespace one_db_mitra.Controllers
                                       SectionName = sec != null ? sec.nama_seksi ?? "-" : "-",
                                       PositionName = pos != null ? pos.nama_jabatan ?? "-" : "-",
                                       NoAcr = k.no_acr,
+                                      PohId = k.poh_id,
                                       IdKaryawanIndexim = k.id_karyawan_indexim,
                                       Grade = k.grade,
+                                      GradeId = k.grade_id,
                                       Klasifikasi = k.klasifikasi,
+                                      KlasifikasiId = k.klasifikasi_id,
                                       GolonganTipe = k.golongan_tipe,
                                       RosterKerja = k.roster_kerja,
+                                      RosterId = k.roster_id,
+                                      StatusKaryawanId = k.status_karyawan_id,
+                                      PaybaseId = k.paybase_id,
+                                      JenisPajakId = k.jenis_pajak_id,
                                       PointOfHire = k.point_of_hire,
                                       LokasiPenerimaan = k.lokasi_penerimaan,
+                                      LokasiPenerimaanId = k.lokasi_penerimaan_id,
                                       LokasiKerja = k.lokasi_kerja,
+                                      LokasiKerjaId = k.lokasi_kerja_id,
                                       StatusResidence = k.status_residence,
+                                      ResidenceId = k.residence_id,
                                       DateOfHire = k.date_of_hire,
                                       IsActive = k.status_aktif,
                                       TanggalMasuk = k.tanggal_masuk,
                                       TanggalAktif = k.tanggal_aktif,
+                                      TanggalNonAktifKaryawan = k.tanggal_non_aktif,
+                                      AlasanNonAktifKaryawan = k.alasan_non_aktif,
+                                      JenisPerjanjianId = k.jenis_perjanjian_id,
+                                      NoPerjanjian = k.no_perjanjian,
+                                      TanggalIjinMulai = k.tanggal_ijin_mulai,
+                                      TanggalIjinAkhir = k.tanggal_ijin_akhir,
+                                      PosisiId = k.posisi_id,
+                                      PerusahaanMId = k.perusahaan_m_id,
                                       CreatedAt = k.created_at,
                                       UpdatedAt = k.updated_at,
                                       CreatedBy = k.created_by,
@@ -1174,10 +1336,17 @@ namespace one_db_mitra.Controllers
                     email_pribadi = model.EmailPribadi?.Trim(),
                     hp_1 = model.Hp1?.Trim(),
                     hp_2 = model.Hp2?.Trim(),
+                    nama_ibu = model.NamaIbu?.Trim(),
+                    nama_ayah = model.NamaAyah?.Trim(),
                     no_npwp = model.NoNpwp?.Trim(),
                     no_bpjs_tk = model.NoBpjsTk?.Trim(),
                     no_bpjs_kes = model.NoBpjsKes?.Trim(),
                     no_bpjs_pensiun = model.NoBpjsPensiun?.Trim(),
+                    id_pendidikan = model.IdPendidikan,
+                    nama_sekolah = model.NamaSekolah?.Trim(),
+                    fakultas = model.Fakultas?.Trim(),
+                    jurusan = model.Jurusan?.Trim(),
+                    file_pendukung = model.FilePendukung?.Trim(),
                     warga_negara = warga,
                     alamat = model.Alamat?.Trim(),
                     provinsi = model.Provinsi?.Trim(),
@@ -1206,10 +1375,17 @@ namespace one_db_mitra.Controllers
                 personal.email_pribadi = model.EmailPribadi?.Trim();
                 personal.hp_1 = model.Hp1?.Trim();
                 personal.hp_2 = model.Hp2?.Trim();
+                personal.nama_ibu = model.NamaIbu?.Trim();
+                personal.nama_ayah = model.NamaAyah?.Trim();
                 personal.no_npwp = model.NoNpwp?.Trim();
                 personal.no_bpjs_tk = model.NoBpjsTk?.Trim();
                 personal.no_bpjs_kes = model.NoBpjsKes?.Trim();
                 personal.no_bpjs_pensiun = model.NoBpjsPensiun?.Trim();
+                personal.id_pendidikan = model.IdPendidikan;
+                personal.nama_sekolah = model.NamaSekolah?.Trim();
+                personal.fakultas = model.Fakultas?.Trim();
+                personal.jurusan = model.Jurusan?.Trim();
+                personal.file_pendukung = model.FilePendukung?.Trim();
                 personal.warga_negara = warga;
                 personal.alamat = model.Alamat?.Trim();
                 personal.provinsi = model.Provinsi?.Trim();
@@ -1229,6 +1405,9 @@ namespace one_db_mitra.Controllers
             {
                 personal_id = personal.personal_id,
                 no_nik = model.NoNik.Trim(),
+                no_acr = model.NoAcr?.Trim(),
+                poh_id = model.IdPoh,
+                point_of_hire = model.PointOfHire?.Trim(),
                 tanggal_masuk = model.TanggalMasuk,
                 tanggal_aktif = model.TanggalAktif,
                 email_kantor = model.EmailKantor?.Trim(),
@@ -1238,16 +1417,32 @@ namespace one_db_mitra.Controllers
                 departemen_id = model.DepartmentId,
                 seksi_id = model.SectionId,
                 jabatan_id = model.PositionId,
+                posisi_id = model.PosisiId,
+                grade_id = model.IdGrade,
                 grade = model.Grade?.Trim(),
+                klasifikasi_id = model.IdKlasifikasi,
                 klasifikasi = model.Klasifikasi?.Trim(),
                 golongan_tipe = model.GolonganTipe?.Trim(),
+                roster_id = model.IdRoster,
                 roster_kerja = model.RosterKerja?.Trim(),
-                point_of_hire = model.PointOfHire?.Trim(),
+                status_karyawan_id = model.IdStatusKaryawan,
+                paybase_id = model.IdPaybase,
+                jenis_pajak_id = model.IdJenisPajak,
+                lokasi_penerimaan_id = model.IdLokasiPenerimaan,
                 lokasi_penerimaan = model.LokasiPenerimaan?.Trim(),
+                lokasi_kerja_id = model.IdLokasiKerja,
                 lokasi_kerja = model.LokasiKerja?.Trim(),
+                residence_id = model.IdResidence,
                 status_residence = model.StatusResidence?.Trim(),
                 date_of_hire = model.DateOfHire,
+                tanggal_non_aktif = model.TanggalNonAktifKaryawan,
+                alasan_non_aktif = model.AlasanNonAktifKaryawan,
+                jenis_perjanjian_id = model.IdJenisPerjanjian,
+                no_perjanjian = model.NoPerjanjian?.Trim(),
+                tanggal_ijin_mulai = model.TanggalIjinMulai,
+                tanggal_ijin_akhir = model.TanggalIjinAkhir,
                 status_aktif = model.IsActive && !model.NonaktifEnabled && !model.BlacklistEnabled,
+                perusahaan_m_id = model.PerusahaanMId,
                 created_at = DateTime.UtcNow,
                 created_by = User.Identity?.Name
             };
@@ -1472,6 +1667,7 @@ namespace one_db_mitra.Controllers
             {
                 KaryawanId = karyawan.karyawan_id,
                 NoNik = karyawan.no_nik,
+                NoAcr = karyawan.no_acr,
                 IdKaryawan = karyawan.id_karyawan_indexim,
                 WargaNegara = personal.warga_negara,
                 NoKtp = personal.no_ktp,
@@ -1487,10 +1683,17 @@ namespace one_db_mitra.Controllers
                 EmailPribadi = personal.email_pribadi,
                 Hp1 = personal.hp_1,
                 Hp2 = personal.hp_2,
+                NamaIbu = personal.nama_ibu,
+                NamaAyah = personal.nama_ayah,
                 NoNpwp = personal.no_npwp,
                 NoBpjsTk = personal.no_bpjs_tk,
                 NoBpjsKes = personal.no_bpjs_kes,
                 NoBpjsPensiun = personal.no_bpjs_pensiun,
+                IdPendidikan = personal.id_pendidikan,
+                NamaSekolah = personal.nama_sekolah,
+                Fakultas = personal.fakultas,
+                Jurusan = personal.jurusan,
+                FilePendukung = personal.file_pendukung,
                 Alamat = personal.alamat,
                 Provinsi = personal.provinsi,
                 Kabupaten = personal.kabupaten,
@@ -1501,19 +1704,37 @@ namespace one_db_mitra.Controllers
                 TanggalAktif = karyawan.tanggal_aktif,
                 EmailKantor = karyawan.email_kantor,
                 Grade = karyawan.grade,
+                IdGrade = karyawan.grade_id,
                 Klasifikasi = karyawan.klasifikasi,
+                IdKlasifikasi = karyawan.klasifikasi_id,
                 GolonganTipe = karyawan.golongan_tipe,
                 RosterKerja = karyawan.roster_kerja,
+                IdRoster = karyawan.roster_id,
                 PointOfHire = karyawan.point_of_hire,
+                IdPoh = karyawan.poh_id,
+                IdStatusKaryawan = karyawan.status_karyawan_id,
+                IdPaybase = karyawan.paybase_id,
+                IdJenisPajak = karyawan.jenis_pajak_id,
                 LokasiPenerimaan = karyawan.lokasi_penerimaan,
+                IdLokasiPenerimaan = karyawan.lokasi_penerimaan_id,
                 LokasiKerja = karyawan.lokasi_kerja,
+                IdLokasiKerja = karyawan.lokasi_kerja_id,
                 StatusResidence = karyawan.status_residence,
+                IdResidence = karyawan.residence_id,
                 DateOfHire = karyawan.date_of_hire,
                 CompanyId = karyawan.perusahaan_id,
                 DepartmentId = karyawan.departemen_id,
                 SectionId = karyawan.seksi_id,
                 PositionId = karyawan.jabatan_id,
+                PosisiId = karyawan.posisi_id,
+                PerusahaanMId = karyawan.perusahaan_m_id,
                 IsActive = karyawan.status_aktif,
+                TanggalNonAktifKaryawan = karyawan.tanggal_non_aktif,
+                AlasanNonAktifKaryawan = karyawan.alasan_non_aktif,
+                IdJenisPerjanjian = karyawan.jenis_perjanjian_id,
+                NoPerjanjian = karyawan.no_perjanjian,
+                TanggalIjinMulai = karyawan.tanggal_ijin_mulai,
+                TanggalIjinAkhir = karyawan.tanggal_ijin_akhir,
                 NonaktifEnabled = latestNonaktif is not null,
                 NonaktifKategori = latestNonaktif?.kategori_blacklist,
                 NonaktifAlasan = latestNonaktif?.alasan,
@@ -1656,10 +1877,17 @@ namespace one_db_mitra.Controllers
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "email_pribadi", personal.email_pribadi, model.EmailPribadi?.Trim(), changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "hp_1", personal.hp_1, model.Hp1?.Trim(), changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "hp_2", personal.hp_2, model.Hp2?.Trim(), changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "nama_ibu", personal.nama_ibu, model.NamaIbu?.Trim(), changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "nama_ayah", personal.nama_ayah, model.NamaAyah?.Trim(), changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "no_npwp", personal.no_npwp, model.NoNpwp?.Trim(), changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "no_bpjs_tk", personal.no_bpjs_tk, model.NoBpjsTk?.Trim(), changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "no_bpjs_kes", personal.no_bpjs_kes, model.NoBpjsKes?.Trim(), changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "no_bpjs_pensiun", personal.no_bpjs_pensiun, model.NoBpjsPensiun?.Trim(), changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "id_pendidikan", personal.id_pendidikan, model.IdPendidikan, changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "nama_sekolah", personal.nama_sekolah, model.NamaSekolah?.Trim(), changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "fakultas", personal.fakultas, model.Fakultas?.Trim(), changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "jurusan", personal.jurusan, model.Jurusan?.Trim(), changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "file_pendukung", personal.file_pendukung, model.FilePendukung?.Trim(), changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "alamat", personal.alamat, model.Alamat?.Trim(), changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "provinsi", personal.provinsi, model.Provinsi?.Trim(), changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "kabupaten", personal.kabupaten, model.Kabupaten?.Trim(), changedBy, now, "edit");
@@ -1670,19 +1898,38 @@ namespace one_db_mitra.Controllers
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "tanggal_masuk", karyawan.tanggal_masuk, model.TanggalMasuk, changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "tanggal_aktif", karyawan.tanggal_aktif, model.TanggalAktif, changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "email_kantor", karyawan.email_kantor, model.EmailKantor?.Trim(), changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "no_acr", karyawan.no_acr, model.NoAcr?.Trim(), changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "id_poh", karyawan.poh_id, model.IdPoh, changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "perusahaan_id", karyawan.perusahaan_id, model.CompanyId, changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "departemen_id", karyawan.departemen_id, model.DepartmentId, changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "seksi_id", karyawan.seksi_id, model.SectionId, changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "jabatan_id", karyawan.jabatan_id, model.PositionId, changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "id_posisi", karyawan.posisi_id, model.PosisiId, changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "grade", karyawan.grade, model.Grade?.Trim(), changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "id_grade", karyawan.grade_id, model.IdGrade, changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "klasifikasi", karyawan.klasifikasi, model.Klasifikasi?.Trim(), changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "id_klasifikasi", karyawan.klasifikasi_id, model.IdKlasifikasi, changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "golongan_tipe", karyawan.golongan_tipe, model.GolonganTipe?.Trim(), changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "roster_kerja", karyawan.roster_kerja, model.RosterKerja?.Trim(), changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "id_roster", karyawan.roster_id, model.IdRoster, changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "id_status_karyawan", karyawan.status_karyawan_id, model.IdStatusKaryawan, changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "id_paybase", karyawan.paybase_id, model.IdPaybase, changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "id_jenis_pajak", karyawan.jenis_pajak_id, model.IdJenisPajak, changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "point_of_hire", karyawan.point_of_hire, model.PointOfHire?.Trim(), changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "lokasi_penerimaan", karyawan.lokasi_penerimaan, model.LokasiPenerimaan?.Trim(), changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "id_lokasi_penerimaan", karyawan.lokasi_penerimaan_id, model.IdLokasiPenerimaan, changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "lokasi_kerja", karyawan.lokasi_kerja, model.LokasiKerja?.Trim(), changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "id_lokasi_kerja", karyawan.lokasi_kerja_id, model.IdLokasiKerja, changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "status_residence", karyawan.status_residence, model.StatusResidence?.Trim(), changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "id_residence", karyawan.residence_id, model.IdResidence, changedBy, now, "edit");
             TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "date_of_hire", karyawan.date_of_hire, model.DateOfHire, changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "tanggal_non_aktif", karyawan.tanggal_non_aktif, model.TanggalNonAktifKaryawan, changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "alasan_non_aktif", karyawan.alasan_non_aktif, model.AlasanNonAktifKaryawan, changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "id_jenis_perjanjian", karyawan.jenis_perjanjian_id, model.IdJenisPerjanjian, changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "no_perjanjian", karyawan.no_perjanjian, model.NoPerjanjian?.Trim(), changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "tanggal_ijin_mulai", karyawan.tanggal_ijin_mulai, model.TanggalIjinMulai, changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "tanggal_ijin_akhir", karyawan.tanggal_ijin_akhir, model.TanggalIjinAkhir, changedBy, now, "edit");
+            TrackAuditChange(audits, karyawan.karyawan_id, personal.personal_id, karyawan.no_nik, "id_m_perusahaan", karyawan.perusahaan_m_id, model.PerusahaanMId, changedBy, now, "edit");
 
             personal.no_ktp = model.NoKtp?.Trim();
             personal.no_kk = model.NoKk?.Trim();
@@ -1697,10 +1944,17 @@ namespace one_db_mitra.Controllers
             personal.email_pribadi = model.EmailPribadi?.Trim();
             personal.hp_1 = model.Hp1?.Trim();
             personal.hp_2 = model.Hp2?.Trim();
+            personal.nama_ibu = model.NamaIbu?.Trim();
+            personal.nama_ayah = model.NamaAyah?.Trim();
             personal.no_npwp = model.NoNpwp?.Trim();
             personal.no_bpjs_tk = model.NoBpjsTk?.Trim();
             personal.no_bpjs_kes = model.NoBpjsKes?.Trim();
             personal.no_bpjs_pensiun = model.NoBpjsPensiun?.Trim();
+            personal.id_pendidikan = model.IdPendidikan;
+            personal.nama_sekolah = model.NamaSekolah?.Trim();
+            personal.fakultas = model.Fakultas?.Trim();
+            personal.jurusan = model.Jurusan?.Trim();
+            personal.file_pendukung = model.FilePendukung?.Trim();
             personal.warga_negara = warga;
             personal.alamat = model.Alamat?.Trim();
             personal.provinsi = model.Provinsi?.Trim();
@@ -1734,20 +1988,39 @@ namespace one_db_mitra.Controllers
             karyawan.tanggal_masuk = model.TanggalMasuk;
             karyawan.tanggal_aktif = model.TanggalAktif;
             karyawan.email_kantor = model.EmailKantor?.Trim();
+            karyawan.no_acr = model.NoAcr?.Trim();
+            karyawan.poh_id = model.IdPoh;
             karyawan.perusahaan_id = model.CompanyId;
             karyawan.departemen_id = model.DepartmentId;
             karyawan.seksi_id = model.SectionId;
             karyawan.jabatan_id = model.PositionId;
+            karyawan.posisi_id = model.PosisiId;
+            karyawan.grade_id = model.IdGrade;
             karyawan.grade = model.Grade?.Trim();
+            karyawan.klasifikasi_id = model.IdKlasifikasi;
             karyawan.klasifikasi = model.Klasifikasi?.Trim();
             karyawan.golongan_tipe = model.GolonganTipe?.Trim();
+            karyawan.roster_id = model.IdRoster;
             karyawan.roster_kerja = model.RosterKerja?.Trim();
             karyawan.point_of_hire = model.PointOfHire?.Trim();
+            karyawan.status_karyawan_id = model.IdStatusKaryawan;
+            karyawan.paybase_id = model.IdPaybase;
+            karyawan.jenis_pajak_id = model.IdJenisPajak;
+            karyawan.lokasi_penerimaan_id = model.IdLokasiPenerimaan;
             karyawan.lokasi_penerimaan = model.LokasiPenerimaan?.Trim();
+            karyawan.lokasi_kerja_id = model.IdLokasiKerja;
             karyawan.lokasi_kerja = model.LokasiKerja?.Trim();
+            karyawan.residence_id = model.IdResidence;
             karyawan.status_residence = model.StatusResidence?.Trim();
             karyawan.date_of_hire = model.DateOfHire;
+            karyawan.tanggal_non_aktif = model.TanggalNonAktifKaryawan;
+            karyawan.alasan_non_aktif = model.AlasanNonAktifKaryawan;
+            karyawan.jenis_perjanjian_id = model.IdJenisPerjanjian;
+            karyawan.no_perjanjian = model.NoPerjanjian?.Trim();
+            karyawan.tanggal_ijin_mulai = model.TanggalIjinMulai;
+            karyawan.tanggal_ijin_akhir = model.TanggalIjinAkhir;
             karyawan.status_aktif = model.IsActive && !model.NonaktifEnabled && !model.BlacklistEnabled;
+            karyawan.perusahaan_m_id = model.PerusahaanMId;
             karyawan.updated_at = now;
             karyawan.updated_by = changedBy;
 
@@ -2528,10 +2801,17 @@ namespace one_db_mitra.Controllers
                     email_pribadi = row.EmailPribadi?.Trim(),
                     hp_1 = row.Hp1?.Trim(),
                     hp_2 = row.Hp2?.Trim(),
+                    nama_ibu = row.NamaIbu?.Trim(),
+                    nama_ayah = row.NamaAyah?.Trim(),
                     no_npwp = row.NoNpwp?.Trim(),
                     no_bpjs_tk = row.NoBpjsTk?.Trim(),
                     no_bpjs_kes = row.NoBpjsKes?.Trim(),
                     no_bpjs_pensiun = row.NoBpjsPensiun?.Trim(),
+                    id_pendidikan = row.IdPendidikan,
+                    nama_sekolah = row.NamaSekolah?.Trim(),
+                    fakultas = row.Fakultas?.Trim(),
+                    jurusan = row.Jurusan?.Trim(),
+                    file_pendukung = row.FilePendukung?.Trim(),
                     warga_negara = row.WargaNegara,
                     alamat = row.Alamat?.Trim(),
                     provinsi = row.Provinsi?.Trim(),
@@ -2557,14 +2837,21 @@ namespace one_db_mitra.Controllers
                 personal.id_agama = row.IdAgama;
                 personal.id_status_nikah = row.IdStatusNikah;
                 personal.status_nikah = row.StatusNikah?.Trim();
-            personal.email_pribadi = row.EmailPribadi?.Trim();
-            personal.hp_1 = row.Hp1?.Trim();
-            personal.hp_2 = row.Hp2?.Trim();
-            personal.no_npwp = row.NoNpwp?.Trim();
-            personal.no_bpjs_tk = row.NoBpjsTk?.Trim();
-            personal.no_bpjs_kes = row.NoBpjsKes?.Trim();
-            personal.no_bpjs_pensiun = row.NoBpjsPensiun?.Trim();
-            personal.warga_negara = row.WargaNegara;
+                personal.email_pribadi = row.EmailPribadi?.Trim();
+                personal.hp_1 = row.Hp1?.Trim();
+                personal.hp_2 = row.Hp2?.Trim();
+                personal.no_npwp = row.NoNpwp?.Trim();
+                personal.no_bpjs_tk = row.NoBpjsTk?.Trim();
+                personal.no_bpjs_kes = row.NoBpjsKes?.Trim();
+                personal.no_bpjs_pensiun = row.NoBpjsPensiun?.Trim();
+                personal.nama_ibu = row.NamaIbu?.Trim();
+                personal.nama_ayah = row.NamaAyah?.Trim();
+                personal.id_pendidikan = row.IdPendidikan;
+                personal.nama_sekolah = row.NamaSekolah?.Trim();
+                personal.fakultas = row.Fakultas?.Trim();
+                personal.jurusan = row.Jurusan?.Trim();
+                personal.file_pendukung = row.FilePendukung?.Trim();
+                personal.warga_negara = row.WargaNegara;
                 personal.alamat = row.Alamat?.Trim();
                 personal.provinsi = row.Provinsi?.Trim();
                 personal.kabupaten = row.Kabupaten?.Trim();
@@ -2590,19 +2877,38 @@ namespace one_db_mitra.Controllers
                 karyawan.departemen_id = row.DepartmentId;
                 karyawan.seksi_id = row.SectionId;
                 karyawan.jabatan_id = row.PositionId;
+                karyawan.posisi_id = row.PosisiId;
+                karyawan.no_acr = row.NoAcr?.Trim();
+                karyawan.poh_id = row.PohId;
+                karyawan.grade_id = row.IdGrade;
                 karyawan.grade = row.Grade?.Trim();
+                karyawan.klasifikasi_id = row.IdKlasifikasi;
                 karyawan.klasifikasi = row.Klasifikasi?.Trim();
                 karyawan.golongan_tipe = row.GolonganTipe?.Trim();
+                karyawan.roster_id = row.IdRoster;
                 karyawan.roster_kerja = row.RosterKerja?.Trim();
                 karyawan.point_of_hire = row.PointOfHire?.Trim();
+                karyawan.status_karyawan_id = row.IdStatusKaryawan;
+                karyawan.paybase_id = row.IdPaybase;
+                karyawan.jenis_pajak_id = row.IdJenisPajak;
+                karyawan.lokasi_penerimaan_id = row.IdLokasiPenerimaan;
                 karyawan.lokasi_penerimaan = row.LokasiPenerimaan?.Trim();
+                karyawan.lokasi_kerja_id = row.IdLokasiKerja;
                 karyawan.lokasi_kerja = row.LokasiKerja?.Trim();
+                karyawan.residence_id = row.IdResidence;
                 karyawan.status_residence = row.StatusResidence?.Trim();
                 karyawan.date_of_hire = row.DateOfHire;
                 karyawan.tanggal_masuk = row.TanggalMasuk;
                 karyawan.tanggal_aktif = row.TanggalAktif;
+                karyawan.tanggal_non_aktif = row.TanggalNonAktifKaryawan;
+                karyawan.alasan_non_aktif = row.AlasanNonAktifKaryawan;
+                karyawan.jenis_perjanjian_id = row.IdJenisPerjanjian;
+                karyawan.no_perjanjian = row.NoPerjanjian?.Trim();
+                karyawan.tanggal_ijin_mulai = row.TanggalIjinMulai;
+                karyawan.tanggal_ijin_akhir = row.TanggalIjinAkhir;
                 karyawan.email_kantor = row.EmailKantor?.Trim();
                 karyawan.status_aktif = row.IsActive;
+                karyawan.perusahaan_m_id = row.PerusahaanMId;
                 karyawan.updated_at = DateTime.UtcNow;
                 karyawan.updated_by = User.Identity?.Name;
 
@@ -2640,24 +2946,43 @@ namespace one_db_mitra.Controllers
             {
                 personal_id = personal.personal_id,
                 no_nik = row.NoNik.Trim(),
+                no_acr = row.NoAcr?.Trim(),
                 email_kantor = row.EmailKantor?.Trim(),
                 id_karyawan_indexim = idKaryawan,
                 perusahaan_id = row.CompanyId,
                 departemen_id = row.DepartmentId,
                 seksi_id = row.SectionId,
                 jabatan_id = row.PositionId,
+                posisi_id = row.PosisiId,
+                poh_id = row.PohId,
+                grade_id = row.IdGrade,
                 grade = row.Grade?.Trim(),
+                klasifikasi_id = row.IdKlasifikasi,
                 klasifikasi = row.Klasifikasi?.Trim(),
                 golongan_tipe = row.GolonganTipe?.Trim(),
+                roster_id = row.IdRoster,
                 roster_kerja = row.RosterKerja?.Trim(),
                 point_of_hire = row.PointOfHire?.Trim(),
+                status_karyawan_id = row.IdStatusKaryawan,
+                paybase_id = row.IdPaybase,
+                jenis_pajak_id = row.IdJenisPajak,
+                lokasi_penerimaan_id = row.IdLokasiPenerimaan,
                 lokasi_penerimaan = row.LokasiPenerimaan?.Trim(),
+                lokasi_kerja_id = row.IdLokasiKerja,
                 lokasi_kerja = row.LokasiKerja?.Trim(),
+                residence_id = row.IdResidence,
                 status_residence = row.StatusResidence?.Trim(),
                 date_of_hire = row.DateOfHire,
                 tanggal_masuk = row.TanggalMasuk,
                 tanggal_aktif = row.TanggalAktif,
+                tanggal_non_aktif = row.TanggalNonAktifKaryawan,
+                alasan_non_aktif = row.AlasanNonAktifKaryawan,
+                jenis_perjanjian_id = row.IdJenisPerjanjian,
+                no_perjanjian = row.NoPerjanjian?.Trim(),
+                tanggal_ijin_mulai = row.TanggalIjinMulai,
+                tanggal_ijin_akhir = row.TanggalIjinAkhir,
                 status_aktif = row.IsActive,
+                perusahaan_m_id = row.PerusahaanMId,
                 created_at = DateTime.UtcNow,
                 created_by = User.Identity?.Name
             };
@@ -2760,8 +3085,11 @@ namespace one_db_mitra.Controllers
                     WargaNegara = GetCell(row, headerMap, "WargaNegara"),
                     NoKtp = GetCell(row, headerMap, "NoKtp"),
                     NoNik = GetCell(row, headerMap, "NoNik"),
+                    NoAcr = GetCell(row, headerMap, "NoAcr"),
                     NamaLengkap = GetCell(row, headerMap, "NamaLengkap"),
                     NamaAlias = GetCell(row, headerMap, "NamaAlias"),
+                    NamaIbu = GetCell(row, headerMap, "NamaIbu"),
+                    NamaAyah = GetCell(row, headerMap, "NamaAyah"),
                     JenisKelamin = GetCell(row, headerMap, "JenisKelamin"),
                     TempatLahir = GetCell(row, headerMap, "TempatLahir"),
                     TanggalLahir = GetCellDate(row, headerMap, "TanggalLahir"),
@@ -2771,7 +3099,8 @@ namespace one_db_mitra.Controllers
                     NoKk = GetCell(row, headerMap, "NoKk"),
                     EmailPribadi = GetCell(row, headerMap, "EmailPribadi"),
                     Hp1 = GetCell(row, headerMap, "Hp1"),
-                    Hp2 = GetCell(row, headerMap, "Hp2"),                    NoNpwp = GetCell(row, headerMap,                "NoNpwp"),
+                    Hp2 = GetCell(row, headerMap, "Hp2"),
+                    NoNpwp = GetCell(row, headerMap, "NoNpwp"),
                     NoBpjsTk = GetCell(row, headerMap, "NoBpjsTk"),
                     NoBpjsKes = GetCell(row, headerMap, "NoBpjsKes"),
                     NoBpjsPensiun = GetCell(row, headerMap, "NoBpjsPensiun"),
@@ -2779,6 +3108,7 @@ namespace one_db_mitra.Controllers
                     NamaSekolah = GetCell(row, headerMap, "NamaSekolah"),
                     Fakultas = GetCell(row, headerMap, "Fakultas"),
                     Jurusan = GetCell(row, headerMap, "Jurusan"),
+                    FilePendukung = GetCell(row, headerMap, "FilePendukung"),
                     Alamat = GetCell(row, headerMap, "Alamat"),
                     Provinsi = GetCell(row, headerMap, "Provinsi"),
                     Kabupaten = GetCell(row, headerMap, "Kabupaten"),
@@ -2793,18 +3123,36 @@ namespace one_db_mitra.Controllers
                     SectionName = GetCell(row, headerMap, "SectionName"),
                     PositionId = GetCellIntNullable(row, headerMap, "PositionId"),
                     PositionName = GetCell(row, headerMap, "PositionName"),
+                    PosisiId = GetCellIntNullable(row, headerMap, "PosisiId"),
+                    IdGrade = GetCellIntNullable(row, headerMap, "IdGrade"),
                     Grade = GetCell(row, headerMap, "Grade"),
+                    IdKlasifikasi = GetCellIntNullable(row, headerMap, "IdKlasifikasi"),
                     Klasifikasi = GetCell(row, headerMap, "Klasifikasi"),
+                    IdStatusKaryawan = GetCellIntNullable(row, headerMap, "IdStatusKaryawan"),
                     GolonganTipe = GetCell(row, headerMap, "GolonganTipe"),
+                    IdRoster = GetCellIntNullable(row, headerMap, "IdRoster"),
                     RosterKerja = GetCell(row, headerMap, "RosterKerja"),
+                    PohId = GetCellIntNullable(row, headerMap, "IdPoh"),
                     PointOfHire = GetCell(row, headerMap, "PointOfHire"),
+                    IdPaybase = GetCellIntNullable(row, headerMap, "IdPaybase"),
+                    IdJenisPajak = GetCellIntNullable(row, headerMap, "IdJenisPajak"),
+                    IdLokasiPenerimaan = GetCellIntNullable(row, headerMap, "IdLokasiPenerimaan"),
                     LokasiPenerimaan = GetCell(row, headerMap, "LokasiPenerimaan"),
+                    IdLokasiKerja = GetCellIntNullable(row, headerMap, "IdLokasiKerja"),
                     LokasiKerja = GetCell(row, headerMap, "LokasiKerja"),
+                    IdResidence = GetCellIntNullable(row, headerMap, "IdResidence"),
                     StatusResidence = GetCell(row, headerMap, "StatusResidence"),
                     DateOfHire = GetCellDate(row, headerMap, "DateOfHire"),
                     TanggalMasuk = GetCellDate(row, headerMap, "TanggalMasuk"),
                     TanggalAktif = GetCellDate(row, headerMap, "TanggalAktif"),
+                    TanggalNonAktifKaryawan = GetCellDate(row, headerMap, "TanggalNonAktifKaryawan"),
+                    AlasanNonAktifKaryawan = GetCellDate(row, headerMap, "AlasanNonAktifKaryawan"),
+                    IdJenisPerjanjian = GetCellIntNullable(row, headerMap, "IdJenisPerjanjian"),
+                    NoPerjanjian = GetCell(row, headerMap, "NoPerjanjian"),
+                    TanggalIjinMulai = GetCellDate(row, headerMap, "TanggalIjinMulai"),
+                    TanggalIjinAkhir = GetCellDate(row, headerMap, "TanggalIjinAkhir"),
                     EmailKantor = GetCell(row, headerMap, "EmailKantor"),
+                    PerusahaanMId = GetCellIntNullable(row, headerMap, "PerusahaanMId"),
                     IsActive = GetCellBool(row, headerMap, "IsActive", true)
                 });
             }

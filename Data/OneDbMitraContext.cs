@@ -153,11 +153,24 @@ public partial class OneDbMitraContext : DbContext
             entity.Property(e => e.departemen_id).HasColumnName("id_departemen");
             entity.Property(e => e.seksi_id).HasColumnName("id_seksi");
             entity.Property(e => e.jabatan_id).HasColumnName("id_jabatan");
+            entity.Property(e => e.posisi_id).HasColumnName("id_posisi");
+            entity.Property(e => e.grade_id).HasColumnName("id_grade");
+            entity.Property(e => e.klasifikasi_id).HasColumnName("id_klasifikasi");
+            entity.Property(e => e.roster_id).HasColumnName("id_roster");
+            entity.Property(e => e.status_karyawan_id).HasColumnName("id_status_karyawan");
+            entity.Property(e => e.paybase_id).HasColumnName("id_paybase");
+            entity.Property(e => e.jenis_pajak_id).HasColumnName("id_jenis_pajak");
+            entity.Property(e => e.lokasi_penerimaan_id).HasColumnName("id_lokasi_penerimaan");
+            entity.Property(e => e.lokasi_kerja_id).HasColumnName("id_lokasi_kerja");
+            entity.Property(e => e.residence_id).HasColumnName("id_residence");
+            entity.Property(e => e.jenis_perjanjian_id).HasColumnName("id_jenis_perjanjian");
+            entity.Property(e => e.perusahaan_m_id).HasColumnName("id_m_perusahaan");
+            entity.Property(e => e.poh_id).HasColumnName("id_poh");
             entity.Property(e => e.point_of_hire).HasColumnName("place_of_hire");
             entity.Property(e => e.no_nik).HasMaxLength(50);
             entity.Property(e => e.no_acr).HasMaxLength(50);
             entity.Property(e => e.email_kantor).HasMaxLength(800);
-            entity.Property(e => e.url_foto).HasColumnName("path_foto").HasMaxLength(200);
+            entity.Property(e => e.url_foto).HasColumnName("path_foto").HasMaxLength(100);
             entity.Property(e => e.id_karyawan_indexim).HasMaxLength(20);
             entity.Property(e => e.grade).HasMaxLength(50);
             entity.Property(e => e.klasifikasi).HasMaxLength(100);
@@ -170,6 +183,7 @@ public partial class OneDbMitraContext : DbContext
             entity.Property(e => e.created_by).HasMaxLength(50);
             entity.Property(e => e.updated_by).HasMaxLength(50);
             entity.Property(e => e.deleted_by).HasMaxLength(50);
+            entity.Property(e => e.no_perjanjian).HasMaxLength(50);
         });
 
         modelBuilder.Entity<tbl_m_menu>(entity =>
@@ -221,10 +235,16 @@ public partial class OneDbMitraContext : DbContext
             entity.Property(e => e.email_pribadi).HasMaxLength(150);
             entity.Property(e => e.hp_1).HasMaxLength(30);
             entity.Property(e => e.hp_2).HasMaxLength(30);
+            entity.Property(e => e.nama_ibu).HasMaxLength(50);
+            entity.Property(e => e.nama_ayah).HasMaxLength(50);
             entity.Property(e => e.no_npwp).HasMaxLength(25);
             entity.Property(e => e.no_bpjs_tk).HasMaxLength(25);
             entity.Property(e => e.no_bpjs_kes).HasMaxLength(25);
             entity.Property(e => e.no_bpjs_pensiun).HasMaxLength(25);
+            entity.Property(e => e.nama_sekolah).HasMaxLength(80);
+            entity.Property(e => e.fakultas).HasMaxLength(50);
+            entity.Property(e => e.jurusan).HasMaxLength(80);
+            entity.Property(e => e.file_pendukung).HasMaxLength(80);
             entity.Property(e => e.created_by).HasMaxLength(30);
             entity.Property(e => e.updated_by).HasMaxLength(30);
             entity.Property(e => e.deleted_by).HasMaxLength(30);

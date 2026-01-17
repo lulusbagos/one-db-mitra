@@ -33,6 +33,10 @@ namespace one_db_mitra.Models.Admin
         [StringLength(50)]
         public string NoNik { get; set; } = string.Empty;
 
+        [Display(Name = "No ACR")]
+        [StringLength(50)]
+        public string? NoAcr { get; set; }
+
         [Display(Name = "ID Karyawan")]
         [StringLength(20)]
         public string? IdKaryawan { get; set; }
@@ -92,6 +96,14 @@ namespace one_db_mitra.Models.Admin
         [StringLength(60)]
         public string? Hp2 { get; set; }
 
+        [Display(Name = "Nama Ibu")]
+        [StringLength(50)]
+        public string? NamaIbu { get; set; }
+
+        [Display(Name = "Nama Ayah")]
+        [StringLength(50)]
+        public string? NamaAyah { get; set; }
+
         [Display(Name = "No NPWP")]
         [StringLength(25)]
         public string? NoNpwp { get; set; }
@@ -107,6 +119,25 @@ namespace one_db_mitra.Models.Admin
         [Display(Name = "No BPJS Pensiun")]
         [StringLength(25)]
         public string? NoBpjsPensiun { get; set; }
+
+        [Display(Name = "ID Pendidikan (Terakhir)")]
+        public int? IdPendidikan { get; set; }
+
+        [Display(Name = "Nama Sekolah")]
+        [StringLength(80)]
+        public string? NamaSekolah { get; set; }
+
+        [Display(Name = "Fakultas")]
+        [StringLength(50)]
+        public string? Fakultas { get; set; }
+
+        [Display(Name = "Jurusan")]
+        [StringLength(80)]
+        public string? Jurusan { get; set; }
+
+        [Display(Name = "File Pendukung")]
+        [StringLength(80)]
+        public string? FilePendukung { get; set; }
 
         public List<KaryawanPendidikanInput> PendidikanItems { get; set; } = new();
 
@@ -150,33 +181,63 @@ namespace one_db_mitra.Models.Admin
         [StringLength(50)]
         public string? Grade { get; set; }
 
+        [Display(Name = "ID Grade")]
+        public int? IdGrade { get; set; }
+
         [Display(Name = "Klasifikasi")]
         [StringLength(100)]
         public string? Klasifikasi { get; set; }
+
+        [Display(Name = "ID Klasifikasi")]
+        public int? IdKlasifikasi { get; set; }
 
         [Display(Name = "Golongan (Tipe)")]
         [StringLength(100)]
         public string? GolonganTipe { get; set; }
 
+        [Display(Name = "ID Status Karyawan")]
+        public int? IdStatusKaryawan { get; set; }
+
         [Display(Name = "Roster Kerja")]
         [StringLength(50)]
         public string? RosterKerja { get; set; }
+
+        [Display(Name = "ID Roster")]
+        public int? IdRoster { get; set; }
 
         [Display(Name = "Point of Hire (POH)")]
         [StringLength(100)]
         public string? PointOfHire { get; set; }
 
+        [Display(Name = "ID POH")]
+        public int? IdPoh { get; set; }
+
+        [Display(Name = "ID Paybase")]
+        public int? IdPaybase { get; set; }
+
+        [Display(Name = "ID Jenis Pajak")]
+        public int? IdJenisPajak { get; set; }
+
         [Display(Name = "Lokasi Penerimaan")]
         [StringLength(150)]
         public string? LokasiPenerimaan { get; set; }
+
+        [Display(Name = "ID Lokasi Penerimaan")]
+        public int? IdLokasiPenerimaan { get; set; }
 
         [Display(Name = "Lokasi Kerja (Site)")]
         [StringLength(150)]
         public string? LokasiKerja { get; set; }
 
+        [Display(Name = "ID Lokasi Kerja")]
+        public int? IdLokasiKerja { get; set; }
+
         [Display(Name = "Status Residence")]
         [StringLength(100)]
         public string? StatusResidence { get; set; }
+
+        [Display(Name = "ID Residence")]
+        public int? IdResidence { get; set; }
 
         [Display(Name = "Date of Hire (DOH)")]
         [DataType(DataType.Date)]
@@ -194,8 +255,37 @@ namespace one_db_mitra.Models.Admin
         [Display(Name = "Jabatan")]
         public int? PositionId { get; set; }
 
+        [Display(Name = "ID Posisi")]
+        public int? PosisiId { get; set; }
+
+        [Display(Name = "ID Perusahaan Induk")]
+        public int? PerusahaanMId { get; set; }
+
         [Display(Name = "Aktif")]
         public bool IsActive { get; set; } = true;
+
+        [Display(Name = "Tanggal Nonaktif (Karyawan)")]
+        [DataType(DataType.Date)]
+        public DateTime? TanggalNonAktifKaryawan { get; set; }
+
+        [Display(Name = "Tanggal Alasan Nonaktif")]
+        [DataType(DataType.Date)]
+        public DateTime? AlasanNonAktifKaryawan { get; set; }
+
+        [Display(Name = "ID Jenis Perjanjian")]
+        public int? IdJenisPerjanjian { get; set; }
+
+        [Display(Name = "No Perjanjian")]
+        [StringLength(50)]
+        public string? NoPerjanjian { get; set; }
+
+        [Display(Name = "Tanggal Ijin Mulai")]
+        [DataType(DataType.Date)]
+        public DateTime? TanggalIjinMulai { get; set; }
+
+        [Display(Name = "Tanggal Ijin Akhir")]
+        [DataType(DataType.Date)]
+        public DateTime? TanggalIjinAkhir { get; set; }
 
         [Display(Name = "Nonaktifkan Karyawan")]
         public bool NonaktifEnabled { get; set; }
@@ -305,6 +395,8 @@ namespace one_db_mitra.Models.Admin
         public string? EmailKantor { get; set; }
         public string? Phone { get; set; }
         public string? PhoneAlt { get; set; }
+        public string? NamaIbu { get; set; }
+        public string? NamaAyah { get; set; }
         public string? JenisKelamin { get; set; }
         public string? TempatLahir { get; set; }
         public DateTime? TanggalLahir { get; set; }
@@ -315,6 +407,11 @@ namespace one_db_mitra.Models.Admin
         public string? NoBpjsTk { get; set; }
         public string? NoBpjsKes { get; set; }
         public string? NoBpjsPensiun { get; set; }
+        public int? IdPendidikan { get; set; }
+        public string? NamaSekolah { get; set; }
+        public string? Fakultas { get; set; }
+        public string? Jurusan { get; set; }
+        public string? FilePendukung { get; set; }
         public string? Alamat { get; set; }
         public string? Provinsi { get; set; }
         public string? Kabupaten { get; set; }
@@ -326,19 +423,37 @@ namespace one_db_mitra.Models.Admin
         public string SectionName { get; set; } = string.Empty;
         public string PositionName { get; set; } = string.Empty;
         public string? NoAcr { get; set; }
+        public int? PohId { get; set; }
         public string? IdKaryawanIndexim { get; set; }
         public string? Grade { get; set; }
+        public int? GradeId { get; set; }
         public string? Klasifikasi { get; set; }
+        public int? KlasifikasiId { get; set; }
         public string? GolonganTipe { get; set; }
         public string? RosterKerja { get; set; }
+        public int? RosterId { get; set; }
+        public int? StatusKaryawanId { get; set; }
+        public int? PaybaseId { get; set; }
+        public int? JenisPajakId { get; set; }
         public string? PointOfHire { get; set; }
         public string? LokasiPenerimaan { get; set; }
+        public int? LokasiPenerimaanId { get; set; }
         public string? LokasiKerja { get; set; }
+        public int? LokasiKerjaId { get; set; }
         public string? StatusResidence { get; set; }
+        public int? ResidenceId { get; set; }
         public DateTime? DateOfHire { get; set; }
         public bool IsActive { get; set; }
         public DateTime? TanggalMasuk { get; set; }
         public DateTime? TanggalAktif { get; set; }
+        public DateTime? TanggalNonAktifKaryawan { get; set; }
+        public DateTime? AlasanNonAktifKaryawan { get; set; }
+        public int? JenisPerjanjianId { get; set; }
+        public string? NoPerjanjian { get; set; }
+        public DateTime? TanggalIjinMulai { get; set; }
+        public DateTime? TanggalIjinAkhir { get; set; }
+        public int? PosisiId { get; set; }
+        public int? PerusahaanMId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public string? CreatedBy { get; set; }
@@ -461,6 +576,8 @@ namespace one_db_mitra.Models.Admin
         public string EmailKantor { get; set; } = string.Empty;
         public string Hp1 { get; set; } = string.Empty;
         public string Hp2 { get; set; } = string.Empty;
+        public string NamaIbu { get; set; } = string.Empty;
+        public string NamaAyah { get; set; } = string.Empty;
         public string NoNpwp { get; set; } = string.Empty;
         public string NoBpjsTk { get; set; } = string.Empty;
         public string NoBpjsKes { get; set; } = string.Empty;
@@ -469,12 +586,32 @@ namespace one_db_mitra.Models.Admin
         public string NamaSekolah { get; set; } = string.Empty;
         public string Fakultas { get; set; } = string.Empty;
         public string Jurusan { get; set; } = string.Empty;
+        public string FilePendukung { get; set; } = string.Empty;
         public string Alamat { get; set; } = string.Empty;
         public string Provinsi { get; set; } = string.Empty;
         public string Kabupaten { get; set; } = string.Empty;
         public string Kecamatan { get; set; } = string.Empty;
         public string Desa { get; set; } = string.Empty;
         public string KodePos { get; set; } = string.Empty;
+        public string NoAcr { get; set; } = string.Empty;
+        public int? PohId { get; set; }
+        public int? PosisiId { get; set; }
+        public int? IdGrade { get; set; }
+        public int? IdKlasifikasi { get; set; }
+        public int? IdRoster { get; set; }
+        public int? IdStatusKaryawan { get; set; }
+        public int? IdPaybase { get; set; }
+        public int? IdJenisPajak { get; set; }
+        public int? IdLokasiPenerimaan { get; set; }
+        public int? IdLokasiKerja { get; set; }
+        public int? IdResidence { get; set; }
+        public DateTime? TanggalNonAktifKaryawan { get; set; }
+        public DateTime? AlasanNonAktifKaryawan { get; set; }
+        public int? IdJenisPerjanjian { get; set; }
+        public string NoPerjanjian { get; set; } = string.Empty;
+        public DateTime? TanggalIjinMulai { get; set; }
+        public DateTime? TanggalIjinAkhir { get; set; }
+        public int? PerusahaanMId { get; set; }
         public bool IsActive { get; set; } = true;
     }
 

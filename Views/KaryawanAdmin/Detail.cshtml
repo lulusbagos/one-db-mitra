@@ -158,6 +158,14 @@
                             <div class="fw-semibold">@Show(Model.NoKk)</div>
                         </div>
                         <div class="col-md-6">
+                            <div class="text-secondary small">Nama Ibu</div>
+                            <div class="fw-semibold">@Show(Model.NamaIbu)</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-secondary small">Nama Ayah</div>
+                            <div class="fw-semibold">@Show(Model.NamaAyah)</div>
+                        </div>
+                        <div class="col-md-6">
                             <div class="text-secondary small">Jenis Kelamin</div>
                             <div class="fw-semibold">@Show(Model.JenisKelamin)</div>
                         </div>
@@ -188,6 +196,26 @@
                         <div class="col-md-6">
                             <div class="text-secondary small">No BPJS Pensiun</div>
                             <div class="fw-semibold">@Show(Model.NoBpjsPensiun)</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-secondary small">ID Pendidikan</div>
+                            <div class="fw-semibold">@ShowInt(Model.IdPendidikan)</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-secondary small">Nama Sekolah</div>
+                            <div class="fw-semibold">@Show(Model.NamaSekolah)</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-secondary small">Fakultas</div>
+                            <div class="fw-semibold">@Show(Model.Fakultas)</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-secondary small">Jurusan</div>
+                            <div class="fw-semibold">@Show(Model.Jurusan)</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-secondary small">File Pendukung</div>
+                            <div class="fw-semibold">@Show(Model.FilePendukung)</div>
                         </div>
                     </div>
                 </div>
@@ -292,6 +320,54 @@
                             <div class="fw-semibold">@Show(Model.StatusResidence)</div>
                         </div>
                         <div class="col-md-4">
+                            <div class="text-secondary small">ID Residence</div>
+                            <div class="fw-semibold">@ShowInt(Model.ResidenceId)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">ID POH</div>
+                            <div class="fw-semibold">@ShowInt(Model.PohId)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">ID Posisi</div>
+                            <div class="fw-semibold">@ShowInt(Model.PosisiId)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">ID Grade</div>
+                            <div class="fw-semibold">@ShowInt(Model.GradeId)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">ID Klasifikasi</div>
+                            <div class="fw-semibold">@ShowInt(Model.KlasifikasiId)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">ID Roster</div>
+                            <div class="fw-semibold">@ShowInt(Model.RosterId)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">ID Status Karyawan</div>
+                            <div class="fw-semibold">@ShowInt(Model.StatusKaryawanId)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">ID Paybase</div>
+                            <div class="fw-semibold">@ShowInt(Model.PaybaseId)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">ID Jenis Pajak</div>
+                            <div class="fw-semibold">@ShowInt(Model.JenisPajakId)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">ID Lokasi Penerimaan</div>
+                            <div class="fw-semibold">@ShowInt(Model.LokasiPenerimaanId)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">ID Lokasi Kerja</div>
+                            <div class="fw-semibold">@ShowInt(Model.LokasiKerjaId)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">ID Perusahaan Induk</div>
+                            <div class="fw-semibold">@ShowInt(Model.PerusahaanMId)</div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="text-secondary small">Date of Hire</div>
                             <div class="fw-semibold">@FormatDate(Model.DateOfHire)</div>
                         </div>
@@ -302,6 +378,30 @@
                         <div class="col-md-4">
                             <div class="text-secondary small">Tanggal Aktif</div>
                             <div class="fw-semibold">@FormatDate(Model.TanggalAktif)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">Tanggal Nonaktif (Karyawan)</div>
+                            <div class="fw-semibold">@FormatDate(Model.TanggalNonAktifKaryawan)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">Tanggal Alasan Nonaktif</div>
+                            <div class="fw-semibold">@FormatDate(Model.AlasanNonAktifKaryawan)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">ID Jenis Perjanjian</div>
+                            <div class="fw-semibold">@ShowInt(Model.JenisPerjanjianId)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">No Perjanjian</div>
+                            <div class="fw-semibold">@Show(Model.NoPerjanjian)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">Tanggal Ijin Mulai</div>
+                            <div class="fw-semibold">@FormatDate(Model.TanggalIjinMulai)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-secondary small">Tanggal Ijin Akhir</div>
+                            <div class="fw-semibold">@FormatDate(Model.TanggalIjinAkhir)</div>
                         </div>
                         <div class="col-md-4">
                             <div class="text-secondary small">Created</div>

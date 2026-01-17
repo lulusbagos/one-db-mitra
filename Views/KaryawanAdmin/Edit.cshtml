@@ -114,6 +114,14 @@
                             <label asp-for="NamaAlias" class="form-label"></label>
                             <input asp-for="NamaAlias" class="form-control" placeholder="Nama panggilan" />
                         </div>
+                        <div class="col-md-6">
+                            <label asp-for="NamaIbu" class="form-label"></label>
+                            <input asp-for="NamaIbu" class="form-control" placeholder="Nama ibu kandung" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="NamaAyah" class="form-label"></label>
+                            <input asp-for="NamaAyah" class="form-control" placeholder="Nama ayah kandung" />
+                        </div>
                         <div class="col-md-3">
                             <label asp-for="JenisKelamin" class="form-label"></label>
                             <select asp-for="JenisKelamin" class="form-select">
@@ -214,6 +222,10 @@
                     </select>
                 </div>
                 <div class="col-md-4">
+                    <label asp-for="NoAcr" class="form-label"></label>
+                    <input asp-for="NoAcr" class="form-control" placeholder="No ACR" />
+                </div>
+                <div class="col-md-4">
                     <label asp-for="Grade" class="form-label"></label>
                     <select asp-for="Grade" class="form-select" id="gradeSelect" data-selected="@Model.Grade">
                         <option value="">-- Pilih --</option>
@@ -260,6 +272,82 @@
                     <select asp-for="StatusResidence" class="form-select" id="statusResidenceSelect" data-selected="@Model.StatusResidence">
                         <option value="">-- Pilih --</option>
                     </select>
+                </div>
+                <div class="col-12 pt-2">
+                    <h6 class="mb-1">Administrasi & ID Master</h6>
+                    <p class="text-secondary small mb-0">Opsional. Isi jika ada ID master dari sistem lain.</p>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="PosisiId" class="form-label"></label>
+                    <input asp-for="PosisiId" class="form-control" type="number" min="0" placeholder="ID posisi" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="IdPoh" class="form-label"></label>
+                    <input asp-for="IdPoh" class="form-control" type="number" min="0" placeholder="ID POH" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="IdGrade" class="form-label"></label>
+                    <input asp-for="IdGrade" class="form-control" type="number" min="0" placeholder="ID grade" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="IdKlasifikasi" class="form-label"></label>
+                    <input asp-for="IdKlasifikasi" class="form-control" type="number" min="0" placeholder="ID klasifikasi" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="IdRoster" class="form-label"></label>
+                    <input asp-for="IdRoster" class="form-control" type="number" min="0" placeholder="ID roster" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="IdStatusKaryawan" class="form-label"></label>
+                    <input asp-for="IdStatusKaryawan" class="form-control" type="number" min="0" placeholder="ID status karyawan" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="IdPaybase" class="form-label"></label>
+                    <input asp-for="IdPaybase" class="form-control" type="number" min="0" placeholder="ID paybase" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="IdJenisPajak" class="form-label"></label>
+                    <input asp-for="IdJenisPajak" class="form-control" type="number" min="0" placeholder="ID jenis pajak" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="IdLokasiPenerimaan" class="form-label"></label>
+                    <input asp-for="IdLokasiPenerimaan" class="form-control" type="number" min="0" placeholder="ID lokasi penerimaan" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="IdLokasiKerja" class="form-label"></label>
+                    <input asp-for="IdLokasiKerja" class="form-control" type="number" min="0" placeholder="ID lokasi kerja" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="IdResidence" class="form-label"></label>
+                    <input asp-for="IdResidence" class="form-control" type="number" min="0" placeholder="ID residence" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="PerusahaanMId" class="form-label"></label>
+                    <input asp-for="PerusahaanMId" class="form-control" type="number" min="0" placeholder="ID perusahaan induk" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="IdJenisPerjanjian" class="form-label"></label>
+                    <input asp-for="IdJenisPerjanjian" class="form-control" type="number" min="0" placeholder="ID jenis perjanjian" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="NoPerjanjian" class="form-label"></label>
+                    <input asp-for="NoPerjanjian" class="form-control" placeholder="No perjanjian" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="TanggalIjinMulai" class="form-label"></label>
+                    <input asp-for="TanggalIjinMulai" class="form-control" type="date" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="TanggalIjinAkhir" class="form-label"></label>
+                    <input asp-for="TanggalIjinAkhir" class="form-control" type="date" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="TanggalNonAktifKaryawan" class="form-label"></label>
+                    <input asp-for="TanggalNonAktifKaryawan" class="form-control" type="date" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="AlasanNonAktifKaryawan" class="form-label"></label>
+                    <input asp-for="AlasanNonAktifKaryawan" class="form-control" type="date" />
                 </div>
                 <div class="col-md-4">
                     <label asp-for="DateOfHire" class="form-label"></label>
@@ -319,6 +407,30 @@
                 <div class="col-md-6">
                     <label asp-for="NoBpjsPensiun" class="form-label"></label>
                     <input asp-for="NoBpjsPensiun" class="form-control" placeholder="No BPJS Pensiun" />
+                </div>
+                <div class="col-12 pt-2">
+                    <h6 class="mb-1">Pendidikan Terakhir</h6>
+                    <p class="text-secondary small mb-0">Ringkasan pendidikan utama di data personal.</p>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="IdPendidikan" class="form-label"></label>
+                    <input asp-for="IdPendidikan" class="form-control" type="number" min="0" placeholder="ID pendidikan" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="NamaSekolah" class="form-label"></label>
+                    <input asp-for="NamaSekolah" class="form-control" placeholder="Nama sekolah" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Fakultas" class="form-label"></label>
+                    <input asp-for="Fakultas" class="form-control" placeholder="Fakultas" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Jurusan" class="form-label"></label>
+                    <input asp-for="Jurusan" class="form-control" placeholder="Jurusan" />
+                </div>
+                <div class="col-md-8">
+                    <label asp-for="FilePendukung" class="form-label"></label>
+                    <input asp-for="FilePendukung" class="form-control" placeholder="Nama file pendukung" />
                 </div>
                 <div class="col-12">
                     <div class="d-flex align-items-center justify-content-between mt-2">

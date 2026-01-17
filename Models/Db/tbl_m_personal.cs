@@ -19,10 +19,17 @@ namespace one_db_mitra.Models.Db
         public string? email_pribadi { get; set; }
         public string? hp_1 { get; set; }
         public string? hp_2 { get; set; }
+        public string? nama_ibu { get; set; }
+        public string? nama_ayah { get; set; }
         public string? no_npwp { get; set; }
         public string? no_bpjs_tk { get; set; }
         public string? no_bpjs_kes { get; set; }
         public string? no_bpjs_pensiun { get; set; }
+        public int? id_pendidikan { get; set; }
+        public string? nama_sekolah { get; set; }
+        public string? fakultas { get; set; }
+        public string? jurusan { get; set; }
+        public string? file_pendukung { get; set; }
         public string? alamat { get; set; }
         public string? provinsi { get; set; }
         public string? kabupaten { get; set; }
