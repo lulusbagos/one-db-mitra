@@ -2,6 +2,12 @@
 @{
     ViewData["Title"] = "Manajemen Jabatan";
     var companyOptions = ViewBag.CompanyOptions as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
+    var guideItems = new[]
+    {
+        "Pastikan section sudah dibuat sebelum menambah jabatan.",
+        "Gunakan filter perusahaan untuk mempercepat pencarian jabatan.",
+        "Jabatan akan dipakai saat input karyawan dan pemetaan akses."
+    };
 }
 
 <div class="container-fluid px-0">
@@ -36,6 +42,10 @@
             </a>
         </div>
     </div>
+    @await Html.PartialAsync("_SettingGuide", guideItems, new ViewDataDictionary(ViewData)
+    {
+        ["GuideTitle"] = "Cara mengatur jabatan"
+    })
 
     <div class="card">
         <div class="card-header">

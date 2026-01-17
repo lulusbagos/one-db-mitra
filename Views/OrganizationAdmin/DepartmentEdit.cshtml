@@ -3,6 +3,12 @@
     ViewData["Title"] = "Edit Departemen";
     var lockCompanyId = ViewBag.LockCompanyId is int value ? value : (int?)null;
     var companyLocked = lockCompanyId.HasValue && lockCompanyId.Value > 0;
+    var guideItems = new[]
+    {
+        "Ubah nama atau deskripsi departemen jika ada perubahan struktur.",
+        "Perhatikan perusahaan induk sebelum menyimpan.",
+        "Nonaktifkan departemen jika sudah tidak digunakan."
+    };
 }
 
 <div class="container-fluid px-0">
@@ -13,6 +19,10 @@
         </div>
         <a class="btn btn-outline-secondary" asp-action="Departments">Kembali</a>
     </div>
+    @await Html.PartialAsync("_SettingGuide", guideItems, new ViewDataDictionary(ViewData)
+    {
+        ["GuideTitle"] = "Cara mengubah departemen"
+    })
 
     <div class="card">
         <div class="card-body">

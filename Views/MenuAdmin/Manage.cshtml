@@ -5,6 +5,12 @@
     {
         ParentOptions = Model.ParentOptions
     };
+    var guideItems = new[]
+    {
+        "Isi kode menu unik, nama tampilan, URL, dan ikon yang sesuai.",
+        "Gunakan Menu Induk untuk membuat submenu bertingkat.",
+        "Simpan lalu cek sidebar untuk memastikan menu muncul sesuai urutan."
+    };
 }
 
 <div class="container-fluid px-0">
@@ -25,6 +31,10 @@
             </span>
         </form>
     </div>
+    @await Html.PartialAsync("_SettingGuide", guideItems, new ViewDataDictionary(ViewData)
+    {
+        ["GuideTitle"] = "Cara mengatur menu"
+    })
 
     <div class="row g-4">
         <div class="col-xl-4">

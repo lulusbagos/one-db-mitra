@@ -1,6 +1,12 @@
 @model one_db_mitra.Models.Admin.AppSettingViewModel
 @{
     ViewData["Title"] = "Pengaturan Aplikasi";
+    var guideItems = new[]
+    {
+        "Isi nama aplikasi, header, dan footer untuk mengubah branding di seluruh halaman.",
+        "Upload logo atau isi URL logo, lalu cek preview sebelum simpan.",
+        "Atur tema, font, dan jadwal pengumuman lalu klik Simpan Pengaturan."
+    };
 }
 
 <div class="container-fluid px-0">
@@ -11,6 +17,10 @@
             <p class="text-secondary mb-0">Atur logo, nama aplikasi, header, dan footer.</p>
         </div>
     </div>
+    @await Html.PartialAsync("_SettingGuide", guideItems, new ViewDataDictionary(ViewData)
+    {
+        ["GuideTitle"] = "Cara melakukan pengaturan aplikasi"
+    })
 
     <div class="card">
         <div class="card-body">

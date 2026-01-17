@@ -2,6 +2,12 @@
 @{
     ViewData["Title"] = "Edit User";
     var isDepartmentAdmin = ViewBag.IsDepartmentAdmin == true;
+    var guideItems = new[]
+    {
+        "Perbarui data user sesuai kebutuhan operasional.",
+        "Pastikan role dan perusahaan sudah sesuai scope akses.",
+        "Simpan untuk menerapkan perubahan."
+    };
 }
 
 <div class="container-fluid px-0">
@@ -12,6 +18,10 @@
         </div>
         <a class="btn btn-outline-secondary" asp-action="Index">Kembali</a>
     </div>
+    @await Html.PartialAsync("_SettingGuide", guideItems, new ViewDataDictionary(ViewData)
+    {
+        ["GuideTitle"] = "Cara mengubah user"
+    })
 
     <div class="card">
         <div class="card-body">

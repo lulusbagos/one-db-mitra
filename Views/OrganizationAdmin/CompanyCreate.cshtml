@@ -1,6 +1,12 @@
 @model one_db_mitra.Models.Admin.CompanyEditViewModel
 @{
     ViewData["Title"] = "Tambah Perusahaan";
+    var guideItems = new[]
+    {
+        "Isi kode dan nama perusahaan sesuai dokumen resmi.",
+        "Pilih tipe perusahaan dan induk jika ada agar hirarki benar.",
+        "Simpan untuk menambahkan perusahaan ke daftar."
+    };
 }
 
 <div class="container-fluid px-0">
@@ -11,6 +17,10 @@
         </div>
         <a class="btn btn-outline-secondary" asp-action="Companies">Kembali</a>
     </div>
+    @await Html.PartialAsync("_SettingGuide", guideItems, new ViewDataDictionary(ViewData)
+    {
+        ["GuideTitle"] = "Cara menambah perusahaan"
+    })
 
     <div class="card">
         <div class="card-body">

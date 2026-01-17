@@ -1,6 +1,12 @@
 @model IReadOnlyList<one_db_mitra.Models.Admin.CompanyListItem>
 @{
     ViewData["Title"] = "Manajemen Perusahaan";
+    var guideItems = new[]
+    {
+        "Tambah perusahaan baru lalu isi tipe dan induk jika ada.",
+        "Gunakan filter aktif untuk fokus pada perusahaan yang masih berlaku.",
+        "Pastikan hierarki induk benar agar akses turunannya akurat."
+    };
 }
 
 <div class="container-fluid px-0">
@@ -34,6 +40,10 @@
             </a>
         </div>
     </div>
+    @await Html.PartialAsync("_SettingGuide", guideItems, new ViewDataDictionary(ViewData)
+    {
+        ["GuideTitle"] = "Cara mengatur perusahaan"
+    })
 
     <div class="card">
         <div class="card-header">

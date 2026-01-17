@@ -1,6 +1,12 @@
 @model one_db_mitra.Models.Admin.MenuAccessMatrixViewModel
 @{
     ViewData["Title"] = "Akses Menu";
+    var guideItems = new[]
+    {
+        "Pilih role dan perusahaan, lalu klik Muat untuk menampilkan matrix akses.",
+        "Centang menu yang boleh diakses, lalu simpan perubahan.",
+        "Gunakan toggle pilih semua untuk percepat pengaturan role/perusahaan."
+    };
 }
 
 <div class="container-fluid px-0">
@@ -11,6 +17,10 @@
             <p class="text-secondary mb-0">Kelola akses menu berdasarkan role dan perusahaan pada satu layar.</p>
         </div>
     </div>
+    @await Html.PartialAsync("_SettingGuide", guideItems, new ViewDataDictionary(ViewData)
+    {
+        ["GuideTitle"] = "Cara mengatur akses menu"
+    })
 
     <div class="card mb-4">
         <div class="card-body">

@@ -1,6 +1,12 @@
 @model one_db_mitra.Models.Admin.UserAdminIndexViewModel
 @{
     ViewData["Title"] = "Manajemen User";
+    var guideItems = new[]
+    {
+        "Gunakan tombol Tambah User untuk membuat akun baru sesuai role dan perusahaan.",
+        "Aktifkan filter untuk melihat hanya user aktif jika dibutuhkan.",
+        "Gunakan Preview Menu untuk memastikan akses sudah sesuai."
+    };
 }
 
 <div class="modal fade" id="menuPreviewModal" tabindex="-1" aria-hidden="true">
@@ -82,6 +88,10 @@
             }
         </div>
     </div>
+    @await Html.PartialAsync("_SettingGuide", guideItems, new ViewDataDictionary(ViewData)
+    {
+        ["GuideTitle"] = "Cara mengatur user"
+    })
 
     <div class="card">
         <div class="card-header">

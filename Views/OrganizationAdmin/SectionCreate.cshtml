@@ -5,6 +5,12 @@
     var lockDepartmentId = ViewBag.LockDepartmentId is int deptValue ? deptValue : (int?)null;
     var companyLocked = lockCompanyId.HasValue && lockCompanyId.Value > 0;
     var departmentLocked = lockDepartmentId.HasValue && lockDepartmentId.Value > 0;
+    var guideItems = new[]
+    {
+        "Pilih perusahaan dan departemen sebelum menambah section.",
+        "Gunakan kode section yang konsisten dengan struktur organisasi.",
+        "Simpan agar section bisa dipakai saat membuat jabatan."
+    };
 }
 
 <div class="container-fluid px-0">
@@ -15,6 +21,10 @@
         </div>
         <a class="btn btn-outline-secondary" asp-action="Sections">Kembali</a>
     </div>
+    @await Html.PartialAsync("_SettingGuide", guideItems, new ViewDataDictionary(ViewData)
+    {
+        ["GuideTitle"] = "Cara menambah section"
+    })
 
     <div class="card">
         <div class="card-body">

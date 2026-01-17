@@ -1,0 +1,23 @@
+@model IReadOnlyList<string>
+@{
+    var title = ViewData["GuideTitle"] as string ?? "Panduan Singkat";
+}
+
+<div class="alert alert-info d-flex flex-column gap-2">
+    <div class="fw-semibold">
+        <i class="bi bi-info-circle me-2"></i>@title
+    </div>
+    @if (Model != null && Model.Count > 0)
+    {
+        <ol class="mb-0 ps-3">
+            @foreach (var item in Model)
+            {
+                <li>@item</li>
+            }
+        </ol>
+    }
+    else
+    {
+        <div class="small text-secondary">Tidak ada panduan tambahan.</div>
+    }
+</div>
