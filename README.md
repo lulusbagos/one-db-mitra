@@ -48,5 +48,24 @@ Aplikasi manajemen data karyawan dan organisasi berbasis ASP.NET Core MVC.
 - File konfigurasi seperti `appsettings.json` dan `appsettings.Development.json` sudah di-ignore agar tidak bocor ke publik.
 - Pastikan data sensitif tidak di-commit ke repository.
 
+## Alur Aplikasi
+
+1. User login ke aplikasi menggunakan akun yang sudah terdaftar.
+2. Setelah login, user akan diarahkan ke dashboard utama yang menampilkan ringkasan data dan notifikasi.
+3. User dapat mengakses menu sesuai hak akses, seperti:
+   - Manajemen data karyawan (tambah, edit, hapus, import, export)
+   - Manajemen organisasi (departemen, jabatan, perusahaan, seksi)
+   - Manajemen user dan role
+   - Audit log aktivitas
+   - Notifikasi real-time
+4. Setiap perubahan data akan tercatat di audit log.
+5. Admin dapat mengatur menu, hak akses, dan setting aplikasi.
+
 ## Lisensi
-Tulis lisensi project di sini jika ada.
+Copyright (c) 2026 Lulus Bagos Hermawan
+
+Seluruh kode dan aset dalam repository ini adalah milik Lulus Bagos Hermawan.
+Penggunaan, distribusi, atau modifikasi project ini harus seizin pemilik.
+
+Untuk izin penggunaan, silakan hubungi:
+Email: lulusbagoshermwan@gmail.com
