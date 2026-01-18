@@ -3,6 +3,7 @@
     ViewData["Title"] = "Pengajuan Perusahaan";
     var canSubmit = (bool?)ViewBag.CanSubmit ?? false;
     var isOwner = (bool?)ViewBag.IsOwner ?? false;
+    var currentUser = User?.Identity?.Name ?? string.Empty;
 }
 
 <div class="container-fluid px-0">
@@ -80,7 +81,7 @@
                     @if (Model.Count == 0)
                     {
                         <tr>
-                            <td colspan="7" class="text-center text-secondary py-4">Belum ada pengajuan.</td>
+                            <td colspan="7" class="text-center text-secondary py-4 empty-state">Belum ada pengajuan.</td>
                         </tr>
                     }
                     else
@@ -142,7 +143,7 @@
                                     {
                                         <a class="btn btn-sm btn-outline-success" asp-action="Review" asp-route-id="@item.PengajuanId">Review</a>
                                     }
-                                    @if (canSubmit && !isOwner)
+                                    @if (canSubmit && !isOwner && string.Equals(item.CreatedBy, currentUser, System.StringComparison.OrdinalIgnoreCase))
                                     {
                                         <form asp-action="Delete" asp-route-id="@item.PengajuanId" method="post" class="d-inline">
                                             @Html.AntiForgeryToken()

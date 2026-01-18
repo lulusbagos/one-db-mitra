@@ -161,47 +161,7 @@ namespace one_db_mitra.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditCompany(CompanyEditViewModel model, CancellationToken cancellationToken)
         {
-            var scope = await BuildOrgScopeAsync(cancellationToken);
-            if (!scope.IsOwner)
-            {
-                SetAlert("Hanya Owner yang dapat mengubah perusahaan.", "warning");
-                return RedirectToAction(nameof(Companies));
-            }
-
-            if (!ModelState.IsValid)
-            {
-                await PopulateCompanyOptionsAsync(model, cancellationToken);
-                return View(model);
-            }
-
-            var company = await _context.tbl_m_perusahaan.FirstOrDefaultAsync(c => c.perusahaan_id == model.CompanyId, cancellationToken);
-            if (company is null)
-            {
-                SetAlert("Perusahaan tidak ditemukan.", "warning");
-                return NotFound();
-            }
-
-            var exists = await _context.tbl_m_perusahaan.AsNoTracking()
-                .AnyAsync(c => c.nama_perusahaan == model.CompanyName && c.perusahaan_id != model.CompanyId, cancellationToken);
-            if (exists)
-            {
-                ModelState.AddModelError(nameof(model.CompanyName), "Nama perusahaan sudah digunakan.");
-                await PopulateCompanyOptionsAsync(model, cancellationToken);
-                return View(model);
-            }
-
-            company.kode_perusahaan = string.IsNullOrWhiteSpace(model.CompanyCode) ? null : model.CompanyCode.Trim();
-            company.nama_perusahaan = model.CompanyName.Trim();
-            company.alamat_perusahaan = string.IsNullOrWhiteSpace(model.CompanyAddress) ? null : model.CompanyAddress.Trim();
-            company.status_perusahaan = string.IsNullOrWhiteSpace(model.CompanyStatus) ? null : model.CompanyStatus.Trim();
-            company.tipe_perusahaan_id = model.CompanyTypeId;
-            company.perusahaan_induk_id = model.ParentCompanyId;
-            company.is_aktif = model.IsActive;
-            company.diubah_pada = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync(cancellationToken);
-            await _auditLogger.LogAsync("UPDATE", "perusahaan", company.perusahaan_id.ToString(), $"Ubah perusahaan {company.nama_perusahaan}", cancellationToken);
-            SetAlert("Perusahaan berhasil diperbarui.");
+            SetAlert("Perubahan perusahaan dinonaktifkan. Gunakan Pengajuan Perusahaan jika ada pembaruan.", "warning");
             return RedirectToAction(nameof(Companies));
         }
 
@@ -209,38 +169,7 @@ namespace one_db_mitra.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteCompany(int id, bool activeOnly = true, CancellationToken cancellationToken = default)
         {
-            var scope = await BuildOrgScopeAsync(cancellationToken);
-            if (!scope.IsOwner)
-            {
-                SetAlert("Hanya Owner yang dapat menghapus perusahaan.", "warning");
-                return RedirectToAction(nameof(Companies), new { activeOnly });
-            }
-
-            var company = await _context.tbl_m_perusahaan.FirstOrDefaultAsync(c => c.perusahaan_id == id, cancellationToken);
-            if (company is null)
-            {
-                SetAlert("Perusahaan tidak ditemukan.", "warning");
-                return RedirectToAction(nameof(Companies), new { activeOnly });
-            }
-
-            var hasDepartments = await _context.tbl_m_departemen.AsNoTracking()
-                .AnyAsync(d => d.perusahaan_id == id && d.is_aktif == true, cancellationToken);
-            var hasUsers = await _context.tbl_m_pengguna.AsNoTracking()
-                .AnyAsync(u => u.perusahaan_id == id && u.is_aktif, cancellationToken);
-            var hasChildren = await _context.tbl_m_perusahaan.AsNoTracking()
-                .AnyAsync(c => c.perusahaan_induk_id == id && c.is_aktif, cancellationToken);
-
-            if (hasDepartments || hasUsers || hasChildren)
-            {
-                SetAlert("Perusahaan tidak bisa dihapus karena masih digunakan.", "warning");
-                return RedirectToAction(nameof(Companies), new { activeOnly });
-            }
-
-            company.is_aktif = false;
-            company.diubah_pada = DateTime.UtcNow;
-            await _context.SaveChangesAsync(cancellationToken);
-            await _auditLogger.LogAsync("DELETE", "perusahaan", company.perusahaan_id.ToString(), $"Hapus perusahaan {company.nama_perusahaan}", cancellationToken);
-            SetAlert("Perusahaan berhasil dinonaktifkan.");
+            SetAlert("Penghapusan perusahaan dinonaktifkan.", "warning");
             return RedirectToAction(nameof(Companies), new { activeOnly });
         }
 

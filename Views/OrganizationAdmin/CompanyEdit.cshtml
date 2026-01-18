@@ -1,11 +1,11 @@
 @model one_db_mitra.Models.Admin.CompanyEditViewModel
 @{
-    ViewData["Title"] = "Edit Perusahaan";
+    ViewData["Title"] = "Detail Perusahaan";
     var guideItems = new[]
     {
-        "Periksa kembali tipe perusahaan dan induk sebelum menyimpan.",
-        "Ubah status aktif jika perusahaan sudah tidak beroperasi.",
-        "Simpan untuk menerapkan perubahan ke seluruh modul."
+        "Halaman ini bersifat informasi saja.",
+        "Perubahan data perusahaan dilakukan melalui Pengajuan Perusahaan.",
+        "Jika ada data kurang lengkap, cek status pengajuan."
     };
 }
 
@@ -13,64 +13,51 @@
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
             <p class="text-uppercase text-secondary small mb-1">Pengaturan</p>
-            <h2 class="mb-0">Edit Perusahaan</h2>
+            <h2 class="mb-0">Detail Perusahaan</h2>
         </div>
         <a class="btn btn-outline-secondary" asp-action="Companies">Kembali</a>
     </div>
     @await Html.PartialAsync("_SettingGuide", guideItems, new ViewDataDictionary(ViewData)
     {
-        ["GuideTitle"] = "Cara mengubah perusahaan"
+        ["GuideTitle"] = "Informasi perusahaan"
     })
 
     <div class="card">
         <div class="card-body">
-            <form method="post" asp-action="EditCompany">
-                @Html.AntiForgeryToken()
-                <input type="hidden" asp-for="CompanyId" />
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label asp-for="CompanyCode" class="form-label"></label>
-                        <input asp-for="CompanyCode" class="form-control" />
-                        <span class="text-danger" asp-validation-for="CompanyCode"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="CompanyName" class="form-label"></label>
-                        <input asp-for="CompanyName" class="form-control" />
-                        <span class="text-danger" asp-validation-for="CompanyName"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="CompanyAddress" class="form-label"></label>
-                        <input asp-for="CompanyAddress" class="form-control" />
-                    </div>
-                    <div class="col-md-4">
-                        <label asp-for="CompanyStatus" class="form-label"></label>
-                        <input asp-for="CompanyStatus" class="form-control" />
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="CompanyTypeId" class="form-label"></label>
-                        <select asp-for="CompanyTypeId" class="form-select" asp-items="Model.CompanyTypeOptions"></select>
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="ParentCompanyId" class="form-label"></label>
-                        <select asp-for="ParentCompanyId" class="form-select" asp-items="Model.ParentCompanyOptions">
-                            <option value="">--</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 d-flex align-items-center">
-                        <div class="form-check mt-4">
-                            <input asp-for="IsActive" class="form-check-input" />
-                            <label asp-for="IsActive" class="form-check-label"></label>
-                        </div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label asp-for="CompanyCode" class="form-label"></label>
+                    <input asp-for="CompanyCode" class="form-control" readonly />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="CompanyName" class="form-label"></label>
+                    <input asp-for="CompanyName" class="form-control" readonly />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="CompanyAddress" class="form-label"></label>
+                    <input asp-for="CompanyAddress" class="form-control" readonly />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="CompanyStatus" class="form-label"></label>
+                    <input asp-for="CompanyStatus" class="form-control" readonly />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="CompanyTypeId" class="form-label"></label>
+                    <select asp-for="CompanyTypeId" class="form-select" asp-items="Model.CompanyTypeOptions" disabled></select>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ParentCompanyId" class="form-label"></label>
+                    <select asp-for="ParentCompanyId" class="form-select" asp-items="Model.ParentCompanyOptions" disabled>
+                        <option value="">--</option>
+                    </select>
+                </div>
+                <div class="col-md-6 d-flex align-items-center">
+                    <div class="form-check mt-4">
+                        <input asp-for="IsActive" class="form-check-input" disabled />
+                        <label asp-for="IsActive" class="form-check-label"></label>
                     </div>
                 </div>
-                <div class="d-grid mt-4">
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}

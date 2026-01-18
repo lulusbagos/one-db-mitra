@@ -6,14 +6,21 @@
         && currentPath.StartsWith(Model.UrlPath, System.StringComparison.OrdinalIgnoreCase);
     var target = Model.OpenInNewTab ? "_blank" : "_self";
     var rel = Model.OpenInNewTab ? "noopener" : string.Empty;
+    var preview = Model.Children.Any()
+        ? $"Submenu: {Model.Children.Count}"
+        : "Buka halaman";
 }
 
 @if (!Model.IsHidden)
 {
     <li class="sidebar-menu-item @(isActive ? "is-active" : "")">
-        <a class="sidebar-link" href="@Model.UrlPath" target="@target" rel="@rel">
+        <a class="sidebar-link" href="@Model.UrlPath" target="@target" rel="@rel" data-preview="@preview">
             <i class="@Model.IconKey"></i>
             <span>@Model.DisplayName</span>
+            @if (Model.Children.Any())
+            {
+                <span class="sidebar-link-count">@Model.Children.Count</span>
+            }
         </a>
         @if (Model.Children.Any())
         {

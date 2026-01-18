@@ -18,41 +18,82 @@ public class WilayahController : Controller
     [HttpGet("Provinsi")]
     public async Task<IActionResult> Provinsi(CancellationToken cancellationToken)
     {
-        return await ProxyAsync("https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json", cancellationToken);
+        var urls = new[]
+        {
+            "https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json",
+            "https://raw.githubusercontent.com/emsifa/api-wilayah-indonesia/master/api/provinces.json",
+            "https://wilayah.id/api/provinces.json"
+        };
+        return await ProxyAsync(urls, cancellationToken);
     }
 
     [HttpGet("Kabupaten/{provinsiId}")]
     public async Task<IActionResult> Kabupaten(string provinsiId, CancellationToken cancellationToken)
     {
-        return await ProxyAsync($"https://emsifa.github.io/api-wilayah-indonesia/api/regencies/{provinsiId}.json", cancellationToken);
+        var urls = new[]
+        {
+            $"https://emsifa.github.io/api-wilayah-indonesia/api/regencies/{provinsiId}.json",
+            $"https://raw.githubusercontent.com/emsifa/api-wilayah-indonesia/master/api/regencies/{provinsiId}.json",
+            $"https://wilayah.id/api/regencies/{provinsiId}.json"
+        };
+        return await ProxyAsync(urls, cancellationToken);
     }
 
     [HttpGet("Kecamatan/{kabupatenId}")]
     public async Task<IActionResult> Kecamatan(string kabupatenId, CancellationToken cancellationToken)
     {
-        return await ProxyAsync($"https://emsifa.github.io/api-wilayah-indonesia/api/districts/{kabupatenId}.json", cancellationToken);
+        var urls = new[]
+        {
+            $"https://emsifa.github.io/api-wilayah-indonesia/api/districts/{kabupatenId}.json",
+            $"https://raw.githubusercontent.com/emsifa/api-wilayah-indonesia/master/api/districts/{kabupatenId}.json",
+            $"https://wilayah.id/api/districts/{kabupatenId}.json"
+        };
+        return await ProxyAsync(urls, cancellationToken);
     }
 
     [HttpGet("Desa/{kecamatanId}")]
     public async Task<IActionResult> Desa(string kecamatanId, CancellationToken cancellationToken)
     {
-        return await ProxyAsync($"https://emsifa.github.io/api-wilayah-indonesia/api/villages/{kecamatanId}.json", cancellationToken);
+        var urls = new[]
+        {
+            $"https://emsifa.github.io/api-wilayah-indonesia/api/villages/{kecamatanId}.json",
+            $"https://raw.githubusercontent.com/emsifa/api-wilayah-indonesia/master/api/villages/{kecamatanId}.json",
+            $"https://wilayah.id/api/villages/{kecamatanId}.json"
+        };
+        return await ProxyAsync(urls, cancellationToken);
     }
 
-    private async Task<IActionResult> ProxyAsync(string url, CancellationToken cancellationToken)
+    private async Task<IActionResult> ProxyAsync(IEnumerable<string> urls, CancellationToken cancellationToken)
     {
         var client = _httpClientFactory.CreateClient();
-        using var response = await client.GetAsync(url, cancellationToken);
-        if (!response.IsSuccessStatusCode)
+        if (!client.DefaultRequestHeaders.UserAgent.Any())
         {
-            return Content("[]", "application/json");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("one-db-mitra/1.0");
         }
 
-        var payload = await response.Content.ReadAsStringAsync(cancellationToken);
-        if (string.IsNullOrWhiteSpace(payload))
+        foreach (var url in urls)
         {
-            return Content("[]", "application/json");
+            try
+            {
+                using var response = await client.GetAsync(url, cancellationToken);
+                if (!response.IsSuccessStatusCode)
+                {
+                    continue;
+                }
+
+                var payload = await response.Content.ReadAsStringAsync(cancellationToken);
+                if (string.IsNullOrWhiteSpace(payload))
+                {
+                    continue;
+                }
+
+                return Content(payload, "application/json");
+            }
+            catch (HttpRequestException)
+            {
+                // Try next fallback URL.
+            }
         }
-        return Content(payload, "application/json");
+        return Content("[]", "application/json");
     }
 }

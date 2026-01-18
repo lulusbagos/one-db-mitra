@@ -16,6 +16,7 @@ public class PengajuanPerusahaanListItem
     public string StatusPengajuan { get; set; } = string.Empty;
     public string? ReviewerNote { get; set; }
     public DateTime CreatedAt { get; set; }
+    public string? CreatedBy { get; set; }
     public bool IsLegacy { get; set; }
     public bool DokumenBelumLengkap { get; set; }
 }

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Caching.Memory;
 using one_db_mitra.Data;
 using one_db_mitra.Models.Auth;
 using one_db_mitra.Services.AppSetting;
@@ -24,13 +25,15 @@ namespace one_db_mitra.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly AppSettingService _settingService;
         private readonly CompanyHierarchyService _companyHierarchyService;
+        private readonly IMemoryCache _memoryCache;
 
-        public AccountController(OneDbMitraContext context, IWebHostEnvironment environment, AppSettingService settingService, CompanyHierarchyService companyHierarchyService)
+        public AccountController(OneDbMitraContext context, IWebHostEnvironment environment, AppSettingService settingService, CompanyHierarchyService companyHierarchyService, IMemoryCache memoryCache)
         {
             _context = context;
             _environment = environment;
             _settingService = settingService;
             _companyHierarchyService = companyHierarchyService;
+            _memoryCache = memoryCache;
         }
 
         [AllowAnonymous]
@@ -64,6 +67,13 @@ namespace one_db_mitra.Controllers
                 return View(model);
             }
 
+            var loginKey = BuildLoginKey(model.Username);
+            if (TryGetLoginLock(loginKey, out var retryAfter))
+            {
+                model.ErrorMessage = $"Terlalu banyak percobaan login. Coba lagi {retryAfter}.";
+                return View(model);
+            }
+
             var loginId = (model.Username ?? string.Empty).Trim().ToLowerInvariant();
             var user = await _context.tbl_m_pengguna
                 .AsNoTracking()
@@ -73,9 +83,12 @@ namespace one_db_mitra.Controllers
 
             if (user is null)
             {
+                RegisterLoginFailure(loginKey);
                 model.ErrorMessage = "Username atau password tidak sesuai.";
                 return View(model);
             }
+
+            ClearLoginFailures(loginKey);
 
             var roles = await LoadUserRolesAsync(user.pengguna_id, user.peran_id, cancellationToken);
             var primaryRole = roles
@@ -1218,6 +1231,68 @@ namespace one_db_mitra.Controllers
             }
 
             return "Public Network";
+        }
+
+        private sealed class LoginAttempt
+        {
+            public int Count { get; set; }
+            public DateTime FirstAttempt { get; set; }
+            public DateTime? LockedUntil { get; set; }
+        }
+
+        private string BuildLoginKey(string? username)
+        {
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            var name = (username ?? string.Empty).Trim().ToLowerInvariant();
+            return $"login:{ip}:{name}";
+        }
+
+        private bool TryGetLoginLock(string key, out string retryAfter)
+        {
+            retryAfter = "beberapa menit";
+            if (!_memoryCache.TryGetValue<LoginAttempt>(key, out var attempt) || attempt?.LockedUntil == null)
+            {
+                return false;
+            }
+
+            var remaining = attempt.LockedUntil.Value - DateTime.UtcNow;
+            if (remaining <= TimeSpan.Zero)
+            {
+                _memoryCache.Remove(key);
+                return false;
+            }
+
+            retryAfter = $"{Math.Ceiling(remaining.TotalMinutes)} menit";
+            return true;
+        }
+
+        private void RegisterLoginFailure(string key)
+        {
+            const int maxAttempts = 5;
+            var now = DateTime.UtcNow;
+            var attempt = _memoryCache.GetOrCreate(key, entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
+                return new LoginAttempt { Count = 0, FirstAttempt = now };
+            });
+
+            if (attempt == null)
+            {
+                return;
+            }
+
+            attempt.Count++;
+            if (attempt.Count >= maxAttempts)
+            {
+                attempt.LockedUntil = now.AddMinutes(10);
+            }
+
+            _memoryCache.Set(key, attempt, TimeSpan.FromMinutes(30));
+        }
+
+        private void ClearLoginFailures(string key)
+        {
+            _memoryCache.Remove(key);
         }
     }
 }

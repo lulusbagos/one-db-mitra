@@ -56,6 +56,44 @@
             padding: 1rem;
             border-radius: 12px;
         }
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+        .doc-tile {
+            border: 1px dashed #cbd5e1;
+            border-radius: 14px;
+            background: #f8fafc;
+            padding: 1.25rem;
+            text-align: center;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .doc-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #e2f7f4;
+            color: #0f766e;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin: 0 auto;
+        }
+        .doc-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #0f172a;
+        }
+        .doc-hint {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
     </style>
 }
 
@@ -81,11 +119,13 @@
                                 <label asp-for="NamaPerusahaan" class="reg-label"></label>
                                 <input asp-for="NamaPerusahaan" class="form-control reg-input" />
                                 <span asp-validation-for="NamaPerusahaan" class="text-danger small"></span>
+                                <div class="form-tip">Gunakan nama resmi sesuai dokumen legal perusahaan.</div>
                             </div>
                             <div class="col-md-6">
                                 <label asp-for="EmailPerusahaan" class="reg-label"></label>
                                 <input asp-for="EmailPerusahaan" class="form-control reg-input" />
                                 <span asp-validation-for="EmailPerusahaan" class="text-danger small"></span>
+                                <div class="form-tip">Email ini akan menerima notifikasi review dan link dokumen.</div>
                             </div>
                             <div class="col-md-6">
                                 <label asp-for="TipePerusahaanId" class="reg-label"></label>
@@ -108,14 +148,17 @@
                             <div class="col-md-4">
                                 <label asp-for="ContactPerson" class="reg-label"></label>
                                 <input asp-for="ContactPerson" class="form-control reg-input" />
+                                <div class="form-tip">Nama PIC utama yang mudah dihubungi.</div>
                             </div>
                             <div class="col-md-4">
                                 <label asp-for="NomorKontrak" class="reg-label"></label>
                                 <input asp-for="NomorKontrak" class="form-control reg-input" />
+                                <div class="form-tip">Isi jika sudah ada kontrak/SPK/PO.</div>
                             </div>
                             <div class="col-md-4">
                                 <label asp-for="DurasiKontrak" class="reg-label"></label>
                                 <input asp-for="DurasiKontrak" class="form-control reg-input" />
+                                <div class="form-tip">Contoh: 12 bulan atau 2024-2025.</div>
                             </div>
                             <div class="col-md-3">
                                 <label asp-for="ProvinsiName" class="reg-label"></label>
@@ -147,6 +190,70 @@
                             <button type="submit" class="btn btn-reg">Lanjutkan ke Dokumen</button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <div class="card reg-card mt-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="mb-1">Dokumen Awal Pendaftaran</h5>
+                            <p class="reg-subtitle mb-0">Opsional, dapat diunggah setelah pengajuan dibuat.</p>
+                        </div>
+                        <span class="badge text-bg-light border">10 Dokumen</span>
+                    </div>
+                    <div class="doc-grid">
+                        <div class="doc-tile">
+                            <div class="doc-icon"><i class="bi bi-gear"></i></div>
+                            <div class="doc-name">IUJP (Inti)</div>
+                            <div class="doc-hint">Format PDF, opsional</div>
+                        </div>
+                        <div class="doc-tile">
+                            <div class="doc-icon"><i class="bi bi-file-earmark-text"></i></div>
+                            <div class="doc-name">SKT / NIB (Non Inti)</div>
+                            <div class="doc-hint">Format PDF, opsional</div>
+                        </div>
+                        <div class="doc-tile">
+                            <div class="doc-icon"><i class="bi bi-card-list"></i></div>
+                            <div class="doc-name">KBLI 2020</div>
+                            <div class="doc-hint">Format PDF, opsional</div>
+                        </div>
+                        <div class="doc-tile">
+                            <div class="doc-icon"><i class="bi bi-card-heading"></i></div>
+                            <div class="doc-name">NPWP</div>
+                            <div class="doc-hint">Format PDF, opsional</div>
+                        </div>
+                        <div class="doc-tile">
+                            <div class="doc-icon"><i class="bi bi-pen"></i></div>
+                            <div class="doc-name">Kontrak / SPK / PO</div>
+                            <div class="doc-hint">Format PDF, opsional</div>
+                        </div>
+                        <div class="doc-tile">
+                            <div class="doc-icon"><i class="bi bi-diagram-3"></i></div>
+                            <div class="doc-name">Struktur Organisasi</div>
+                            <div class="doc-hint">Bagan organisasi, opsional</div>
+                        </div>
+                        <div class="doc-tile">
+                            <div class="doc-icon"><i class="bi bi-person-badge"></i></div>
+                            <div class="doc-name">Org Card</div>
+                            <div class="doc-hint">Kartu organisasi, opsional</div>
+                        </div>
+                        <div class="doc-tile">
+                            <div class="doc-icon"><i class="bi bi-file-earmark-check"></i></div>
+                            <div class="doc-name">Surat Penunjukan PJO</div>
+                            <div class="doc-hint">Surat penunjukan, opsional</div>
+                        </div>
+                        <div class="doc-tile">
+                            <div class="doc-icon"><i class="bi bi-heart-pulse"></i></div>
+                            <div class="doc-name">Keanggotaan BPJS</div>
+                            <div class="doc-hint">Bukti BPJS TK, opsional</div>
+                        </div>
+                        <div class="doc-tile">
+                            <div class="doc-icon"><i class="bi bi-folder"></i></div>
+                            <div class="doc-name">Dokumen Lainnya</div>
+                            <div class="doc-hint">Opsional</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

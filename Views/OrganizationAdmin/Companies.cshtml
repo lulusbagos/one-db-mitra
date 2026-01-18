@@ -63,7 +63,7 @@
                     @if (Model.Count == 0)
                     {
                         <tr>
-                            <td colspan="7" class="text-center text-secondary py-4">Belum ada data perusahaan.</td>
+                            <td colspan="7" class="text-center text-secondary py-4 empty-state">Belum ada data perusahaan.</td>
                         </tr>
                     }
                     else
@@ -91,12 +91,7 @@
                                     </span>
                                 </td>
                                 <td class="text-end">
-                                    <a class="btn btn-sm btn-outline-primary" asp-action="EditCompany" asp-route-id="@company.CompanyId">Edit</a>
-                                <form asp-action="DeleteCompany" asp-route-id="@company.CompanyId" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="activeOnly" value="@((bool?)ViewBag.ActiveOnly ?? true)" />
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus perusahaan ini?')">Hapus</button>
-                                </form>
+                                    <a class="btn btn-sm btn-outline-primary" asp-action="EditCompany" asp-route-id="@company.CompanyId">Detail</a>
                                 </td>
                             </tr>
                         }

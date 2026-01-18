@@ -120,8 +120,11 @@
                     <span class="brand-title">@appName</span>
                     <small class="brand-subtitle">@headerName</small>
                     <span class="brand-underline"></span>
-                    <span class="brand-chip">Live</span>
+                    <span class="brand-chip"><span class="brand-live-dot" aria-hidden="true"></span>Live</span>
                 </div>
+                <button class="btn btn-link text-decoration-none text-white sidebar-collapse d-none d-lg-inline-flex" data-sidebar-collapse title="Minimize sidebar">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
                 <button class="btn btn-link text-decoration-none text-white sidebar-close d-lg-none" data-sidebar-close>
                     <i class="bi bi-x-lg"></i>
                 </button>
@@ -135,6 +138,12 @@
                     <div class="sidebar-card">
                         <p class="mb-1 fw-semibold">Status Sistem</p>
                         <p class="mb-0 text-secondary small">Sinkronisasi menu berjalan normal.</p>
+                    </div>
+                    <div class="sidebar-card mt-3">
+                        <p class="mb-2 fw-semibold">Aktivitas Terakhir</p>
+                        <div class="sidebar-activity" id="recentActivityList">
+                            <div class="text-secondary small">Memuat aktivitas...</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -160,6 +169,15 @@
                         <span class="badge text-bg-light border mt-2 d-inline-flex align-items-center gap-1">
                             <i class="bi bi-shield-lock"></i>@scopeLabel
                         </span>
+                        <div class="topbar-status mt-2" aria-label="Status sistem">
+                            <span class="status-pill status-live">
+                                <span class="status-dot" aria-hidden="true"></span>DB Online
+                            </span>
+                            <span class="status-pill" id="serverTime">--:--</span>
+                            <span class="status-pill" id="notifSummary">
+                                <i class="bi bi-bell"></i><span id="notifCount">0</span> Notifikasi
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-2 topbar-actions">

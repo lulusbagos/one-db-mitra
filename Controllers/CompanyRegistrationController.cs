@@ -34,10 +34,11 @@ public class CompanyRegistrationController : Controller
     {
         var scope = await BuildScopeAsync(cancellationToken);
         var query = _context.tbl_r_pengajuan_perusahaan.AsNoTracking().AsQueryable();
+        var username = User.Identity?.Name ?? string.Empty;
 
-        if (!scope.IsOwner && scope.CompanyId > 0)
+        if (!scope.IsOwner)
         {
-            query = query.Where(p => p.perusahaan_id == scope.CompanyId);
+            query = query.Where(p => p.created_by == username);
         }
 
         if (scope.IsOwner)
@@ -68,6 +69,7 @@ public class CompanyRegistrationController : Controller
                 StatusPengajuan = p.status_pengajuan,
                 ReviewerNote = p.reviewer_note,
                 CreatedAt = p.created_at,
+                CreatedBy = p.created_by,
                 IsLegacy = p.is_legacy,
                 DokumenBelumLengkap = !p.perusahaan_id.HasValue || !approvedSet.Contains(p.perusahaan_id.Value)
             }).ToListAsync(cancellationToken);
@@ -264,10 +266,18 @@ public class CompanyRegistrationController : Controller
             .Where(r => r.pengajuan_id == id)
             .ToListAsync(cancellationToken);
 
+        var uploadErrors = new List<string>();
+
         foreach (var item in model.Dokumen)
         {
             if (item.UploadFile == null || item.ReqId == 0)
             {
+                continue;
+            }
+
+            if (!TryValidateUpload(item.UploadFile, out var reason))
+            {
+                uploadErrors.Add($"{item.NamaDokumen}: {reason}");
                 continue;
             }
 
@@ -316,8 +326,16 @@ public class CompanyRegistrationController : Controller
         });
         await _context.SaveChangesAsync(cancellationToken);
 
+        if (uploadErrors.Count > 0)
+        {
+            TempData["AlertMessage"] = $"Sebagian dokumen gagal diunggah: {string.Join("; ", uploadErrors)}";
+            TempData["AlertType"] = "warning";
+        }
+        else
+        {
         TempData["AlertMessage"] = "Dokumen berhasil diunggah.";
         TempData["AlertType"] = "success";
+        }
         return RedirectToAction(nameof(UploadDokumen), new { id });
     }
 
@@ -1161,6 +1179,33 @@ public class CompanyRegistrationController : Controller
         };
 
         return allowed.Any(item => lower.Contains(item));
+    }
+
+    private static bool TryValidateUpload(Microsoft.AspNetCore.Http.IFormFile file, out string reason)
+    {
+        reason = string.Empty;
+        if (file.Length <= 0)
+        {
+            reason = "File kosong.";
+            return false;
+        }
+
+        const long maxSize = 5 * 1024 * 1024;
+        if (file.Length > maxSize)
+        {
+            reason = "Ukuran file melebihi 5MB.";
+            return false;
+        }
+
+        var ext = Path.GetExtension(file.FileName)?.ToLowerInvariant();
+        var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".pdf", ".jpg", ".jpeg", ".png" };
+        if (string.IsNullOrWhiteSpace(ext) || !allowed.Contains(ext))
+        {
+            reason = "Format harus PDF/JPG/PNG.";
+            return false;
+        }
+
+        return true;
     }
 
     private int GetClaimInt(string key)
